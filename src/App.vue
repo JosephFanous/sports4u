@@ -4,11 +4,25 @@
       <router-link to="/">Home</router-link> |
       <router-link to="/about">About</router-link>
     </div>
+    <section class="hero is-primary">
+      <div class="hero-body">
+        <div class="container">
+          <h1 class="title">
+            Welcome to sports4u
+          </h1>
+          <h2 class="subtitle">
+            This is just here to test Bulma. You can delete it.
+          </h2>
+        </div>
+      </div>
+    </section>
     <router-view />
   </div>
 </template>
 
 <style lang="scss">
+@import "~bulma/css/bulma.css";
+
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
