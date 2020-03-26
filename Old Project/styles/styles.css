@@ -1,0 +1,22 @@
+html, body{
+  height: 100%;
+}
+// Nav bar
+nav{
+  padding: 20px;
+
+}
+section{
+  border-top: 2px solid grey;
+  margin-bottom: 50px;
+}
+//Cards
+article a{
+
+}
+p.title{
+}
+a.subtitle{
+padding: 5px;
+}
+//Modals
