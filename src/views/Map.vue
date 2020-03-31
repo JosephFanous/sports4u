@@ -56,20 +56,43 @@
 
 <script>
 const mapboxgl = require("mapbox-gl/dist/mapbox-gl.js");
+import { getClientLocation } from '../util';
 
-function onMount() {
-  mapboxgl.accessToken = process.env.VUE_APP_MAPBOX_API_KEY;
-  // eslint-disable-next-line
-  var map = new mapboxgl.Map({
-    container: "map-container",
-    style: "mapbox://styles/mapbox/streets-v11"
-  });
-}
+// TODO: geocode entered location to coords and show marker on map
+// TODO: setting fields from URL params
+// TODO: reverse geocoding for coordinate click -> location
 
 export default {
   name: "Map",
-  components: {
-  },
-  mounted: onMount
+  components: {},
+  mounted: function() {
+    mapboxgl.accessToken = process.env.VUE_APP_MAPBOX_API_KEY;
+    // eslint-disable-next-line
+    const map = new mapboxgl.Map({
+      container: "map-container",
+      style: "mapbox://styles/mapbox/streets-v11"
+    });
+
+    const nav = new mapboxgl.NavigationControl();
+    map.addControl(nav, 'bottom-right');
+
+    // const query = 'ontario tech university';
+    // const endpoint = `geocoding/v5/mapbox.places/${query}.json`;
+    // fetch(`https://api.mapbox.com/${endpoint}?access_token=${process.env.VUE_APP_MAPBOX_API_KEY}`)
+    //   .then(res => res.json())
+    //   .then(json => console.log(json));
+
+    // const marker = new mapboxgl.Marker()
+    //   .setLngLat([30.5, 50.5])
+    //   .addTo(map);
+
+    getClientLocation(location => {
+      const { coords } = location;
+      map.jumpTo({
+        center: { lon: coords.longitude, lat: coords.latitude },
+        zoom: 12
+      });
+    });
+  }
 };
 </script>
