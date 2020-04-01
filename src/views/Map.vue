@@ -7,7 +7,7 @@
           <label class="label">Sport</label>
           <div class="control is-expanded">
             <div class="select is-fullwidth">
-              <select v-model="sport">
+              <select v-model="sport" v-on:change="handleSportChange">
                 <option>Basketball</option>
                 <option>Table Tennis</option>
                 <option>Volleyball</option>
@@ -106,7 +106,7 @@ import LocationResult from '../components/LocationResult.vue';
 // TODO: search for location from text box and list possible and select to set center of search radius - DONE
 // TODO: set default search center to client location, if available - DONE
 // TODO: display some type of search radius circle on map - DONE
-// TODO: setting fields from URL params
+// TODO: setting sport from URL param - DONE
 // TODO: reverse geocoding for coordinate click -> location
 
 export default {
@@ -120,12 +120,18 @@ export default {
       isSearchCenterResultsLoading: false,
       searchRadius: 100,
       searchLocation: '',
-      sport: 'Basketball',
+      sport: this.$route.query.sport || 'Basketball',
       searchLocationCenter: null, // coords returned by mapbox have format [longitude, latitude]
       searchHasError: false
     }
   },
   methods: {
+    handleSportChange: function() {
+      this.$router.push({
+        path: this.$route.path,
+        query: { sport: this.sport }
+      })
+    },
     handleLocationSelect: function(location) {
       console.log(location)
       console.log(this.sport)
