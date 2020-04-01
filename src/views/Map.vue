@@ -21,7 +21,13 @@
             <label class="label">Search Radius</label>
             <div class='field has-addons'>
               <div class="control">
-                <input class="input" type="number" v-model="searchRadius">
+                <input
+                  class="input"
+                  type="number"
+                  v-bind:class="{ 'is-danger': fieldErrors.searchRadius }"
+                  v-model="searchRadius"
+                  v-on:change="handleRadiusChange"
+                >
               </div>
               <div class="control">
                 <div class='button is-static'>km</div>
@@ -38,6 +44,8 @@
                 placeholder="Enter a location"
                 v-model="searchLocation"
                 v-on:keyup.enter="handleLocationSearch"
+                v-on:input="handleSearchChange"
+                v-bind:class="{ 'is-danger': fieldErrors.searchLocation }"
               >
               </div>
               <div class="control">
@@ -54,13 +62,22 @@
             </div>
           </div>
         </div>
-        <ul v-if="searchCenterResults && searchCenterResults.length && !searchLocationCenter" class='location-results'>
+        <ul
+          v-if="!searchHasError && !isSearchCenterResultsLoading && searchCenterResults && searchCenterResults.length && !searchLocationCenter"
+          class='location-results'
+        >
           <li v-for="result in searchCenterResults" v-bind:key="result.id">
             <LocationResult v-on:locationSelect='handleLocationSelect' v-bind:result='result' />
           </li>
         </ul>
-        <p v-if="searchHasError">An error occurred - try searching again.</p>
+        <p class="error-text" v-if="searchHasError">An error occurred - try searching again.</p>
         <p v-if="searchCenterResults && !searchCenterResults.length">No results - try a different search query.</p>
+        <div class="errors">
+          <p v-for="message in errorMessages" v-bind:key="message" class="has-text-danger">
+            {{ message }}
+          </p>
+        </div>
+        <button v-on:click="handleUpdateClick" class='button is-link'>Update Search</button>
       </div>
     </div>
     <div id="map-container" class="column">
@@ -78,6 +95,7 @@
   overflow-y: scroll;
   border: 1px solid $grey-lighter;
   border-radius: $radius;
+  margin-bottom: 0.75rem;
   li {
     padding: 0.75rem 1rem;
   }
@@ -96,6 +114,10 @@
     padding-left: 1rem;
   }
 }
+
+.error-text, .errors p:last-child {
+  margin-bottom: 0.75rem;
+}
 </style>
 
 <script>
@@ -107,7 +129,10 @@ import LocationResult from '../components/LocationResult.vue';
 // TODO: set default search center to client location, if available - DONE
 // TODO: display some type of search radius circle on map - DONE
 // TODO: setting sport from URL param - DONE
+// TODO: form validation - DONE
 // TODO: reverse geocoding for coordinate click -> location
+//       clicking on a location on the map should display a view that shows the name, address, and sports at that
+//       location
 
 export default {
   name: "Map",
@@ -122,19 +147,34 @@ export default {
       searchLocation: '',
       sport: this.$route.query.sport || 'Basketball',
       searchLocationCenter: null, // coords returned by mapbox have format [longitude, latitude]
-      searchHasError: false
+      searchHasError: false,
+      fieldErrors: {}
     }
   },
   methods: {
+    handleUpdateClick: function() {
+      this.fieldErrors = {}
+      const errors = {}
+      if (!this.searchLocationCenter) errors.searchLocation = 'Please select a search location.'
+      if (this.searchRadius <= 0) errors.searchRadius = 'Please enter a search radius greater than zero.'
+      this.fieldErrors = errors
+    },
     handleSportChange: function() {
       this.$router.push({
         path: this.$route.path,
         query: { sport: this.sport }
       })
     },
+    handleRadiusChange: function() {
+      this.fieldErrors = { ...this.fieldErrors, searchRadius: null }
+    },
+    handleSearchChange: function() {
+      this.searchLocationCenter = null
+      this.searchCenterResults = null
+      this.fieldErrors = { ...this.fieldErrors, searchLocation: null }
+    },
     handleLocationSelect: function(location) {
-      console.log(location)
-      console.log(this.sport)
+      this.fieldErrors = { ...this.fieldErrors, searchLocation: null }
       this.searchLocation = location.place_name
       this.searchLocationCenter = location.center
     },
@@ -158,6 +198,12 @@ export default {
         .finally(() => {
           this.isSearchCenterResultsLoading = false
         })
+    }
+  },
+  computed: {
+    errorMessages: function() {
+      // compute error messages array from fieldErrors object
+      return Object.values(this.fieldErrors).filter(str => str)
     }
   },
   mounted: function() {
