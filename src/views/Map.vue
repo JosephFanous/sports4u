@@ -104,8 +104,8 @@ import { getClientLocation } from '../util';
 import LocationResult from '../components/LocationResult.vue';
 
 // TODO: search for location from text box and list possible and select to set center of search radius - DONE
-// TODO: set default search center to client location, if available
-// TODO: search from form
+// TODO: set default search center to client location, if available - DONE
+// TODO: display some type of search radius circle on map
 // TODO: setting fields from URL params
 // TODO: reverse geocoding for coordinate click -> location
 
@@ -165,16 +165,30 @@ export default {
     const nav = new mapboxgl.NavigationControl();
     map.addControl(nav, 'bottom-right');
 
-    // const marker = new mapboxgl.Marker()
-    //   .setLngLat([30.5, 50.5])
-    //   .addTo(map);
-
     getClientLocation(location => {
       const { coords } = location;
+      const endpoint = `geocoding/v5/mapbox.places/${coords.longitude},${coords.latitude}.json`
+      
       map.jumpTo({
         center: { lon: coords.longitude, lat: coords.latitude },
         zoom: 12
       });
+      // const marker = new mapboxgl.Marker()
+      //   .setLngLat([coords.longitude, coords.latitude])
+      //   .addTo(map);
+      
+      fetch(`https://api.mapbox.com/${endpoint}?access_token=${process.env.VUE_APP_MAPBOX_API_KEY}`)
+        .then(res => {
+          if (res.ok) return res.json()
+          else throw new Error(res.status)
+        })
+        .then(json => {
+          const loc = json.features[0]
+          if (loc) {
+            this.searchLocation = loc.place_name
+            this.searchLocationCenter = loc.center
+          }
+        })
     });
   }
 };
