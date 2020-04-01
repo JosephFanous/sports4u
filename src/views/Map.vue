@@ -100,12 +100,12 @@
 
 <script>
 const mapboxgl = require("mapbox-gl/dist/mapbox-gl.js");
-import { getClientLocation } from '../util';
+import { getClientLocation, metresToPixels } from '../util';
 import LocationResult from '../components/LocationResult.vue';
 
 // TODO: search for location from text box and list possible and select to set center of search radius - DONE
 // TODO: set default search center to client location, if available - DONE
-// TODO: display some type of search radius circle on map
+// TODO: display some type of search radius circle on map - DONE
 // TODO: setting fields from URL params
 // TODO: reverse geocoding for coordinate click -> location
 
@@ -118,10 +118,10 @@ export default {
     return {
       searchCenterResults: null,
       isSearchCenterResultsLoading: false,
-      searchRadius: 10,
+      searchRadius: 100,
       searchLocation: '',
       sport: 'Basketball',
-      searchLocationCenter: null,
+      searchLocationCenter: null, // coords returned by mapbox have format [longitude, latitude]
       searchHasError: false
     }
   },
@@ -165,31 +165,85 @@ export default {
     const nav = new mapboxgl.NavigationControl();
     map.addControl(nav, 'bottom-right');
 
-    getClientLocation(location => {
-      const { coords } = location;
-      const endpoint = `geocoding/v5/mapbox.places/${coords.longitude},${coords.latitude}.json`
-      
-      map.jumpTo({
-        center: { lon: coords.longitude, lat: coords.latitude },
-        zoom: 12
+    // update radius circle on zoom change
+    map.on('zoom', () => {
+      const searchRadiusSource = map.getSource('search-radius')
+
+      if (searchRadiusSource && map.getLayer('search-radius')) {
+        const data = searchRadiusSource._data
+        map.setPaintProperty(
+          'search-radius',
+          'circle-radius',
+          metresToPixels(
+            // use the radius and coordinates set when it was created
+            // (we want the displayed circle to reflect the current displayed search
+            // and not change just because text input changed)
+            // we could just save the last search in the vue component data instead
+            data.properties.searchRadiusMetres,
+            data.geometry.coordinates[1],
+            map.getZoom()
+          )
+        )
+      }
+    })
+
+    map.on('load', () => {
+      getClientLocation(location => {
+        const { coords } = location;
+        const endpoint = `geocoding/v5/mapbox.places/${coords.longitude},${coords.latitude}.json`
+        
+        map.jumpTo({
+          center: { lon: coords.longitude, lat: coords.latitude },
+          zoom: 8
+        });
+
+        // const marker = new mapboxgl.Marker()
+        //   .setLngLat([coords.longitude, coords.latitude])
+        //   .addTo(map);
+        
+        fetch(`https://api.mapbox.com/${endpoint}?access_token=${process.env.VUE_APP_MAPBOX_API_KEY}`)
+          .then(res => {
+            if (res.ok) return res.json()
+            else throw new Error(res.status)
+          })
+          .then(json => {
+            const loc = json.features[0]
+            if (loc) {
+              this.searchLocation = loc.place_name
+              this.searchLocationCenter = loc.center
+              const searchRadiusMetres = parseFloat(this.searchRadius) * 1000
+              
+              const searchRadiusSource = {
+                type: 'geojson',
+                data: {
+                  type: 'Feature',
+                  geometry: {
+                    type: 'Point',
+                    coordinates: loc.center
+                  },
+                  properties: {
+                    searchRadiusMetres
+                  }
+                }
+              }
+
+              map.addLayer({
+                id: 'search-radius',
+                source: searchRadiusSource,
+                type: 'circle',
+                paint: {
+                  'circle-color': '#6eb9ff',
+                  'circle-opacity': 0.1,
+                  'circle-radius': metresToPixels(searchRadiusMetres, loc.center[1], map.getZoom()),
+                  'circle-stroke-color': '#0000ff',
+                  'circle-stroke-opacity': 0.3,
+                  'circle-stroke-width': 2
+                }
+              })
+            }
+          })
       });
-      // const marker = new mapboxgl.Marker()
-      //   .setLngLat([coords.longitude, coords.latitude])
-      //   .addTo(map);
-      
-      fetch(`https://api.mapbox.com/${endpoint}?access_token=${process.env.VUE_APP_MAPBOX_API_KEY}`)
-        .then(res => {
-          if (res.ok) return res.json()
-          else throw new Error(res.status)
-        })
-        .then(json => {
-          const loc = json.features[0]
-          if (loc) {
-            this.searchLocation = loc.place_name
-            this.searchLocationCenter = loc.center
-          }
-        })
-    });
+    })
   }
 };
 </script>
