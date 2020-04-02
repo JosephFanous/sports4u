@@ -133,6 +133,9 @@ import LocationResult from '../components/LocationResult.vue';
 // TODO: reverse geocoding for coordinate click -> location
 //       clicking on a location on the map should display a view that shows the name, address, and sports at that
 //       location
+// on search, we get points from the server and display them on the map
+// we add click listeners to the points added that when clicked, reverse geocode the coordinates to an address
+// we display the address and the sports data from the server for that location
 
 export default {
   name: "Map",
@@ -217,28 +220,6 @@ export default {
     const nav = new mapboxgl.NavigationControl();
     map.addControl(nav, 'bottom-right');
 
-    // update radius circle on zoom change
-    map.on('zoom', () => {
-      const searchRadiusSource = map.getSource('search-radius')
-
-      if (searchRadiusSource && map.getLayer('search-radius')) {
-        const data = searchRadiusSource._data
-        map.setPaintProperty(
-          'search-radius',
-          'circle-radius',
-          metresToPixels(
-            // use the radius and coordinates set when it was created
-            // (we want the displayed circle to reflect the current displayed search
-            // and not change just because text input changed)
-            // we could just save the last search in the vue component data instead
-            data.properties.searchRadiusMetres,
-            data.geometry.coordinates[1],
-            map.getZoom()
-          )
-        )
-      }
-    })
-
     map.on('load', () => {
       getClientLocation(location => {
         const { coords } = location;
@@ -272,9 +253,6 @@ export default {
                   geometry: {
                     type: 'Point',
                     coordinates: loc.center
-                  },
-                  properties: {
-                    searchRadiusMetres
                   }
                 }
               }
@@ -286,7 +264,13 @@ export default {
                 paint: {
                   'circle-color': '#6eb9ff',
                   'circle-opacity': 0.1,
-                  'circle-radius': metresToPixels(searchRadiusMetres, loc.center[1], map.getZoom()),
+                  'circle-radius': [
+                    // https://docs.mapbox.com/mapbox-gl-js/style-spec/expressions/#camera-expressions
+                    // interpolate between 0 when completely zoomed out and pixel radius at max zoom
+                    'interpolate', ['exponential', 2], ['zoom'],
+                    0, 0,
+                    20, metresToPixels(searchRadiusMetres, loc.center[1], 20)
+                  ],
                   'circle-stroke-color': '#0000ff',
                   'circle-stroke-opacity': 0.3,
                   'circle-stroke-width': 2
