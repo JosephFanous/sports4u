@@ -79,6 +79,8 @@
         </div>
         <button v-on:click="handleUpdateClick" class='button is-link'>Update Search</button>
       </div>
+      <hr>
+      {{ venueResults }}
     </div>
     <div id="map-container" class="column">
     </div>
@@ -88,6 +90,14 @@
 <style lang="scss">
 .map {
   height: 100%;
+}
+
+.sidebar .section {
+  padding-bottom: 2rem;
+}
+
+hr {
+  margin: 0;
 }
 
 .location-results {
@@ -130,12 +140,15 @@ import LocationResult from '../components/LocationResult.vue';
 // TODO: display some type of search radius circle on map - DONE
 // TODO: setting sport from URL param - DONE
 // TODO: form validation - DONE
+// TODO: display venue results on map - DONE
 // TODO: reverse geocoding for coordinate click -> location
 //       clicking on a location on the map should display a view that shows the name, address, and sports at that
 //       location
+//       - use layer with features: https://docs.mapbox.com/mapbox-gl-js/example/popup-on-click/
 // on search, we get points from the server and display them on the map
-// we add click listeners to the points added that when clicked, reverse geocode the coordinates to an address
-// we display the address and the sports data from the server for that location
+// when a venue is clicked, we send a request to reverse geocode the venue's coordinates to get
+// the correct location data
+// we also send a request to the api to get all the sports data for that venue
 
 export default {
   name: "Map",
@@ -144,6 +157,7 @@ export default {
   },
   data: function() {
     return {
+      map: null,
       searchCenterResults: null,
       isSearchCenterResultsLoading: false,
       searchRadius: 100,
@@ -151,7 +165,9 @@ export default {
       sport: this.$route.query.sport || 'Basketball',
       searchLocationCenter: null, // coords returned by mapbox have format [longitude, latitude]
       searchHasError: false,
-      fieldErrors: {}
+      selectedLocation: null,
+      fieldErrors: {},
+      venueResults: [] // array of { id: number, coordiantes: [lon, lat] } of search results
     }
   },
   methods: {
@@ -160,7 +176,59 @@ export default {
       const errors = {}
       if (!this.searchLocationCenter) errors.searchLocation = 'Please select a search location.'
       if (this.searchRadius <= 0) errors.searchRadius = 'Please enter a search radius greater than zero.'
-      this.fieldErrors = errors
+
+      if (Object.values(errors).length) {
+        this.fieldErrors = errors
+        return
+      }
+
+      const [lon, lat] = this.searchLocationCenter
+      // TODO: add loading indicators
+      const apiUrl = process.env.VUE_APP_API_URL
+      fetch(`${apiUrl}/venues/search?lon=${lon}&lat=${lat}&radius=${this.searchRadius}&sport=${this.sport}`)
+        .then(res => {
+          if (res.ok) return res.json()
+          else throw new Error(res.status)
+        })
+        .then(json => {
+          this.venueResults = json.venues
+
+          if (this.map.getLayer('venues')) this.map.removeLayer('venues')
+          if (this.map.getSource('venues')) this.map.removeSource('venues')
+
+          const features = json.venues.map(venue => {
+            return {
+              type: 'Feature',
+              properties: {
+                venueId: venue.id
+              },
+              geometry: {
+                type: 'Point',
+                coordinates: venue.coordinates
+              }
+            }
+          })
+          this.map.addSource('venues', {
+            type: 'geojson',
+            data: {
+              type: 'FeatureCollection',
+              features
+            }
+          })
+
+          this.map.addLayer({
+            id: 'venues',
+            type: 'symbol',
+            source: 'venues',
+            layout: {
+              'icon-image': 'marker-15',
+              'icon-allow-overlap': true
+            }
+          })
+        })
+        .catch(err => {
+          this.searchHasError = true
+        })
     },
     handleSportChange: function() {
       this.$router.push({
@@ -212,27 +280,38 @@ export default {
   mounted: function() {
     mapboxgl.accessToken = process.env.VUE_APP_MAPBOX_API_KEY;
     // eslint-disable-next-line
-    const map = new mapboxgl.Map({
+    this.map = new mapboxgl.Map({
       container: "map-container",
       style: "mapbox://styles/mapbox/streets-v11?optimize=true"
     });
 
     const nav = new mapboxgl.NavigationControl();
-    map.addControl(nav, 'bottom-right');
+    this.map.addControl(nav, 'bottom-right');
 
-    map.on('load', () => {
+    this.map.on('load', () => {
+      this.map.on('mouseenter', 'venues', () => {
+        this.map.getCanvas().style.cursor = 'pointer';
+      })
+
+      this.map.on('mouseleave', 'venues', () => {
+        this.map.getCanvas().style.cursor = '';
+      })
+
+      this.map.on('click', 'venues', event => {
+        // TODO: query mapbox reverse geocode API for location information
+        // TODO: query sports4u API for venue information (sports info, events, etc.)
+        console.log(event.features[0].geometry.coordinates)
+        console.log(event.features[0].properties.venueId)
+      })
+
       getClientLocation(location => {
         const { coords } = location;
         const endpoint = `geocoding/v5/mapbox.places/${coords.longitude},${coords.latitude}.json`
         
-        map.jumpTo({
+        this.map.jumpTo({
           center: { lon: coords.longitude, lat: coords.latitude },
           zoom: 8
         });
-
-        // const marker = new mapboxgl.Marker()
-        //   .setLngLat([coords.longitude, coords.latitude])
-        //   .addTo(map);
         
         fetch(`https://api.mapbox.com/${endpoint}?access_token=${process.env.VUE_APP_MAPBOX_API_KEY}`)
           .then(res => {
@@ -257,7 +336,7 @@ export default {
                 }
               }
 
-              map.addLayer({
+              this.map.addLayer({
                 id: 'search-radius',
                 source: searchRadiusSource,
                 type: 'circle',
@@ -280,6 +359,28 @@ export default {
           })
       });
     })
+
+    // for reverse geocoding (coords -> location)
+    // const venues = []
+    // this.map.on('click', (event) => {
+    //   const endpoint = `geocoding/v5/mapbox.places/${event.lngLat.lng},${event.lngLat.lat}.json`
+    //   fetch(`https://api.mapbox.com/${endpoint}?access_token=${process.env.VUE_APP_MAPBOX_API_KEY}`)
+    //     .then(res => {
+    //       if (res.ok) return res.json()
+    //       else throw new Error(res.status)
+    //     })
+    //     .then(json => {
+    //       console.log(json)
+    //       const location = json.features[0]
+    //       const placeType = location.place_type[0]
+    //       if (placeType == 'address' || placeType == 'poi') {
+    //         this.selectedLocation = location
+    //         venues.push(location.geometry.coordinates)
+    //         console.log(venues)
+    //       }
+    //     })
+    //   console.log(event)
+    // })
   }
 };
 </script>
