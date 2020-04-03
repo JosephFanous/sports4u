@@ -9,6 +9,7 @@ npm install
 Create a file named `.env` in the root directory with this content:
 ```
 VUE_APP_MAPBOX_API_KEY=<insert mapbox API key here>
+VUE_APP_API_URL=http://localhost:3000
 ```
 
 ## Scripts
