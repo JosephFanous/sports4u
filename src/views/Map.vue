@@ -77,10 +77,19 @@
             {{ message }}
           </p>
         </div>
-        <button v-on:click="handleUpdateClick" class='button is-link'>Update Search</button>
+        <button
+          v-on:click="handleUpdateClick"
+          class='button is-link'
+        >
+          Update Search
+        </button>
       </div>
       <hr>
-      {{ venueResults }}
+      <section class="section section-venue">
+        <p v-if="venueError">{{ venueError }}</p>
+        <p v-if="isVenueLoading">Loading venue data...</p>
+        <MapVenue v-if="selectedVenue && !venueError && !isVenueLoading" v-bind:venue="selectedVenue" />
+      </section>
     </div>
     <div id="map-container" class="column">
     </div>
@@ -116,10 +125,10 @@ hr {
 
 .location-row {
   width: 100%;
-  .radius-field { 
+  .radius-field {
     width: 30%;
   }
-  .location-field { 
+  .location-field {
     width: 70%;
     padding-left: 1rem;
   }
@@ -128,12 +137,17 @@ hr {
 .error-text, .errors p:last-child {
   margin-bottom: 0.75rem;
 }
+
+.section.section-venue {
+  padding-top: 1.5rem;
+}
 </style>
 
 <script>
 const mapboxgl = require("mapbox-gl/dist/mapbox-gl.js");
 import { getClientLocation, metresToPixels } from '../util';
 import LocationResult from '../components/LocationResult.vue';
+import MapVenue from '../components/MapVenue.vue';
 
 // TODO: search for location from text box and list possible and select to set center of search radius - DONE
 // TODO: set default search center to client location, if available - DONE
@@ -153,7 +167,8 @@ import LocationResult from '../components/LocationResult.vue';
 export default {
   name: "Map",
   components: {
-    LocationResult
+    LocationResult,
+    MapVenue
   },
   data: function() {
     return {
@@ -164,8 +179,10 @@ export default {
       searchLocation: '',
       sport: this.$route.query.sport || 'Basketball',
       searchLocationCenter: null, // coords returned by mapbox have format [longitude, latitude]
-      searchHasError: false,
-      selectedLocation: null,
+      searchHasError: false, // NOTE: maybe just store the error string here and check for that
+      isVenueLoading: false,
+      venueError: '',
+      selectedVenue: null, // i tend to use "venue" for locations that are from the venues layer/from our API
       fieldErrors: {},
       venueResults: [] // array of { id: number, coordiantes: [lon, lat] } of search results
     }
@@ -184,7 +201,9 @@ export default {
 
       const [lon, lat] = this.searchLocationCenter
       // TODO: add loading indicators
+
       const apiUrl = process.env.VUE_APP_API_URL
+      // fetch venue search data
       fetch(`${apiUrl}/venues/search?lon=${lon}&lat=${lat}&radius=${this.searchRadius}&sport=${this.sport}`)
         .then(res => {
           if (res.ok) return res.json()
@@ -298,21 +317,41 @@ export default {
       })
 
       this.map.on('click', 'venues', event => {
-        // TODO: query mapbox reverse geocode API for location information
+        // TODO: query mapbox reverse geocode API for location information - DONE
         // TODO: query sports4u API for venue information (sports info, events, etc.)
-        console.log(event.features[0].geometry.coordinates)
+        const [lon, lat] = event.features[0].geometry.coordinates
+        const endpoint = `geocoding/v5/mapbox.places/${lon},${lat}.json`
+        this.isVenueLoading = true
+        this.venueError = ''
+
+        fetch(`https://api.mapbox.com/${endpoint}?access_token=${process.env.VUE_APP_MAPBOX_API_KEY}`)
+          .then(res => {
+            if (res.ok) return res.json()
+            else throw new Error(res.status)
+          })
+          .then(json => {
+            // console.log(json)
+            this.selectedVenue = json.features[0]
+            console.log(this.selectedVenue)
+          })
+          .catch(err => {
+            this.venueError = 'Could not fetch venue data - try selecting the venue again.'
+          })
+          .finally(() => {
+            this.isVenueLoading = false
+          })
         console.log(event.features[0].properties.venueId)
       })
 
       getClientLocation(location => {
         const { coords } = location;
         const endpoint = `geocoding/v5/mapbox.places/${coords.longitude},${coords.latitude}.json`
-        
+
         this.map.jumpTo({
           center: { lon: coords.longitude, lat: coords.latitude },
           zoom: 8
         });
-        
+
         fetch(`https://api.mapbox.com/${endpoint}?access_token=${process.env.VUE_APP_MAPBOX_API_KEY}`)
           .then(res => {
             if (res.ok) return res.json()
@@ -324,7 +363,7 @@ export default {
               this.searchLocation = loc.place_name
               this.searchLocationCenter = loc.center
               const searchRadiusMetres = parseFloat(this.searchRadius) * 1000
-              
+
               const searchRadiusSource = {
                 type: 'geojson',
                 data: {
@@ -370,14 +409,14 @@ export default {
     //       else throw new Error(res.status)
     //     })
     //     .then(json => {
-    //       console.log(json)
+    //       console.log(json.features)
     //       const location = json.features[0]
     //       const placeType = location.place_type[0]
-    //       if (placeType == 'address' || placeType == 'poi') {
-    //         this.selectedLocation = location
-    //         venues.push(location.geometry.coordinates)
-    //         console.log(venues)
-    //       }
+    //       // if (placeType == 'address' || placeType == 'poi') {
+    //       //   this.selectedLocation = location
+    //       //   venues.push(location.geometry.coordinates)
+    //       //   console.log(venues)
+    //       // }
     //     })
     //   console.log(event)
     // })

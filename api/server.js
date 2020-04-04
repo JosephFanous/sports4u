@@ -5,6 +5,7 @@ const bodyParser = require('body-parser')
 const app = express()
 app.use(bodyParser.urlencoded({ extended: true }))
 
+// TODO: database integration (this is just mock data for testing)
 const venues = [
   {
     id: 1,
@@ -35,13 +36,19 @@ const corsOptions = {
 }
 app.use(cors(corsOptions))
 
-// handle GET /checkUsername
 app.get('/venues/search', (req, res, next) => {
   console.log('query', req.query)
   // const { sport, lon, lat, radius } = req.query
-  // TODO: database integration (this is just mock data for testing)
   res.json({
     venues
+  })
+})
+
+app.get('/venues/:id', (req, res, next) => {
+  console.log('params', req.params )
+  res.json({
+    id: req.params.id,
+    sports: ['Basketball', 'Volleyball', 'Table Tennis']
   })
 })
 
