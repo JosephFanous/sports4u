@@ -63,15 +63,15 @@
           </div>
         </div>
         <ul
-          v-if="!searchHasError && !isSearchCenterResultsLoading && searchCenterResults && searchCenterResults.length && !searchLocationCenter"
+          v-if="!searchCenterError & !isSearchCenterResultsLoading && searchCenterResults && searchCenterResults.length && !searchLocationCenter"
           class='location-results'
         >
           <li v-for="result in searchCenterResults" v-bind:key="result.id">
             <LocationResult v-on:locationSelect='handleLocationSelect' v-bind:result='result' />
           </li>
         </ul>
-        <p class="error-text" v-if="searchHasError">An error occurred - try searching again.</p>
-        <p v-if="searchCenterResults && !searchCenterResults.length">No results - try a different search query.</p>
+        <p class="error-text" v-if="searchCenterError">{{ searchCenterError }}</p>
+        <p v-if="!searchCenterError && !isSearchCenterResultsLoading && searchCenterResults && !searchCenterResults.length">No results - try a different search query.</p>
         <div class="errors">
           <p v-for="message in errorMessages" v-bind:key="message" class="has-text-danger">
             {{ message }}
@@ -79,10 +79,12 @@
         </div>
         <button
           v-on:click="handleUpdateClick"
-          class='button is-link'
+          class="button is-link"
+          v-bind:class="{ 'is-loading': isVenueSearchLoading }"
         >
           Update Search
         </button>
+        <p v-if="venueSearchError">{{ venueSearchError }}</p>
       </div>
       <hr>
       <section class="section section-venue">
@@ -173,18 +175,23 @@ export default {
   data: function() {
     return {
       map: null,
-      searchCenterResults: null,
-      isSearchCenterResultsLoading: false,
       searchRadius: 100,
       searchLocation: '',
       sport: this.$route.query.sport || 'Basketball',
+      fieldErrors: {},
+
+      isSearchCenterResultsLoading: false,
+      searchCenterResults: null,
+      searchCenterError: '',
       searchLocationCenter: null, // coords returned by mapbox have format [longitude, latitude]
-      searchHasError: false, // NOTE: maybe just store the error string here and check for that
+
+      isVenueSearchLoading: false,
+      venueSearchError: '',
+      venueResults: [], // array of { id: number, coordiantes: [lon, lat] } of search results
+
       isVenueLoading: false,
       venueError: '',
-      selectedVenue: null, // i tend to use "venue" for locations that are from the venues layer/from our API
-      fieldErrors: {},
-      venueResults: [] // array of { id: number, coordiantes: [lon, lat] } of search results
+      selectedVenue: null // i tend to use "venue" for locations that are from the venues layer/from our API
     }
   },
   methods: {
@@ -200,10 +207,12 @@ export default {
       }
 
       const [lon, lat] = this.searchLocationCenter
-      // TODO: add loading indicators
 
+      this.isVenueSearchLoading = true
+      this.venueSearchError = ''
+
+      // fetch venue points to display on map
       const apiUrl = process.env.VUE_APP_API_URL
-      // fetch venue search data
       fetch(`${apiUrl}/venues/search?lon=${lon}&lat=${lat}&radius=${this.searchRadius}&sport=${this.sport}`)
         .then(res => {
           if (res.ok) return res.json()
@@ -246,7 +255,10 @@ export default {
           })
         })
         .catch(err => {
-          this.searchHasError = true
+          this.venueSearchError = 'An error occurred - try searching again.'
+        })
+        .finally(() => {
+          this.isVenueSearchLoading = false
         })
     },
     handleSportChange: function() {
@@ -271,8 +283,8 @@ export default {
     handleLocationSearch: function() {
       const endpoint = `geocoding/v5/mapbox.places/${this.searchLocation}.json`;
       this.isSearchCenterResultsLoading = true
+      this.searchCenterError = ''
       this.searchLocationCenter = null
-      this.searchHasError = false
       fetch(`https://api.mapbox.com/${endpoint}?access_token=${process.env.VUE_APP_MAPBOX_API_KEY}`)
         .then(res => {
           if (res.ok) return res.json()
@@ -283,7 +295,7 @@ export default {
           this.searchCenterResults = json.features;
         })
         .catch(err => {
-          this.searchHasError = true
+          this.searchCenterError = 'An error occurred - try searching again.'
         })
         .finally(() => {
           this.isSearchCenterResultsLoading = false
