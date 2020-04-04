@@ -88,9 +88,7 @@
       </div>
       <hr>
       <section class="section section-venue">
-        <p v-if="venueError">{{ venueError }}</p>
-        <p v-if="isVenueLoading">Loading venue data...</p>
-        <MapVenue v-if="selectedVenue && !venueError && !isVenueLoading" v-bind:venue="selectedVenue" />
+        <MapVenue v-if="selectedVenue" v-bind:venue="selectedVenue" />
       </section>
     </div>
     <div id="map-container" class="column">
@@ -157,7 +155,7 @@ import MapVenue from '../components/MapVenue.vue';
 // TODO: setting sport from URL param - DONE
 // TODO: form validation - DONE
 // TODO: display venue results on map - DONE
-// TODO: reverse geocoding for coordinate click -> location
+// TODO: reverse geocoding for coordinate click -> location - DONE
 //       clicking on a location on the map should display a view that shows the name, address, and sports at that
 //       location
 //       - use layer with features: https://docs.mapbox.com/mapbox-gl-js/example/popup-on-click/
@@ -189,9 +187,7 @@ export default {
       venueSearchError: '',
       venueResults: [], // array of { id: number, coordiantes: [lon, lat] } of search results
 
-      isVenueLoading: false,
-      venueError: '',
-      selectedVenue: null // i tend to use "venue" for locations that are from the venues layer/from our API
+      selectedVenue: null
     }
   },
   methods: {
@@ -329,30 +325,7 @@ export default {
       })
 
       this.map.on('click', 'venues', event => {
-        // TODO: query mapbox reverse geocode API for location information - DONE
-        // TODO: query sports4u API for venue information (sports info, events, etc.)
-        const [lon, lat] = event.features[0].geometry.coordinates
-        const endpoint = `geocoding/v5/mapbox.places/${lon},${lat}.json`
-        this.isVenueLoading = true
-        this.venueError = ''
-
-        fetch(`https://api.mapbox.com/${endpoint}?access_token=${process.env.VUE_APP_MAPBOX_API_KEY}`)
-          .then(res => {
-            if (res.ok) return res.json()
-            else throw new Error(res.status)
-          })
-          .then(json => {
-            // console.log(json)
-            this.selectedVenue = json.features[0]
-            console.log(this.selectedVenue)
-          })
-          .catch(err => {
-            this.venueError = 'Could not fetch venue data - try selecting the venue again.'
-          })
-          .finally(() => {
-            this.isVenueLoading = false
-          })
-        console.log(event.features[0].properties.venueId)
+        this.selectedVenue = event.features[0]
       })
 
       getClientLocation(location => {
