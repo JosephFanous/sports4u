@@ -24,7 +24,7 @@
       <div class="navbar-item">
         <div class="buttons">
            <a class="button is-danger is-large">Register</a>
-           <a class="button has-background-light is-large">Log in</a>
+           <router-link class="button has-background-light is-large" v-bind:to="`/login`">Log in</router-link>
         </div>
       </div>
     </div>
@@ -101,7 +101,7 @@
         </ul> !-->
         
       <footer class="modal-card-foot">
-        <button class="button is-success">View map</button>
+        <router-link class="button is-success" v-bind:to="`/map?sport=${selectedSport}`">View map</router-link>
         <button class="button" v-on:click="handleCloseClick">Cancel</button>
       </footer>
       </section>
@@ -110,7 +110,7 @@
   </div>
 </template>
 
-<style lang="scss" scope>
+<style lang="scss" scoped>
 html, body{
   height: 100%;
 }

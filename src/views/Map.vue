@@ -12,6 +12,7 @@
                 <option>Table Tennis</option>
                 <option>Volleyball</option>
                 <option>Badminton</option>
+                <option>Soccer</option>
               </select>
             </div>
           </div>
