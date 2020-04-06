@@ -15,16 +15,16 @@
     <div class="navbar-start">
       <div class="navbar-item">
         <div class="buttons is-large">
-          <a class="button is-large" href="#main">Home</a>
-          <a class="button is-large" href="#Aboutpage">About Us</a>
+          <router-link class="button is-large" v-bind:to="`/`">Home</router-link>
+          <router-link class="button is-large" v-bind:to="`/about`">About Us</router-link>
         </div>
       </div>
     </div>
     <div class="navbar-end">
       <div class="navbar-item">
         <div class="buttons">
-           <a class="button is-danger is-large">Register</a>
-           <router-link class="button has-background-light is-large" v-bind:to="`/login`">Log in</router-link>
+           <router-link class="button is-danger is-large" to="/register">Register</router-link>
+           <router-link class="button has-background-light is-large" to="/login">Log in</router-link>
         </div>
       </div>
     </div>
