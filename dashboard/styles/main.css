@@ -16,12 +16,18 @@ a{
 
 #eml{
   width: 500px;
+  margin: auto;
 }
 
 #pss{
   width: 500px;
+  margin: auto;
 }
 
 #form{
   text-align: center;
+}
+#log{
+  text-align: center;
+  margin: auto;
 }
