@@ -4,7 +4,7 @@
   <img src="images/logo.png" alt="Sports4U" id = "s4upic"/>
   <h1 class="title is-1">Sports4U</h1>
   </div>
-  <div id="form" class="content-tab">
+  <div id="form" class="box">
    <div class="field">
       <label class="label">E-Mail</label>
       <div class="control has-icons-left has-icons-right" id="eml">
@@ -34,15 +34,22 @@
    </div>
    <div class="field">
       <div class="control" id="log">
-         <button class="button is-link">Register</button>
+         <button class="button is-link">Log In</button>
+      </div>
       </div>
    </div>
-   </div>
+      <div>
+      <label class="label" id="sign">Don't have an account? Sign up below.</label>
+      </div>
+      <div class="control" id="log">
+         <button class="button is-link">Sign Up</button>
+      </div>
   </div>
 </template>
 <style lang="scss" scoped>
   h1{
     text-align: center;
+    padding-bottom: 5px;
   }
   button{
     text-align: center;
@@ -69,10 +76,21 @@
 
   #form{
     text-align: center;
+    margin-left: 350px;
+    margin-right: 320px;
   }
   #log{
     text-align: center;
     margin: auto;
+  }
+  #sign{
+    padding-top: 50px;
+  }
+  .field{
+    label{
+      padding-left: 5px;
+    }
+    text-align: left;
   }
 </style>
 <script>
