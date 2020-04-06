@@ -52,6 +52,14 @@ app.get('/venues/:id', (req, res, next) => {
   })
 })
 
+app.get('/sports/search', (req, res, next) => {
+  const {lon, lat} = req.query
+  res.json({
+    venues: venues
+  })
+})
+
+
 // start server listening on port 3000
 app.listen(3000, () => {
   console.log('Server listening on port 3000')
