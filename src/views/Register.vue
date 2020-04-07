@@ -42,7 +42,7 @@
       <label class="label" id="sign">Don't have an account? Sign up below.</label>
       </div>
       <div class="control" id="log">
-      <router-link class="button is-link" to="/register">Sign Up</router-link>
+         <button class="button is-link">Sign Up</button>
       </div>
   </div>
 </template>
@@ -95,7 +95,7 @@
 </style>
 <script>
   export default{
-    name: "Login",
+    name: "Register",
     components: {
     },
   }
