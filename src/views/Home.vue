@@ -87,9 +87,10 @@
       </header>
       <section class="modal-card-body">
       {{selectedSport}}
-      <ul>
-        <li v-for="location in locations" v-bind:key = "location.place_name">
-          {{ location.place_name }}
+      <ul v-for="location in locations" v-bind:key = "location.place_name">
+        <li class="has-text-weight-bold" >
+        Name: {{location.text}}
+        Address: {{ location.place_name }}
         </li>
       </ul>
       <!--LISTING # 1
@@ -130,6 +131,8 @@ padding: 5px;
 // @ is an alias to /src
 import { getClientLocation } from '../util';
 
+//TODO IF THE USER IS LOGGED IN, THEN DISPLAY THE USER'S NAME AND A SIGN OUT BUTTON 
+
 export default {
   name: "Home",
   components: {
@@ -141,6 +144,8 @@ export default {
       const promises = []
       //Fetch the coordinates from the API
       // Fetch location data from map box
+      
+      //TODO HANDLE LOADING
       const apiUrl = process.env.VUE_APP_API_URL
       fetch(apiUrl + `/sports/search?lon=${this.clientCoords.longitude}&lat=${this.clientCoords.latitude}`)
         .then(res => {
@@ -172,6 +177,7 @@ export default {
     handleCloseClick(){
       this.showModal = false
     },
+    //TODO handleSignOutClick(){}
   },
   data: function(){
     return{
@@ -179,6 +185,7 @@ export default {
       selectedSport: '',
       clientCoords: null,
       locations: [],
+      user_name: '',
     }
   },
   mounted: function(){
