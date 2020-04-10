@@ -24,6 +24,12 @@ const routes = [
     name: "Map",
     component: () =>
       import(/* webpackChunkName: "map" */ "../views/Map.vue")
+  },
+  {
+    path: "/afterLogin",
+    name: "AfterLogin",
+    component: () =>
+      import(/* webpackChunkName: "map" */ "../views/AfterLogin.vue")
   }
 ];
 
