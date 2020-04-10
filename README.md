@@ -6,9 +6,10 @@
 npm install
 ```
 ### Setting up environment variables
-Create a file named `.env` in the root directory with this content:
+- Get a Mapbox API key from here: https://www.mapbox.com/
+- Create a file named `.env` in the root directory with this content:
 ```
-VUE_APP_MAPBOX_API_KEY=<insert mapbox API key here>
+VUE_APP_MAPBOX_API_KEY=insert_mapbox_api_key_here
 VUE_APP_API_URL=http://localhost:3000
 ```
 

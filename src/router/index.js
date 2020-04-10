@@ -26,10 +26,23 @@ const routes = [
       import(/* webpackChunkName: "map" */ "../views/Map.vue")
   },
   {
+<<<<<<< HEAD
     path: "/afterLogin",
     name: "AfterLogin",
     component: () =>
       import(/* webpackChunkName: "map" */ "../views/AfterLogin.vue")
+=======
+    path: "/login",
+    name: "Login",
+    component: () =>
+      import(/* webpackChunkName: "map" */ "../views/Login.vue")
+  },
+  {
+    path: "/register",
+    name: "Register",
+    component: () =>
+    import(/* webpackChunkName: "map" */ "../views/Register.vue")
+>>>>>>> aeeda851e526bc977cbdc8a9396d7ceb82e60774
   }
 ];
 
