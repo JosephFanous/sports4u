@@ -34,7 +34,7 @@
    </div>
    <div class="field">
       <div class="control" id="log">
-         <button class="button is-link">Log In</button>
+          <router-link class="button is-link" v-bind:to="`/afterLogin`">Log In</router-link>
       </div>
       </div>
    </div>
