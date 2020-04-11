@@ -1,6 +1,7 @@
 const express = require('express')
 const cors = require('cors')
 const bodyParser = require('body-parser')
+const sqlite3 = require('sqlite3').verbose();
 
 const app = express()
 app.use(bodyParser.urlencoded({ extended: true }))
@@ -58,6 +59,15 @@ app.get('/sports/search', (req, res, next) => {
     venues: venues
   })
 })
+
+// open the database
+let db = new sqlite3.Database('./database/sportDatabase.db', sqlite3.OPEN_READWRITE, (err) => {
+  if (err) {
+    console.error(err.message);
+  }
+  console.log('Connected to the Sports database.');
+});
+
 
 
 // start server listening on port 3000

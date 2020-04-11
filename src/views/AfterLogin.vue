@@ -198,7 +198,7 @@
 export default {
   name: "AfterLogin",
   props: {
-    msg: String
+
   }
 };
 </script>
