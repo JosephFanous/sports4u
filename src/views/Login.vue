@@ -34,7 +34,7 @@
    </div>
    <div class="field">
       <div class="control" id="log">
-         <button class="button is-link">Log In</button>
+          <router-link class="button is-link" v-bind:to="`/afterLogin`">Log In</router-link>
       </div>
       </div>
    </div>
@@ -65,19 +65,20 @@
   }
 
   #eml{
-    width: 500px;
+    width: 400px;
     margin: auto;
   }
 
   #pss{
-    width: 500px;
+    width: 400px;
     margin: auto;
   }
 
   #form{
     text-align: center;
-    margin-left: 350px;
-    margin-right: 320px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 40%;
   }
   #log{
     text-align: center;
@@ -85,6 +86,7 @@
   }
   #sign{
     padding-top: 50px;
+    text-align: center;
   }
   .field{
     label{
