@@ -22,13 +22,14 @@
           <span>Home</span>
           </router-link>
           <router-link class="button is-large" v-bind:to="`/about`">About Us</router-link>
+          <router-link v-if="isSignedIn"class="button is-large" v-bind:to="`/afterLogin`">Dashboard</router-link>
         </div>
+        
       </div>
     </div>
     <div class="navbar-end">
       <div class="navbar-item">
         <div v-if="isSignedIn" class="buttons">
-          
            <router-link  class="button is-large" to="/afterLogin">
              <span class="icon">
               <i class="fas fa-user"></i>
@@ -53,45 +54,20 @@
   </section>
 
   <div class="container is-centered">
-      <div class="tile is-ancestor">
-        <div class="tile is-parent">
-            <article class="tile is-child box">
-              <p class="title center-text">Soccer</p>
-              <a class="subtitle has-text-link" v-on:click="handlesSportsClick('Soccer')">Click for more details</a>
-              <figure class="image is-4by3">
-                <img src="images/soccer.png">
-              </figure>
-            </article>
-          </div>
-        <div class="tile is-parent">
-          <article class="tile is-child box">
-            <p class="title">Volleyball</p>
-            <a class="subtitle has-text-link" v-on:click="handlesSportsClick('Volleyball')">Click for more details</a>
-            <figure class="image is-4by3">
-              <img src="images/volleyball.png">
-            </figure>
-          </article>
-        </div>
-        <div class="tile is-parent">
-            <article class="tile is-child box">
-              <p class="title">Basketball</p>
-              <a class="subtitle has-text-link" v-on:click="handlesSportsClick('Basketball')">Click for more details</a>
-              <figure class="image is-4by3">
-                <img src="images/basketball.png">
-              </figure>
-            </article>
-          </div>
-        <div class="tile is-parent">
-          <article class="tile is-child box">
-            <p class="title">Table Tennis</p>
-            <a class="subtitle has-text-link" v-on:click="handlesSportsClick('Table Tennis')">Click for more details</a>
-            <figure class="image is-4by3">
-              <img src="images/pingpong.png">
-            </figure>
-          </article>
-        </div>
+   <div class='sport-container is-flex' >
+    <div class='sport' v-for="sport in sports" v-bind:key = "sport">
+        <div class='box'>
+        <p class="title center-text">{{sport}}</p>
+        <a class="subtitle has-text-link" v-on:click="handlesSportsClick(`${sport}`)">Click for more details</a>
+        <figure class="image is-4by3">
+        <img v-bind:src="'images/' + sport + '.png'">
+        </figure>
       </div>
+    </div>
+    </div>
   </div>
+   
+  
   <div class="modal"
   v-bind:class= "{ 'is-active' : showModal }"
   >
@@ -102,10 +78,14 @@
         <button class="delete" aria-label="close" v-on:click="handleCloseClick"></button>
       </header>
       <section class="modal-card-body">
+      <div class="container">
       {{selectedSport}}
+      </div>
       <ul v-for="location in locations" v-bind:key = "location.place_name">
         <li class="has-text-weight-bold" >
         Name: {{location.text}}
+        </li>
+        <li class="has-text-weight-bold" >
         Address: {{ location.place_name }}
         </li>
       </ul>
@@ -141,10 +121,20 @@ nav{
 }
 section{
   border-top: 2px solid grey;
-  margin-bottom: 50px;
+  margin-bottom: 10px;
 }
 a.subtitle{
 padding: 5px;
+}
+.sport-container{
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+.sport{
+  padding: 5px 20px;
+  width: 25%;
+  margin-bottom: 40px;
+  
 }
 </style>
 
@@ -205,6 +195,7 @@ export default {
   },
   data: function(){
     return{
+      sports: ["Soccer","Volleyball","Basketball","Table Tennis","Football", "Hockey", "Baseball", "Badminton"],
       showModal: false,
       selectedSport: '',
       clientCoords: null,
