@@ -15,15 +15,31 @@
     <div class="navbar-start">
       <div class="navbar-item">
         <div class="buttons is-large">
-          <router-link class="button is-large" v-bind:to="`/`">Home</router-link>
+          <router-link class="button is-large" v-bind:to="`/`">
+          <span class="icon">
+           <i class="fas fa-home"></i>
+          </span>
+          <span>Home</span>
+          </router-link>
           <router-link class="button is-large" v-bind:to="`/about`">About Us</router-link>
         </div>
       </div>
     </div>
     <div class="navbar-end">
       <div class="navbar-item">
-        <div class="buttons">
-           <router-link class="button is-danger is-large" to="/register">Register</router-link>
+        <div v-if="isSignedIn" class="buttons">
+          
+           <router-link  class="button is-large" to="/afterLogin">
+             <span class="icon">
+              <i class="fas fa-user"></i>
+             </span>
+             <span>Logged in as: {{user_name}} </span>
+           </router-link>
+           
+           <Button v-on:click="handleSignOutClick" class="button has-background-light is-medium" to="/">Sign Out</Button>
+        </div>
+        <div v-else class="buttons">
+           <router-link  class="button is-danger is-large" to="/register">Register</router-link>
            <router-link class="button has-background-light is-large" to="/login">Log in</router-link>
         </div>
       </div>
@@ -102,7 +118,12 @@
         </ul> !-->
         
       <footer class="modal-card-foot">
-        <router-link class="button is-success" v-bind:to="`/map?sport=${selectedSport}`">View map</router-link>
+        <router-link class="button is-success" v-bind:to="`/map?sport=${selectedSport}`">
+        <span class="icon">
+         <i class="fas fa-map"></i>
+        </span>
+        <span>View Map</span>
+        </router-link>
         <button class="button" v-on:click="handleCloseClick">Cancel</button>
       </footer>
       </section>
@@ -177,13 +198,18 @@ export default {
     handleCloseClick(){
       this.showModal = false
     },
-    //TODO handleSignOutClick(){}
+    handleSignOutClick(){
+      console.log("User Signed Out")
+      this.isSignedIn = false
+    },
   },
   data: function(){
     return{
       showModal: false,
       selectedSport: '',
       clientCoords: null,
+      //Set to False;
+      isSignedIn: true,
       locations: [],
       user_name: '',
     }
@@ -194,6 +220,16 @@ export default {
       this.clientCoords = coords;
     })
   },
+  beforeMount: function(){
+    //Check if the user is signed in From another page
+    if(this.isSignedIn == true){
+      //TODO PULL USERNAME FROM DATABASE AFTER LOGIN
+      this.user_name = "Nandor";
+    }else{
+      
+    }
+  },
+  
   
 };
 </script>
