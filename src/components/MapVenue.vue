@@ -13,6 +13,7 @@
     <p class='error-text' v-if="!isDataLoading && dataError">{{ dataErrror }}</p>
     <div v-if="!isDataLoading && !dataError && data" class="sports">
       <h5 class="title-sports title is-5">Sports</h5>
+      <p class='error-text' v-if="!data.sports.length">No sports at this location currently... 🙁</p>
       <button
         v-for="sport in data.sports"
         v-bind:key="sport"
@@ -77,7 +78,7 @@ export default {
 
       // get sports data using venueId
       const apiUrl = process.env.VUE_APP_API_URL
-      fetch(`${apiUrl}/venues/${venueId}`)
+      fetch(`${apiUrl}/venues/${venueId}/sports`)
         .then(res => {
           if (res.ok) return res.json()
           else throw new Error(res.status)

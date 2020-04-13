@@ -58,7 +58,10 @@ app.get('/venues/search', (req, res, next) => {
   })
 })
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 7f080b2d8976db3b1e754593d25ce50129579e23
 app.get('/venues/:id/sports', (req, res, next) => {
   const { id } = req.params
   console.log('params', req.params )
