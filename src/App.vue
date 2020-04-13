@@ -1,5 +1,5 @@
 <template>
-  <div id="app" class="has-background-white-ter">
+  <div id="app" >
     <!-- <div v-if="$route.name !== 'Map'" id="nav">
       <router-link to="/">Home</router-link> |
       <router-link to="/about">About</router-link> |
@@ -11,6 +11,7 @@
 
 <style lang="scss">
 @import "~bulma/css/bulma.css";
+
 
 html, body {
   height: 100%;
