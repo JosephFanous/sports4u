@@ -13,6 +13,7 @@
     <p class='error-text' v-if="!isDataLoading && dataError">{{ dataErrror }}</p>
     <div v-if="!isDataLoading && !dataError && data" class="sports">
       <h5 class="title-sports title is-5">Sports</h5>
+      <p class='error-text' v-if="!data.sports.length">No sports at this location currently... 🙁</p>
       <button
         v-for="sport in data.sports"
         v-bind:key="sport"

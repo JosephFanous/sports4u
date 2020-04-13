@@ -211,6 +211,7 @@ export default {
 
       this.isVenueSearchLoading = true
       this.venueSearchError = ''
+      this.updateRadiusOnMap()
 
       // fetch venue points to display on map
       const apiUrl = process.env.VUE_APP_API_URL
@@ -301,6 +302,43 @@ export default {
         .finally(() => {
           this.isSearchCenterResultsLoading = false
         })
+    },
+    updateRadiusOnMap: function() {
+      const searchRadiusMetres = parseFloat(this.searchRadius) * 1000
+
+      const searchRadiusSource = {
+        type: 'geojson',
+        data: {
+          type: 'Feature',
+          geometry: {
+            type: 'Point',
+            coordinates: this.searchLocationCenter
+          }
+        }
+      }
+
+      if (this.map.getLayer('search-radius')) this.map.removeLayer('search-radius')
+      if (this.map.getSource('search-radius')) this.map.removeSource('search-radius')
+
+      this.map.addLayer({
+        id: 'search-radius',
+        source: searchRadiusSource,
+        type: 'circle',
+        paint: {
+          'circle-color': '#6eb9ff',
+          'circle-opacity': 0.1,
+          'circle-radius': [
+            // https://docs.mapbox.com/mapbox-gl-js/style-spec/expressions/#camera-expressions
+            // interpolate between 0 when completely zoomed out and pixel radius at max zoom
+            'interpolate', ['exponential', 2], ['zoom'],
+            0, 0,
+            20, metresToPixels(searchRadiusMetres, this.searchLocationCenter[1], 20)
+          ],
+          'circle-stroke-color': '#0000ff',
+          'circle-stroke-opacity': 0.3,
+          'circle-stroke-width': 2
+        }
+      })
     }
   },
   computed: {
@@ -342,6 +380,7 @@ export default {
           zoom: 8
         });
 
+        // get client location data from mapbox using client's coordinates
         fetch(`https://api.mapbox.com/${endpoint}?access_token=${process.env.VUE_APP_MAPBOX_API_KEY}`)
           .then(res => {
             if (res.ok) return res.json()
@@ -349,42 +388,9 @@ export default {
           })
           .then(json => {
             const loc = json.features[0]
-            if (loc) {
-              this.searchLocation = loc.place_name
-              this.searchLocationCenter = loc.center
-              const searchRadiusMetres = parseFloat(this.searchRadius) * 1000
-
-              const searchRadiusSource = {
-                type: 'geojson',
-                data: {
-                  type: 'Feature',
-                  geometry: {
-                    type: 'Point',
-                    coordinates: loc.center
-                  }
-                }
-              }
-
-              this.map.addLayer({
-                id: 'search-radius',
-                source: searchRadiusSource,
-                type: 'circle',
-                paint: {
-                  'circle-color': '#6eb9ff',
-                  'circle-opacity': 0.1,
-                  'circle-radius': [
-                    // https://docs.mapbox.com/mapbox-gl-js/style-spec/expressions/#camera-expressions
-                    // interpolate between 0 when completely zoomed out and pixel radius at max zoom
-                    'interpolate', ['exponential', 2], ['zoom'],
-                    0, 0,
-                    20, metresToPixels(searchRadiusMetres, loc.center[1], 20)
-                  ],
-                  'circle-stroke-color': '#0000ff',
-                  'circle-stroke-opacity': 0.3,
-                  'circle-stroke-width': 2
-                }
-              })
-            }
+            this.searchLocation = loc.place_name
+            this.searchLocationCenter = loc.center
+            this.updateRadiusOnMap()
           })
       });
     })
