@@ -51,10 +51,19 @@ app.get('/venues/search', (req, res, next) => {
   console.log('query', req.query)
   // const { sport, lon, lat, radius } = req.query
   // TODO: replace this with a radius search
-  db.all('SELECT LocationID as id, Latitude, Longitude FROM Location', (err, rows) => {
-    res.json({
-      venues: rows
-    })
+  db.all(
+    `
+      SELECT Location.LocationID as id, Latitude, Longitude FROM Location
+      INNER JOIN Event ON Location.LocationID = Event.LocationID
+      INNER JOIN SportType on Event.SportID = SportType.SportID
+      WHERE SportType.SportName = ?
+    `,
+    req.query.sport,
+    (err, rows) => {
+      console.log(rows)
+      res.json({
+        venues: rows
+      })
   })
 })
 
@@ -63,11 +72,11 @@ app.get('/venues/:id/sports', (req, res, next) => {
   console.log('params', req.params )
   db.all(
     `
-      SELECT SportType.Name FROM Location
+      SELECT SportType.SportName FROM Location
       INNER JOIN Event ON Location.LocationID = Event.LocationID
       INNER JOIN SportType on Event.SportID = SportType.SportID
       WHERE Location.LocationID = ?
-      GROUP BY SportType.Name
+      GROUP BY SportType.SportName
     `,
     id,
     (err, rows) => {
@@ -75,7 +84,7 @@ app.get('/venues/:id/sports', (req, res, next) => {
       console.log(rows)
       res.json({
         id: req.params.id,
-        sports: rows.map(sport => sport.Name)
+        sports: rows.map(sport => sport.SportName)
       })
     })
 })
