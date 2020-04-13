@@ -92,6 +92,12 @@ app.get('/sports/search', (req, res, next) => {
   })
 })
 
+//Pulls isSigned in From  DB
+//TODO
+app.get('/', (req, res, next) => {
+
+})
+
 // Used to get user data
 app.get('/users/:id', (req, res, next) => {
   db.serialize(() => {

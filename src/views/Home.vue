@@ -1,17 +1,6 @@
 <template>
   <div class="has-background-white-ter">
   <nav class="navbar has-background-white-ter" role="navigation" aria-label="main navigation">
-    <div class="navbar-brand">
-       <a class="navbar-item" href="https://sports4u.com">
-          <img src="images/sports_logo.png"  alt="Sports4U" />
-       </a>
-
-       <a role="button" class="navbar-burger burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
-          <span aria-hidden="true"></span>
-          <span aria-hidden="true"></span>
-          <span aria-hidden="true"></span>
-       </a>
-    </div>
     <div class="navbar-start">
       <div class="navbar-item">
         <div class="buttons is-large">
@@ -24,7 +13,9 @@
           <router-link class="button is-large" v-bind:to="`/about`">About Us</router-link>
           <router-link v-if="isSignedIn"class="button is-large" v-bind:to="`/afterLogin`">Dashboard</router-link>
         </div>
-        
+        <div class="centerlogo">
+          <img class="logo" src="images/atheletes.png"  alt="Sports4U" />
+        </div>
       </div>
     </div>
     <div class="navbar-end">
@@ -117,11 +108,21 @@ html, body{
   height: 100%;
 }
 nav{
-  padding: 20px;
+  margin-bottom: 0px;
+  padding-top: 10px;
+  padding-bottom: 0px;
+  width: auto;
 }
-section{
+.centerlogo{
+  text-align: center;
+  align-self: center;
+}
+.section{
   border-top: 2px solid grey;
   margin-bottom: 10px;
+  margin-top:0px;
+  padding-left: 40px;
+  padding-top: 20px
 }
 a.subtitle{
 padding: 5px;
@@ -212,7 +213,7 @@ export default {
     })
   },
   beforeMount: function(){
-    //Check if the user is signed in From another page
+    //Check if the user is signed in From another page, check sign in and username from log in.
     if(this.isSignedIn == true){
       //TODO PULL USERNAME FROM DATABASE AFTER LOGIN
       this.user_name = "Nandor";

@@ -95,6 +95,7 @@
     text-align: left;
   }
 </style>
+//TODO change variable signed in to true corresponding to the correct username
 <script>
   export default{
     name: "Login",
