@@ -142,12 +142,14 @@ padding: 5px;
 <script>
 // @ is an alias to /src
 import { getClientLocation } from '../util';
+import Navbar from '../components/Navbar.vue';
 
-//TODO IF THE USER IS LOGGED IN, THEN DISPLAY THE USER'S NAME AND A SIGN OUT BUTTON 
+//TODO IF THE USER IS LOGGED IN, THEN DISPLAY THE USER'S NAME AND A SIGN OUT BUTTON DONE
 
 export default {
   name: "Home",
   components: {
+    Navbar,
   },
   methods: {
     handlesSportsClick(sport){

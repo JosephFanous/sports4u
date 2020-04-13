@@ -43,5 +43,14 @@
 //TODO Maybe center logo
   export default {
     name: 'Navbar',
+    props: {
+      isSignedin: true,
+    },
+    // data: function() 
+    // {
+    //   return{
+    //     //isSignedin: true,
+    //   }
+    // },
   };
 </script>
