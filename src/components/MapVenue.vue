@@ -77,7 +77,7 @@ export default {
 
       // get sports data using venueId
       const apiUrl = process.env.VUE_APP_API_URL
-      fetch(`${apiUrl}/venues/${venueId}`)
+      fetch(`${apiUrl}/venues/${venueId}/sports`)
         .then(res => {
           if (res.ok) return res.json()
           else throw new Error(res.status)

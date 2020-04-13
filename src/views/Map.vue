@@ -102,6 +102,10 @@
   height: 100%;
 }
 
+.sidebar {
+  background-color: white;
+}
+
 .sidebar .section {
   padding-bottom: 2rem;
 }
@@ -229,7 +233,7 @@ export default {
               },
               geometry: {
                 type: 'Point',
-                coordinates: venue.coordinates
+                coordinates: [venue.Longitude, venue.Latitude]
               }
             }
           })

@@ -49,25 +49,35 @@ app.use(cors(corsOptions))
 app.get('/venues/search', (req, res, next) => {
   console.log('query', req.query)
   // const { sport, lon, lat, radius } = req.query
-  db.all('SELECT LocationID as id, Latitude, Longitude FROM Location INNER JOIN ', (err, rows) => {
-    console.log(rows)
+  // TODO: replace this with a radius search
+  db.all('SELECT LocationID as id, Latitude, Longitude FROM Location', (err, rows) => {
     res.json({
       venues: rows
     })
   })
-  // res.json({
-  //   venues
-  // })
 })
 
-// app.get('/venues/:id/sports', (req, res, next) => {
-//   console.log('params', req.params )
-//   db.get('SELECT * FROM Location WHERE Latitude=?')
-//   res.json({
-//     id: req.params.id,
-//     sports: ['Basketball', 'Volleyball', 'Table Tennis']
-//   })
-// })
+app.get('/venues/:id/sports', (req, res, next) => {
+  const { id } = req.params
+  console.log('params', req.params )
+  db.all(
+    `
+      SELECT SportType.Name FROM Location
+      INNER JOIN Event ON Location.LocationID = Event.LocationID
+      INNER JOIN SportType on Event.SportID = SportType.SportID
+      WHERE Location.LocationID = ?
+      GROUP BY SportType.Name
+    `,
+    id,
+    (err, rows) => {
+      if (err) console.error(err)
+      console.log(rows)
+      res.json({
+        id: req.params.id,
+        sports: rows.map(sport => sport.Name)
+      })
+    })
+})
 
 app.post('/login', (req, res, next) => {
   console.log(req.body)
