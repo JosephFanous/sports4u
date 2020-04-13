@@ -1,7 +1,8 @@
 const express = require('express')
 const cors = require('cors')
 const bodyParser = require('body-parser')
-const sqlite3 = require('sqlite3').verbose();
+const sqlite3 = require('sqlite3').verbose()
+const { toRadians } = require('./util')
 
 const app = express()
 app.use(express.urlencoded({ extended: true }))
@@ -49,17 +50,36 @@ app.use(cors(corsOptions));
 
 app.get('/venues/search', (req, res, next) => {
   console.log('query', req.query)
-  // const { sport, lon, lat, radius } = req.query
-  // TODO: replace this with a radius search
+  const { sport, radius } = req.query
+  const lon = parseFloat(req.query.lon)
+  const lat = parseFloat(req.query.lat)
+
+  // try to calculate a square
+  // because trying to calculate points within radius is too hard with sqlite
+  // https://stackoverflow.com/questions/639695/how-to-convert-latitude-or-longitude-to-meters
+  const latDelta = radius / 111.32
+  const lonDelta = radius / (40075 * Math.cos(toRadians(lat)) / 360)
+
   db.all(
     `
-      SELECT Location.LocationID as id, Latitude, Longitude FROM Location
+      SELECT Location.LocationID as id, Latitude, Longitude
+      FROM Location
       INNER JOIN Event ON Location.LocationID = Event.LocationID
       INNER JOIN SportType on Event.SportID = SportType.SportID
-      WHERE SportType.SportName = ?
+      WHERE SportType.SportName = ? AND
+      Location.Latitude < ? AND
+      Location.Latitude > ? AND
+      Location.Longitude < ? AND
+      Location.Longitude > ?
+      GROUP BY Location.LocationID
     `,
-    req.query.sport,
+    sport,
+    lat + latDelta,
+    lat - latDelta,
+    lon + lonDelta,
+    lon - lonDelta,
     (err, rows) => {
+      if (err) console.log(err)
       console.log(rows)
       res.json({
         venues: rows
