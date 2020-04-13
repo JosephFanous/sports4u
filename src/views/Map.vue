@@ -251,7 +251,7 @@ export default {
             type: 'symbol',
             source: 'venues',
             layout: {
-              'icon-image': 'marker-15',
+              'icon-image': 'sport-marker',
               'icon-allow-overlap': true
             }
           })
@@ -369,6 +369,11 @@ export default {
 
       this.map.on('click', 'venues', event => {
         this.selectedVenue = event.features[0]
+      })
+
+      this.map.loadImage('images/sport-marker.png', (err, image) => {
+        if (err) console.error(err)
+        this.map.addImage('sport-marker', image)
       })
 
       getClientLocation(location => {
