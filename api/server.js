@@ -4,7 +4,8 @@ const bodyParser = require('body-parser')
 const sqlite3 = require('sqlite3').verbose();
 
 const app = express()
-app.use(bodyParser.urlencoded({ extended: true }))
+app.use(express.urlencoded({ extended: true }))
+app.use(express.json())
 
 // TODO: database integration (this is just mock data for testing)
 const venues = [
@@ -21,6 +22,14 @@ const venues = [
     coordinates: [-78.896513, 43.944809]
   }
 ]
+
+// open the database
+const db = new sqlite3.Database('./database/sportDatabase.db', sqlite3.OPEN_READWRITE, (err) => {
+  if (err) {
+    console.error(err.message);
+  }
+  console.log('Connected to the Sports database.');
+});
 
 // whitelist requests from frontend server
 const whitelist = ['http://localhost:8080', 'http://localhost:3000']
@@ -40,17 +49,29 @@ app.use(cors(corsOptions))
 app.get('/venues/search', (req, res, next) => {
   console.log('query', req.query)
   // const { sport, lon, lat, radius } = req.query
-  res.json({
-    venues
+  db.all('SELECT LocationID as id, Latitude, Longitude FROM Location INNER JOIN ', (err, rows) => {
+    console.log(rows)
+    res.json({
+      venues: rows
+    })
   })
+  // res.json({
+  //   venues
+  // })
 })
 
-app.get('/venues/:id', (req, res, next) => {
-  console.log('params', req.params )
-  res.json({
-    id: req.params.id,
-    sports: ['Basketball', 'Volleyball', 'Table Tennis']
-  })
+// app.get('/venues/:id/sports', (req, res, next) => {
+//   console.log('params', req.params )
+//   db.get('SELECT * FROM Location WHERE Latitude=?')
+//   res.json({
+//     id: req.params.id,
+//     sports: ['Basketball', 'Volleyball', 'Table Tennis']
+//   })
+// })
+
+app.post('/login', (req, res, next) => {
+  console.log(req.body)
+  res.json(req.body)
 })
 
 app.get('/sports/search', (req, res, next) => {
@@ -59,16 +80,6 @@ app.get('/sports/search', (req, res, next) => {
     venues: venues
   })
 })
-
-// open the database
-let db = new sqlite3.Database('./database/sportDatabase.db', sqlite3.OPEN_READWRITE, (err) => {
-  if (err) {
-    console.error(err.message);
-  }
-  console.log('Connected to the Sports database.');
-});
-
-
 
 // start server listening on port 3000
 app.listen(3000, () => {

@@ -8,7 +8,7 @@
    <div class="field">
       <label class="label">E-Mail</label>
       <div class="control has-icons-left has-icons-right" id="eml">
-         <input class="input is-danger" type="email" placeholder="E-Mail address" />
+         <input v-model="email" class="input is-dark" type="email" placeholder="E-Mail address" />
          <span class="icon is-small is-left">
             <i class="fas fa-user"></i>
          </span>
@@ -22,7 +22,7 @@
    <div class="field">
       <label class="label">Password</label>
       <div class="control has-icons-left has-icons-right" id="pss">
-         <input class="input is-danger" type="password" placeholder="Password">
+         <input v-model="password" class="input is-dark" type="password" placeholder="Password">
          <span class="icon is-small is-left">
             <i class="fas fa-envelope"></i>
          </span>
@@ -34,7 +34,7 @@
    </div>
    <div class="field">
       <div class="control" id="log">
-          <router-link class="button is-link" v-bind:to="`/afterLogin`">Log In</router-link>
+          <button v-on:click="login" class="button is-link">Log In</button>
       </div>
       </div>
    </div>
@@ -98,7 +98,31 @@
 <script>
   export default{
     name: "Login",
+    data: function() {
+      return {
+        email: null,
+        password: null
+      }
+    },
     components: {
     },
+    methods: {
+      login: function() {
+        const apiUrl = process.env.VUE_APP_API_URL
+        fetch(`${apiUrl}/login`, {
+          method: 'post',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: this.email,
+            password: this.password
+          })
+        })
+          .then(res => res.json())
+          .then(data => console.log(data))
+      }
+    }
   }
 </script>
