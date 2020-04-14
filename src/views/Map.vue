@@ -1,6 +1,8 @@
 <template>
+<div class="mappage">
+<Navbar></Navbar>
   <div class="map columns is-gapless">
-    <div class="sidebar has-text-left column is-4">
+    <div class="sidebar has-text-left column is-4 has-background-white-ter">
       <div class="section">
         <h1 class="title">Sport Finder</h1>
         <div class="field">
@@ -94,12 +96,20 @@
     </div>
     <div id="map-container" class="column">
     </div>
+    </div>
   </div>
 </template>
 
 <style lang="scss">
 .map {
   height: 100%;
+}
+.mappage{
+  height:90%;
+}
+nav{
+  border-bottom: 1px solid gray;
+  height: 10%;
 }
 
 .sidebar {
@@ -153,6 +163,7 @@ const mapboxgl = require("mapbox-gl/dist/mapbox-gl.js");
 import { getClientLocation, metresToPixels } from '../util';
 import LocationResult from '../components/LocationResult.vue';
 import MapVenue from '../components/MapVenue.vue';
+import Navbar from '../components/Navbar.vue';
 
 // TODO: search for location from text box and list possible and select to set center of search radius - DONE
 // TODO: set default search center to client location, if available - DONE
@@ -173,7 +184,8 @@ export default {
   name: "Map",
   components: {
     LocationResult,
-    MapVenue
+    MapVenue,
+    Navbar,
   },
   data: function() {
     return {

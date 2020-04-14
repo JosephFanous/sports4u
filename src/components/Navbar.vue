@@ -2,10 +2,10 @@
   <nav class="navbar has-background-white-ter" role="navigation" aria-label="main navigation">
     <div class="navbar-start">
       <div class="navbar-item">
-        <div class="buttons is-large">
+        <div class="buttons">
           <router-link class="button is-large" v-bind:to="`/`">
           <span class="icon">
-           <i class="fas fa-home"></i>
+            <i class="fas fa-home"></i>
           </span>
           <span>Home</span>
           </router-link>
@@ -26,7 +26,6 @@
              </span>
              <span>Logged in as: {{user_name}} </span>
            </router-link>
-           
            <Button v-on:click="handleSignOutClick" class="button has-background-light is-medium" to="/">Sign Out</Button>
         </div>
         <div v-else class="buttons">
@@ -37,6 +36,11 @@
     </div>
   </nav>
 </template>
+<style scoped>
+  .buttons{
+    margin-bottom: 0;
+  }
+</style>
 <script>
 //TODO Add Navbars ontop of everypage
 //TODO Create Proper Router links on Navbars
@@ -44,7 +48,14 @@
   export default {
     name: 'Navbar',
     props: {
-      isSignedin: true,
+      isSignedIn: Boolean,
+      user_name: String,
+    },
+    methods: {
+      handleSignOutClick(){
+        console.log("User Signed Out")
+        this.isSignedIn = false
+      },
     },
     // data: function() 
     // {
