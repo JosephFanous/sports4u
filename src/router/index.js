@@ -48,6 +48,12 @@ const routes = [
     name: "Register",
     component: () =>
     import(/* webpackChunkName: "map" */ "../views/Register.vue")
+  },
+  {
+    path: "/locationsearch",
+    name: "LocationSearch",
+    component: () =>
+    import(/* webpackChunkName: "locationsearch" */ "../views/LocationSearch.vue")
   }
 ];
 
