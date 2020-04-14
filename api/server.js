@@ -137,6 +137,28 @@ app.post('/login', (req, res, next) => {
 
 })
 
+app.post('/', (req, res, next) => {
+ console.log(req.body)
+ db.all('SELECT Name as name, StartTime as start,EndTime as endtime FROM Event',(err, rows) => {
+  if (err) {
+    throw err;
+  }
+  if(!rows){
+    res.json({
+      errors:{
+        eventnames: 'Events not found'
+      }
+    })
+   }else{
+    res.json({
+      events: rows,
+    })
+  }
+  console.log(rows);
+  });
+
+})
+
 app.get('/sports/search', (req, res, next) => {
   const {lon, lat} = req.query
   res.json({
