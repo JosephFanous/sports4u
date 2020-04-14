@@ -284,6 +284,7 @@ export default {
     this.loadEvents(); //Active events
     this.loadSignedUpEvents();
     this.loadUpComingEvents();
+
   },
   methods: {
     loadUserData: function(){
@@ -331,15 +332,21 @@ export default {
     .catch(err => console.log(err));
 
     },
+
   },
 
   mounted: function() {
     mapboxgl.accessToken = process.env.VUE_APP_MAPBOX_API_KEY;
     const map = new mapboxgl.Map({
-    container: 'map',
-    style: 'mapbox://styles/mapbox/streets-v9'
+      container: 'map',
+      style: 'mapbox://styles/mapbox/streets-v9',
+      center: [-79.347015, 43.651070],
+      zoom: 7,
+      attributionControl: false
     });
+
   }
+
 };
 </script>
 <style scoped lang="scss">
