@@ -71,3 +71,21 @@ export function getVenue(id) {
     })
     .then(data => data)
 }
+
+// send a request to end the current session (deletes session on server and cookie on client)
+export function endSession() {
+  const apiUrl = process.env.VUE_APP_API_URL
+  return fetch(`${apiUrl}/logout`,
+    {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include'
+    }
+  ).then(res => {
+    if (res.ok) return res.json()
+    else throw new Error(res.status)
+  })
+}

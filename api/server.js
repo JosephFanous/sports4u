@@ -2,6 +2,7 @@ const express = require('express')
 const cors = require('cors')
 const bodyParser = require('body-parser')
 const sqlite3 = require('sqlite3').verbose()
+const session = require('express-session')
 const { toRadians } = require('./util')
 
 const app = express()
@@ -32,7 +33,6 @@ const db = new sqlite3.Database('./database/sportDatabase.db', sqlite3.OPEN_READ
   console.log('Connected to the Sports database.');
 });
 
-
 // whitelist requests from frontend server
 const whitelist = ['http://localhost:8080', 'http://localhost:3000']
 const corsOptions = {
@@ -44,9 +44,19 @@ const corsOptions = {
       error.status = 400
       callback(error)
     }
-  }
+  },
+  credentials: true
 }
 app.use(cors(corsOptions));
+
+app.use(session({
+  secret: 'change this probably',
+  cookie: {
+    maxAge: 60000
+  },
+  resave: false,
+  saveUninitialized: true
+}))
 
 app.get('/venues/search', (req, res, next) => {
   console.log('query', req.query)
@@ -198,7 +208,7 @@ app.post('/venues/find', (req, res, next) => {
 
 app.post('/login', (req, res, next) => {
  console.log(req.body)
- db.get('SELECT Email as email, Password as pass FROM User WHERE email = ?',req.body.email,(err, row) => {
+ db.get('SELECT Email as email, Password as pass, UserName as username FROM User WHERE email = ?',req.body.email,(err, row) => {
   if (err) {
     throw err;
   }
@@ -215,13 +225,33 @@ app.post('/login', (req, res, next) => {
       }
     })
   }else{
+    // set the session cookie username field to the row's username
+    // and send it back so we can store it in vue globals for UI
+    req.session.username = row.username
+    console.log('/login:', row)
+    console.log('/login:', req.session.username)
     res.json({
-      success: true
+      success: true,
+      username: row.username
     })
   }
   console.log(row);
   });
 
+})
+
+app.post('/logout', (req, res, next) => {
+  console.log('/logout:', req.session)
+
+  if (!req.session.username) {
+    return res.status(400).json({
+      error: 'Not logged in'
+    })
+  }
+
+  res.json({
+    success: true
+  })
 })
 
 app.post('/', (req, res, next) => {

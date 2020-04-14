@@ -124,15 +124,17 @@
             'Accept': 'application/json',
             'Content-Type': 'application/json',
           },
+          // to be able to receive cookies back
+          credentials: 'include',
           body: JSON.stringify({
             email: this.email,
             password: this.password
           })
         })
           .then(res => res.json())
-          //.then(data => console.log(data))
           .then(data => {
             if(data.success){
+              this.$globalStore.currentUsername = data.username
               this.$router.push({
                 path: '/'
               })
