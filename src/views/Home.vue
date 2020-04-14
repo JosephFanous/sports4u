@@ -123,8 +123,8 @@ export default {
       const promises = []
       //Fetch the coordinates from the API
       // Fetch location data from map box
+      //TODO GET EVENT DATA FROM DATABASE
       
-      //TODO HANDLE LOADING
       const apiUrl = process.env.VUE_APP_API_URL
       fetch(apiUrl + `/sports/search?lon=${this.clientCoords.longitude}&lat=${this.clientCoords.latitude}`)
         .then(res => {
@@ -164,6 +164,9 @@ export default {
       selectedSport: '',
       clientCoords: null,
       locations: [],
+      eventnames:[],
+      eventTimes:[],
+      eventEndTimes:[],
     }
   },
   mounted: function(){
