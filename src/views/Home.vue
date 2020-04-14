@@ -24,9 +24,7 @@
   </div>
    
   
-  <div class="modal"
-  v-bind:class= "{ 'is-active' : showModal }"
-  >
+  <div class="modal"v-bind:class= "{ 'is-active' : showModal }">
     <div class="modal-background"></div>
     <div class="modal-card">
       <header class="modal-card-head">
@@ -36,7 +34,7 @@
       <section class="modal-card-body">
       <div class="container">
       </div>
-      <ul v-for="location in locations" v-bind:key = "location.place_name">
+      <ul v-for="location in locations">
         <li class="has-text-weight-bold" >
           Name: {{location.text}}
         </li>
@@ -48,20 +46,12 @@
         </li>
         <li class="has-text-weight-bold">
           Events:
-          <--! For loop for events--> 
-          <ul>
-            <li>(insert events here)</li>
-            <li>(insert events here)</li>
+          <ul v-for="events in eventnames">
+            <li>{{events}}</li>
           </ul>
         </li>
       </ul>
-      <!--LISTING # 1
-        <ul>
-          <li>Locations: Underground Goodlife Parking</li>
-          <li>Address: 399 Elmgrove Ave, Oshawa, ON L1J 2C6 Elmgrove Ave, Oshawa, ON L1J 2C6</li>
-          <li>Rating: 4.0</li>
-          <li>Phone Number: 905 ### ###</li>
-        </ul> !-->
+
         
       <footer class="modal-card-foot">
         <router-link class="button is-success" v-bind:to="`/map?sport=${selectedSport}`">
@@ -118,14 +108,34 @@ export default {
   },
   methods: {
     handlesSportsClick(sport){
-      this.showModal = true,
+      const apiUrl = process.env.VUE_APP_API_URL
+      this.showModal = true
       this.selectedSport = sport
       const promises = []
+      
       //Fetch the coordinates from the API
       // Fetch location data from map box
       //TODO GET EVENT DATA FROM DATABASE
-      
-      const apiUrl = process.env.VUE_APP_API_URL
+      fetch(`${apiUrl}/`, {
+        method: 'post',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+      })
+        .then(res => res.json())
+        //.then(data => console.log(data))
+        .then(data => {
+          data.events.forEach( event => {
+            console.log(event)
+            this.eventnames.push(event.name);
+            this.eventStartTimes.push(event.start);
+            this.eventEndTimes.push(event.end);
+          })
+          console.log(this.eventnames);
+          
+        })
+        
       fetch(apiUrl + `/sports/search?lon=${this.clientCoords.longitude}&lat=${this.clientCoords.latitude}`)
         .then(res => {
           if (res.ok) return res.json()
@@ -165,7 +175,7 @@ export default {
       clientCoords: null,
       locations: [],
       eventnames:[],
-      eventTimes:[],
+      eventStartTimes:[],
       eventEndTimes:[],
     }
   },
