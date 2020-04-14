@@ -111,7 +111,30 @@ app.get('/venues/:id/sports', (req, res, next) => {
 
 app.post('/login', (req, res, next) => {
  console.log(req.body)
- res.json(req.body)
+ db.get('SELECT Email as email, Password as pass FROM User WHERE email = ?',req.body.email,(err, row) => {
+  if (err) {
+    throw err;
+  }
+  if(!row){
+    res.json({
+      errors:{
+        email: 'hasError'
+      }
+    })
+  } else if(req.body.password!=row.pass){
+    res.json({
+      errors:{
+        password: 'hasError'
+      }
+    })
+  }else{
+    res.json({
+      success: true
+    })
+  }
+  console.log(row);
+  });
+
 })
 
 app.get('/sports/search', (req, res, next) => {
@@ -126,6 +149,8 @@ app.get('/sports/search', (req, res, next) => {
 app.get('/', (req, res, next) => {
 
 })
+
+//Gets all event names, event start times, and event endtimes
 
 // Used to get user data
 app.get('/users/:id', (req, res, next) => {
@@ -144,7 +169,7 @@ app.get('/users/:id', (req, res, next) => {
 // Get finished and unfinshed events
 app.get('/Events/:id/:EventStatus', (req, res, next) => {
   db.serialize(() => {
-    db.all(`SELECT Name, StartTime, EndTime, EventAddedTime, EventDone, PeopleAttending,SportName, Latitude, Longitude
+    db.all(`SELECT Name, StartTime, EndTime, EventAddedTime, EventDone, PeopleAttending,SportName, Latitude, Longitude, Address
             FROM EVENT
             INNER JOIN SportType ON Event.SportID= SportType.SportID
             INNER JOIN Location ON Event.LocationID = Location.LocationID
@@ -159,11 +184,29 @@ app.get('/Events/:id/:EventStatus', (req, res, next) => {
   });
 });
 
+// Get all upcming events near user
+app.get('/UpcomingEvents/:id/:EventStatus', (req, res, next) => {
+  db.serialize(() => {
+    db.all(`SELECT Name, StartTime, EndTime, EventAddedTime, EventDone, PeopleAttending,SportName, Latitude, Longitude, Address
+            FROM EVENT
+            INNER JOIN SportType ON Event.SportID= SportType.SportID
+            INNER JOIN Location ON Event.LocationID = Location.LocationID
+            WHERE EventDone = ? AND UserID != ?`,req.params.EventStatus,req.params.id ,(err, row) => {
+      if (err) {
+        console.error(err.message);
+      }
+      console.log(row);
+       // Sending data with the request
+      res.send(JSON.stringify(row));
+    })
+  });
+});
+
 // Get SignedUp evemts by a specfic user
 app.get('/SignedUpEvents/:id/Attending', (req, res, next) => {
   db.serialize(() => {
     db.all(`Select User.UserName,User.Email,Event.Name,Event.StartTime,Event.EndTime, Event.EventAddedTime, Event.EventDone,
-            Event.PeopleAttending,SportType.SportName, Location.Latitude, Location.Longitude
+            Event.PeopleAttending,SportType.SportName, Location.Latitude, Location.Longitude, Location.Address
             From UserAttendingEvent
             INNER JOIN Event ON Event.EventID= UserAttendingEvent.EventID
             INNER JOIN Location ON Event.LocationID= Location.LocationID

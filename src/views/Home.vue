@@ -1,42 +1,7 @@
 <template>
   <div class="has-background-white-ter">
-  <nav class="navbar has-background-white-ter" role="navigation" aria-label="main navigation">
-    <div class="navbar-start">
-      <div class="navbar-item">
-        <div class="buttons is-large">
-          <router-link class="button is-large" v-bind:to="`/`">
-          <span class="icon">
-           <i class="fas fa-home"></i>
-          </span>
-          <span>Home</span>
-          </router-link>
-          <router-link class="button is-large" v-bind:to="`/about`">About Us</router-link>
-          <router-link v-if="isSignedIn"class="button is-large" v-bind:to="`/afterLogin`">Dashboard</router-link>
-        </div>
-        <div class="centerlogo">
-          <img class="logo" src="images/atheletes.png"  alt="Sports4U" />
-        </div>
-      </div>
-    </div>
-    <div class="navbar-end">
-      <div class="navbar-item">
-        <div v-if="isSignedIn" class="buttons">
-           <router-link  class="button is-large" to="/afterLogin">
-             <span class="icon">
-              <i class="fas fa-user"></i>
-             </span>
-             <span>Logged in as: {{user_name}} </span>
-           </router-link>
-           
-           <Button v-on:click="handleSignOutClick" class="button has-background-light is-medium" to="/">Sign Out</Button>
-        </div>
-        <div v-else class="buttons">
-           <router-link  class="button is-danger is-large" to="/register">Register</router-link>
-           <router-link class="button has-background-light is-large" to="/login">Log in</router-link>
-        </div>
-      </div>
-    </div>
-  </nav>
+  <Navbar v-bind:isSignedIn="true" vbind:user_name=Nandor></Navbar>
+  
   <section class="section">
     <h1 class="title">Sports</h1>
     <h2 class="subtitle">
@@ -70,14 +35,24 @@
       </header>
       <section class="modal-card-body">
       <div class="container">
-      {{selectedSport}}
       </div>
       <ul v-for="location in locations" v-bind:key = "location.place_name">
         <li class="has-text-weight-bold" >
-        Name: {{location.text}}
+          Name: {{location.text}}
         </li>
         <li class="has-text-weight-bold" >
-        Address: {{ location.place_name }}
+          Address: {{ location.place_name }}
+        </li>
+        <li class="has-text-weight-bold">
+          Phone number: ###-###-####
+        </li>
+        <li class="has-text-weight-bold">
+          Events:
+          <--! For loop for events--> 
+          <ul>
+            <li>(insert events here)</li>
+            <li>(insert events here)</li>
+          </ul>
         </li>
       </ul>
       <!--LISTING # 1
@@ -107,16 +82,6 @@
 html, body{
   height: 100%;
 }
-nav{
-  margin-bottom: 0px;
-  padding-top: 10px;
-  padding-bottom: 0px;
-  width: auto;
-}
-.centerlogo{
-  text-align: center;
-  align-self: center;
-}
 .section{
   border-top: 2px solid grey;
   margin-bottom: 10px;
@@ -142,12 +107,14 @@ padding: 5px;
 <script>
 // @ is an alias to /src
 import { getClientLocation } from '../util';
+import Navbar from '../components/Navbar.vue';
 
-//TODO IF THE USER IS LOGGED IN, THEN DISPLAY THE USER'S NAME AND A SIGN OUT BUTTON 
+//TODO IF THE USER IS LOGGED IN, THEN DISPLAY THE USER'S NAME AND A SIGN OUT BUTTON DONE
 
 export default {
   name: "Home",
   components: {
+    Navbar,
   },
   methods: {
     handlesSportsClick(sport){
@@ -156,8 +123,8 @@ export default {
       const promises = []
       //Fetch the coordinates from the API
       // Fetch location data from map box
+      //TODO GET EVENT DATA FROM DATABASE
       
-      //TODO HANDLE LOADING
       const apiUrl = process.env.VUE_APP_API_URL
       fetch(apiUrl + `/sports/search?lon=${this.clientCoords.longitude}&lat=${this.clientCoords.latitude}`)
         .then(res => {
@@ -189,10 +156,6 @@ export default {
     handleCloseClick(){
       this.showModal = false
     },
-    handleSignOutClick(){
-      console.log("User Signed Out")
-      this.isSignedIn = false
-    },
   },
   data: function(){
     return{
@@ -200,10 +163,10 @@ export default {
       showModal: false,
       selectedSport: '',
       clientCoords: null,
-      //Set to False;
-      isSignedIn: true,
       locations: [],
-      user_name: '',
+      eventnames:[],
+      eventTimes:[],
+      eventEndTimes:[],
     }
   },
   mounted: function(){

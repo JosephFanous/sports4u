@@ -8,30 +8,31 @@
    <div class="field">
       <label class="label">E-Mail</label>
       <div class="control has-icons-left has-icons-right" id="eml">
-         <input v-model="email" class="input is-dark" type="email" placeholder="E-Mail address" />
+         <input v-model="email" class="input is-dark" v-bind:class="{'is-danger': emlerr}" type="email" placeholder="E-Mail address" />
          <span class="icon is-small is-left">
             <i class="fas fa-user"></i>
          </span>
          <span class="icon is-small is-right">
-            <i class="fas fa-exclamation-triangle"></i>
+            <i class="fas" v-bind:class="{'fa-exclamation-triangle': emlerr}"></i>
          </span>
+         <p id="emltxt"> {{emlerr}} </p>
       </div>
-      <!-- <p class="help is-success">This E-Mail is available</p> -->
    </div>
 
    <div class="field">
       <label class="label">Password</label>
       <div class="control has-icons-left has-icons-right" id="pss">
-         <input v-model="password" class="input is-dark" type="password" placeholder="Password">
+         <input v-model="password" class="input is-dark" v-bind:class="{'is-danger': psserr}" type="password" placeholder="Password">
          <span class="icon is-small is-left">
             <i class="fas fa-envelope"></i>
          </span>
          <span class="icon is-small is-right">
-            <i class="fas fa-exclamation-triangle"></i>
+           <i class="fas" v-bind:class="{'fa-exclamation-triangle': psserr}"></i>
          </span>
+         <p id="psstxt"> {{psserr}} </p>
       </div>
-      <!-- <p class="help is-danger">This password does not meet our minimum requirements</p> -->
    </div>
+
    <div class="field">
       <div class="control" id="log">
           <button v-on:click="login" class="button is-link">Log In</button>
@@ -64,14 +65,13 @@
     width: 190px;
   }
 
-  #eml{
+  #eml, #pss{
     width: 400px;
     margin: auto;
   }
 
   #pss{
-    width: 400px;
-    margin: auto;
+    padding-bottom: 25px;
   }
 
   #form{
@@ -79,6 +79,8 @@
     margin-left: auto;
     margin-right: auto;
     width: 40%;
+    min-width: 647px;
+
   }
   #log{
     text-align: center;
@@ -94,15 +96,19 @@
     }
     text-align: left;
   }
+  #emltxt, #psstxt{
+    text-align: center;
+  }
 </style>
-//TODO change variable signed in to true corresponding to the correct username
 <script>
   export default{
     name: "Login",
     data: function() {
       return {
         email: null,
-        password: null
+        password: null,
+        emlerr: '',
+        psserr: ''
       }
     },
     components: {
@@ -110,6 +116,8 @@
     methods: {
       login: function() {
         const apiUrl = process.env.VUE_APP_API_URL
+        this.emlerr = '';
+        this.psserr = '';
         fetch(`${apiUrl}/login`, {
           method: 'post',
           headers: {
@@ -122,7 +130,22 @@
           })
         })
           .then(res => res.json())
-          .then(data => console.log(data))
+          //.then(data => console.log(data))
+          .then(data => {
+            if(data.success){
+              this.$router.push({
+                path: '/'
+              })
+              return
+            }
+            if (data.errors.email){
+              this.emlerr = 'Email could not be found. Please enter a valid Email.';
+            }
+            if (data.errors.password){
+              this.psserr = 'Password is incorrect.';
+            }
+
+          })
       }
     }
   }

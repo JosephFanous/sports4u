@@ -1,6 +1,6 @@
 <template>
-  <div class="about">
-  <Navbar></Navbar>
+  <div>
+  <Navbar v-bind:isSignedIn="true" vbind:user_name="Nandor"></Navbar>
     <div class="title">
       <h2 class="title is-1">About Sports4U</h2>
       <h4 class="subtitle is-2">We provide you a simple way to find sports and events, locally in your area.</h4>
@@ -21,6 +21,15 @@ export default {
   name: "About",
   components: {
     Navbar,
+  },
+  beforeMount: function(){
+    //Check if the user is signed in From another page, check sign in and username from log in.
+    if(this.isSignedIn == true){
+      //TODO PULL USERNAME FROM DATABASE AFTER LOGIN
+      this.user_name = "Nandor";
+    }else{
+      
+    }
   },
 }
 </script>

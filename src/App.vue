@@ -1,5 +1,5 @@
 <template>
-  <div id="app" >
+  <div id="app" class="has-background-white-ter" >
     <!-- <div v-if="$route.name !== 'Map'" id="nav">
       <router-link to="/">Home</router-link> |
       <router-link to="/about">About</router-link> |
