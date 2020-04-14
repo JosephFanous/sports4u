@@ -54,6 +54,12 @@ const routes = [
     name: "LocationSearch",
     component: () =>
     import(/* webpackChunkName: "locationsearch" */ "../views/LocationSearch.vue")
+  },
+  {
+    path: "/venue/:id",
+    name: "VenuePage",
+    component: () =>
+      import(/* webpackChunkName: "venue" */ "../views/VenuePage.vue")
   }
 ];
 

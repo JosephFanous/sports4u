@@ -87,6 +87,53 @@ app.get('/venues/search', (req, res, next) => {
   })
 })
 
+// get venue data given some id
+app.get('/venues/:id', (req, res, next) => {
+  const { id } = req.params
+  db.all(
+    `
+      SELECT * FROM Location
+      LEFT JOIN Event ON Location.LocationID = Event.LocationID
+      LEFT JOIN SportType on Event.SportID = SportType.SportID
+      WHERE Location.LocationID = ?
+      ORDER BY Event.EventAddedTime DESC
+    `,
+    id,
+    (err, rows) => {
+      if (err) console.error(err)
+      console.log('/venues/:id', rows)
+      if (!rows) {
+        return res.json({
+          error: 'Venue not found'
+        })
+      }
+
+      let events = []
+      // if there actually are events at this location, we add create an array of them
+      if (rows[0].EventID) {
+        events = rows.map(row => {
+          return {
+            EventID: row.EventID,
+            Name: row.Name,
+            SportName: row.SportName,
+            StartTime: row.StartTime,
+            EndTime: row.EndTime,
+            EventAddedTime: row.EventAddedTime
+          }
+        })
+      }
+
+      res.json({
+        id: req.params.id,
+        coords: {
+          Longitude: rows[0].Longitude,
+          Latitude: rows[0].Latitude
+        },
+        events: events
+      })
+    })
+})
+
 app.get('/venues/:id/sports', (req, res, next) => {
   const { id } = req.params
   console.log('params', req.params )

@@ -15,6 +15,7 @@ export function metresToPixels(metres, latitude, zoomLevel) {
   return metres / metresPerPixel
 }
 
+// get locations from some search query
 export function geocode(query) {
   const endpoint = `geocoding/v5/mapbox.places/${query}.json`;
   return fetch(`https://api.mapbox.com/${endpoint}?access_token=${process.env.VUE_APP_MAPBOX_API_KEY}`)
@@ -27,6 +28,22 @@ export function geocode(query) {
     })
 }
 
+// get location data from coordinates
+export function reverseGeocode(lon, lat) {
+  const endpoint = `geocoding/v5/mapbox.places/${lon},${lat}.json`
+
+  return fetch(`https://api.mapbox.com/${endpoint}?access_token=${process.env.VUE_APP_MAPBOX_API_KEY}`)
+    .then(res => {
+      if (res.ok) return res.json()
+      else throw new Error(res.status)
+    })
+    .then(json => {
+      const location = json.features[0]
+      return location
+    })
+}
+
+// get the venue id from db given some coordinates and address
 export function findVenuePage(lon, lat, address) {
   const apiUrl = process.env.VUE_APP_API_URL
   return fetch(`${apiUrl}/venues/find`,
@@ -42,4 +59,15 @@ export function findVenuePage(lon, lat, address) {
     if (res.ok) return res.json()
     else throw new Error(res.status)
   }).then(data => data.venueID)
+}
+
+// get venue data from some venue id
+export function getVenue(id) {
+  const apiUrl = process.env.VUE_APP_API_URL
+  return fetch(`${apiUrl}/venues/${id}`)
+    .then(res => {
+      if (res.ok) return res.json()
+      else throw new Error(res.status)
+    })
+    .then(data => data)
 }

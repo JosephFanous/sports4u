@@ -5,7 +5,12 @@
     <div class='location-data' v-if="!isLocationLoading && !locationError && location">
       <div class="header-location is-flex">
         <h4 class="title is-4">{{ location.text }}</h4>
-        <button class="button is-small is-pulled-right">Go to venue page</button>
+        <router-link
+          v-bind:to="`/venue/${venue.properties.venueId}`"
+          class="button is-small is-pulled-right"
+        >
+          Go to venue page
+        </router-link>
       </div>
       <p class="subtitle is-6">{{ location.properties.address || location.place_name }}</p>
     </div>
