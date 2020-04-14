@@ -191,7 +191,7 @@ app.get('/users/:id', (req, res, next) => {
 // Get finished and unfinshed events
 app.get('/Events/:id/:EventStatus', (req, res, next) => {
   db.serialize(() => {
-    db.all(`SELECT Name, StartTime, EndTime, EventAddedTime, EventDone, PeopleAttending,SportName, Latitude, Longitude, Address
+    db.all(`SELECT *
             FROM EVENT
             INNER JOIN SportType ON Event.SportID= SportType.SportID
             INNER JOIN Location ON Event.LocationID = Location.LocationID
@@ -243,9 +243,20 @@ app.get('/SignedUpEvents/:id/Attending', (req, res, next) => {
       res.send(JSON.stringify(row));
     })
   });
-
 });
 
+// Post request to deleteEvents for a specfic user
+app.post('/DeleteEvents', (req, res) => {
+  db.serialize(() => {
+    db.all(`DELETE FROM Event WHERE EventID = ?`, req.body.EventID ,(err, row) => {
+      if (err) {
+        console.error(err.message);
+      }
+    })
+  });
+  console.log("Event ID Removed : ",req.body.EventID)
+
+});
 
 
 // start server listening on port 3000

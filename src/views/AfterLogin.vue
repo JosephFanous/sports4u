@@ -1,5 +1,5 @@
 <template>
-  <div class="columns">
+  <div class="columns is-gapless">
    <div id = "ColumnInfoBar" class="column is-one-fifths">
      <div id = "InfoBar" >
         <div class="ImageInfo">
@@ -73,19 +73,19 @@
 
 
            <div role="tablist">
-            <b-card no-body class="mb-1">
+            <b-card  no-body class="mb-1">
               <b-card-header header-tag="header" class="p-1" role="tab">
                 <b-button block href="#" v-b-toggle.accordion-1 variant="info">Your Event (s)</b-button>
               </b-card-header>
               <b-collapse id="accordion-1" visible accordion="my-accordion" role="tabpanel">
-                <b-card-body>
-                  <table class="table is-fullwidth is-striped">
+                <b-card-body >
+                  <table id = "EventsTable" class="table is-fullwidth is-striped">
                      <tbody v-for="items in UserEvents">
-                        <tr  v-for="item in items">
-                           <td  width="5%"><i class="fas fa-user-friends"></i>{{item.PeopleAttending}}</td>
-                           <td><a href="#"> {{item.Name}} </a></td>
-                           <td width="10%"><a  href="#"><i class="fas fa-edit"></i></a></td>
-                           <td width="10%"><a  href="#"><i class="fas fa-trash-alt"></i></a></td>
+                        <tr>
+                           <td  width="5%"><i class="fas fa-user-friends"></i>{{items.PeopleAttending}}</td>
+                           <td><a v-on:click="MoreDetails"> {{items.Name}} </a></td>
+                           <td width="10%"><a  v-on:click="EditButton(items.Name)"><i class="fas fa-edit" ></i></a></td>
+                           <td width="10%"><a v-on:click="DeleteButton(items.Name)"><i class="fas fa-trash-alt"></i></a></td>
                            <!-- <td class="level-right"><a class="button is-small is-primary" href="#">Edit</a></td> -->
                         </tr>
 
@@ -199,17 +199,19 @@
        <div class="tile is-12 is-vertical is-parent">
          <div class="tile is-child box">
            <p class="title">Map</p>
+           <div id='map'></div>
 
 
-           <div class="card">
-            <div class="card-image">
-                <div id='map'style='width: 100%; height: 100%;' ></div>
+
+        <!-- <div class="card"> -->
+            <!-- <div class="card-image"> -->
+
               <!-- <figure class="image is-4by3">
 
                 <img src="https://bulma.io/images/placeholders/1280x960.png" alt="Placeholder image">
               </figure> -->
-            </div>
-            <div class="card-content">
+            <!-- </div> -->
+            <!-- <div class="card-content">
               <div class="content">
                 <header class="card-header">
                    <p class="card-header-title">
@@ -243,7 +245,7 @@
                      </tbody>
                   </table>
                 </div>
-              </div>
+              </div> -->
 
                 </div>
 
@@ -252,6 +254,22 @@
 
 
          </div>
+         <div  v-bind:class= "{ 'is-active' : EditOption}" class="modal">
+            <div class="modal-background"></div>
+            <div class="modal-card">
+              <header class="modal-card-head">
+                <p class="modal-card-title">Modal title</p>
+                <button class="delete" aria-label="close"></button>
+              </header>
+              <section class="modal-card-body">
+                <!-- Content ... -->
+              </section>
+              <footer class="modal-card-foot">
+                <button class="button is-success">Save changes</button>
+                <button class="button">Cancel</button>
+              </footer>
+            </div>
+          </div>
 
       </div>
     </div>
@@ -275,7 +293,10 @@ export default {
       UserSignedUpEvents: [],
       UpcomingEvents : [],
       UserID : 1,
-
+      map : null,
+      popup : null,
+      centerOfMap : null,
+      EditOption : false,
     }
 
   },
@@ -303,7 +324,9 @@ export default {
       fetch('http://localhost:3000/Events/'+this.UserID+'/0')
         .then(response => response.json())
         .then(data => {
-            vm.UserEvents.push(data);
+          for(var i=0;i<data.length;i++){
+            vm.UserEvents.push(data[i]);
+          }
           })
     .catch(err => console.log(err));
 
@@ -328,26 +351,105 @@ export default {
         .then(response => response.json())
         .then(data => {
             vm.UpcomingEvents.push(data);
-          })
-    .catch(err => console.log(err));
-
+          }).catch(err => console.log(err));
     },
+    MoreDetails: function(event){
+      // Remove previous popups and add new ones
+      if(this.popup != null)this.popup.remove();
+      var element = event.target;
+      var vm = this;
+      for(var i=0;i<vm.UserEvents.length;i++){
+        if(vm.UserEvents[i].Name == element.text.trim()){
+            console.log(vm.UserEvents[i].Name)
+            this.popup = new mapboxgl.Popup({ closeOnClick: false })
+            .setLngLat([vm.UserEvents[i].Longitude, vm.UserEvents[i].Latitude])
+            .setHTML('<div><h3>'+ vm.UserEvents[i].Name + '</h3><ul style="list-style-type:none;"><li><strong>SportName: </strong>' + vm.UserEvents[i].SportName +
+            '</li><li><strong>StartTime: </strong>'+ vm.UserEvents[i].StartTime + '</li><li><strong>EndTime: </strong>'+ vm.UserEvents[i].EndTime +
+             '</li><li><strong>Address: </strong>'+ vm.UserEvents[i].Address + '<li></ul></div>')
+            .addTo(vm.map);
+            var target = [vm.UserEvents[i].Longitude, vm.UserEvents[i].Latitude];
+
+            /*With the help of https://docs.mapbox.com/mapbox-gl-js/example/flyto-options/ */
+            this.map.flyTo({
+              center: target,
+              zoom: 11,
+              bearing: 0,
+
+              speed: 2, // make the flying slow
+              curve: 1, // change the speed at which it zooms out
+
+              easing: function(t) {
+              return t;
+              },
+              essential: true
+              });
+          }
+        }
+      },
+      EditButton: function(EventName){
+        console.log(EventName);
+        // var element = event.target.parentElement;
+        // console.log(element);
+        // this.EditButton = true;
+
+      },
+
+      DeleteButton: function(DeleteEvent){
+
+        var EventID;
+        if(confirm("Are you sure!") == true){
+          for(var i=0;i<this.UserEvents.length;i++){
+            console.log(this.UserEvents[i].Name)
+             if(this.UserEvents[i].Name == DeleteEvent){
+                 EventID = this.UserEvents[i].EventID
+                 delete this.UserEvents[i]
+             }
+          }
+            var data = {EventID};
+            const options = {
+              method: 'POST',
+              headers: {
+                'Content-Type':  'application/json'
+              },
+              body: JSON.stringify(data)
+            };
+            fetch('http://localhost:3000/DeleteEvents', options)
+              console.log(DeleteEvent);
+
+            location.reload(); // temp fix for reloading page
+
+        }else {
+            console.log("Not happening ");
+        }
+
+      }
+
+
+
+
+
 
   },
 
   mounted: function() {
     mapboxgl.accessToken = process.env.VUE_APP_MAPBOX_API_KEY;
-    const map = new mapboxgl.Map({
+    this.map = new mapboxgl.Map({
       container: 'map',
       style: 'mapbox://styles/mapbox/streets-v9',
       center: [-79.347015, 43.651070],
-      zoom: 7,
+      zoom: 8,
       attributionControl: false
     });
+    this.map.addControl(new mapboxgl.FullscreenControl())
+    this.map.addControl(new mapboxgl.NavigationControl());
+
+
 
   }
 
 };
+
+
 </script>
 <style scoped lang="scss">
 #LogoutButton { margin-top: 80px;
@@ -422,8 +524,18 @@ body,html{
     max-height: 200px;
     overflow-y: scroll;
 }
-// #EventLayout, #ColumnTwo, {
-//   height: 100%;
-// }
+#map{
+  height: 50%;
+  width: 100%;
+}
+#MapLayout, #EventLayout, #accordingMain{
+  height: 100%;
+  width: 100%;
+}
+.mapboxgl-popup-content{
+  background-color: yellow;
+  // max-width: 20px;
+  // font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+}
 
 </style>
