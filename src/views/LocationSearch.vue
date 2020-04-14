@@ -40,6 +40,11 @@
               <button
                 class='button is-small is-pulled-right'
                 v-bind:class="{ 'is-loading': resultsIsLoading }"
+                v-on:click="findPage(
+                  result.center[0],
+                  result.center[1],
+                  result.place_name
+                )"
               >
                 Go to venue page
               </button>
@@ -59,7 +64,7 @@
 
 <script>
 const mapboxgl = require("mapbox-gl/dist/mapbox-gl.js");
-import { geocode } from '../util';
+import { geocode, findVenuePage } from '../util';
 
 export default {
   name: "LocationSearch",
@@ -94,6 +99,13 @@ export default {
       }).finally(() => {
         this.resultsIsLoading = false
       })
+    },
+    findPage(lon, lat, address) {
+      findVenuePage(lon, lat, address).then(venueID => {
+        this.$router.push({
+          path: '/venue/' + venueID
+        })
+      }).catch(console.error)
     }
   },
   computed: {

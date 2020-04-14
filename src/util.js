@@ -26,3 +26,20 @@ export function geocode(query) {
       return data.features
     })
 }
+
+export function findVenuePage(lon, lat, address) {
+  const apiUrl = process.env.VUE_APP_API_URL
+  return fetch(`${apiUrl}/venues/find`,
+    {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ lon, lat, address })
+    }
+  ).then(res => {
+    if (res.ok) return res.json()
+    else throw new Error(res.status)
+  }).then(data => data.venueID)
+}

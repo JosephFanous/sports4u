@@ -109,6 +109,46 @@ app.get('/venues/:id/sports', (req, res, next) => {
     })
 })
 
+// return venue id if it exists, else, create it and return it
+app.post('/venues/find', (req, res, next) => {
+  const { lon, lat, address } = req.body
+  console.log('/venues/find:', lon, lat, address)
+  db.get(
+    `
+      SELECT Location.LocationID FROM Location
+      WHERE Location.Longitude = ?
+      AND Location.Latitude = ?
+      AND Location.Address = ?
+    `,
+    [lon, lat, address],
+    (err, row) => {
+      console.log('/venues/find:', row)
+      if (row) {
+        return res.json({
+          venueID: row.LocationID
+        })
+      }
+
+      // if no row is found, we create the venue page
+      db.run(`
+        INSERT INTO Location (Longitude, Latitude, Address)
+        VALUES (?, ?, ?)
+      `,
+      [lon, lat, address],
+      function (err) {
+        if (err){
+          console.error(err)
+          return res.json({ venueID: null })
+        }
+        // if we successfully added the location, we send the newly added ID
+        return res.json({
+          venueID: this.lastID
+        })
+      })
+    }
+  )
+})
+
 app.post('/login', (req, res, next) => {
  console.log(req.body)
  db.get('SELECT Email as email, Password as pass FROM User WHERE email = ?',req.body.email,(err, row) => {
