@@ -11,7 +11,7 @@ import 'bootstrap-vue/dist/bootstrap-vue.css';
 // global variables to be accessed and changed by any component
 const globalStore = new Vue({
   data: {
-    currentUsername: null
+    user: null
   }
 })
 Vue.prototype.$globalStore = globalStore

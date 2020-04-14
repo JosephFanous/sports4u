@@ -52,7 +52,8 @@ app.use(cors(corsOptions));
 app.use(session({
   secret: 'change this probably',
   cookie: {
-    maxAge: 60000
+    // 365 days in milliseconds
+    maxAge: 365 * 24 * 60 * 60 * 1000
   },
   resave: false,
   saveUninitialized: true
@@ -208,7 +209,7 @@ app.post('/venues/find', (req, res, next) => {
 
 app.post('/login', (req, res, next) => {
  console.log(req.body)
- db.get('SELECT Email as email, Password as pass, UserName as username FROM User WHERE email = ?',req.body.email,(err, row) => {
+ db.get('SELECT UserID as id, Email as email, Password as pass, UserName as username FROM User WHERE email = ?',req.body.email,(err, row) => {
   if (err) {
     throw err;
   }
@@ -227,12 +228,15 @@ app.post('/login', (req, res, next) => {
   }else{
     // set the session cookie username field to the row's username
     // and send it back so we can store it in vue globals for UI
-    req.session.username = row.username
+    req.session.userID = row.id
     console.log('/login:', row)
-    console.log('/login:', req.session.username)
+    console.log('/login:', req.session.userID)
     res.json({
       success: true,
-      username: row.username
+      user: {
+        id: row.id,
+        username: row.username,
+      }
     })
   }
   console.log(row);
@@ -243,7 +247,7 @@ app.post('/login', (req, res, next) => {
 app.post('/logout', (req, res, next) => {
   console.log('/logout:', req.session)
 
-  if (!req.session.username) {
+  if (!req.session.userID) {
     return res.status(400).json({
       error: 'Not logged in'
     })

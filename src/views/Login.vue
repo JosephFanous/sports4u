@@ -134,7 +134,7 @@
           .then(res => res.json())
           .then(data => {
             if(data.success){
-              this.$globalStore.currentUsername = data.username
+              this.$globalStore.user = data.user
               this.$router.push({
                 path: '/'
               })

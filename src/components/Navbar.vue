@@ -10,7 +10,7 @@
           <span>Home</span>
           </router-link>
           <router-link class="button is-large" v-bind:to="`/about`">About Us</router-link>
-          <router-link v-if="$globalStore.currentUsername" class="button is-large" v-bind:to="`/afterLogin`">Dashboard</router-link>
+          <router-link v-if="$globalStore.user" class="button is-large" v-bind:to="`/afterLogin`">Dashboard</router-link>
         </div>
         <div class="centerlogo">
           <img class="logo" src="images/atheletes.png"  alt="Sports4U" />
@@ -19,12 +19,12 @@
     </div>
     <div class="navbar-end">
       <div class="navbar-item">
-        <div v-if="$globalStore.currentUsername" class="buttons">
+        <div v-if="$globalStore.user" class="buttons">
            <router-link  class="button is-large" to="/afterLogin">
              <span class="icon">
               <i class="fas fa-user"></i>
              </span>
-             <span>Logged in as: {{ $globalStore.currentUsername }} </span>
+             <span>Logged in as: {{ $globalStore.user.username }} </span>
            </router-link>
            <Button
             v-on:click="handleSignOutClick"
@@ -67,7 +67,7 @@ import { endSession } from '../util'
         this.isLogoutLoading = true
 
         endSession().then(data => {
-          this.$globalStore.currentUsername = null
+          this.$globalStore.user = null
         }).finally(() => {
           this.isLogoutLoading = false
         })
