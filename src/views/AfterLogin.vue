@@ -118,7 +118,7 @@
                         <div class="content">
                           <p>
                             <a href="#">@{{item.UserName}} &nbsp; &nbsp; &nbsp; &nbsp;</a> <i class="fas fa-clock"></i> {{item.StartTime}} &nbsp;
-                            <span class="tag"> <i class="fas fa-location-arrow"> </i> &nbsp; 2000 Simcoe St N, Oshawa, ON L1G 0C5</span>
+                            <span class="tag"> <i class="fas fa-location-arrow"> </i> &nbsp;{{item.Address}}</span>
                           </p>
                         </div>
                       </div>
@@ -174,27 +174,13 @@
                   </div> -->
                   <div class="content">
                      <table class="table is-fullwidth is-striped">
-                        <tbody>
-                           <tr>
+                        <tbody v-for="items in UpcomingEvents">
+                           <tr v-for="item in items">
                               <td width="5%"><i class="fa fa-circle" style=color:green;></i></td>
-                              <td><a href="#">Lorum ipsum dolem aire</a></td>
+                              <td><a href="#">{{item.Name}}</a></td>
                               <td class="level-right"><a class="button is-small is-primary" href="#">Join</a></td>
                            </tr>
-                           <tr>
-                              <td width="5%"><i class="fa fa-circle" style=color:green;></i></td>
-                                <td><a href="#">Lorum ipsum dolem aire</a></td>
-                              <td class="level-right"><a class="button is-small is-primary" href="#">Join</a></td>
-                           </tr>
-                           <tr>
-                              <td width="5%"><i class="fa fa-circle" style=color:green;></i></td>
-                                <td><a href="#">Lorum ipsum dolem aire</a></td>
-                              <td class="level-right"><a class="button is-small is-primary" href="#">Join</a></td>
-                           </tr>
-                           <tr>
-                              <td width="5%"><i class="fa fa-circle" style=color:green;></i></td>
-                                <td><a href="#">Lorum ipsum dolem aire</a></td>
-                              <td class="level-right"><a class="button is-small is-primary" href="#">Join</a></td>
-                           </tr>
+
                         </tbody>
                      </table>
                   </div>
@@ -287,7 +273,9 @@ export default {
       EmailAddress: '',
       UserEvents: [],
       UserSignedUpEvents: [],
+      UpcomingEvents : [],
       UserID : 1,
+
     }
 
   },
@@ -295,6 +283,7 @@ export default {
     this.loadUserData();
     this.loadEvents(); //Active events
     this.loadSignedUpEvents();
+    this.loadUpComingEvents();
   },
   methods: {
     loadUserData: function(){
@@ -328,6 +317,16 @@ export default {
               data[i].StartTime = d.getHours() + ':' + d.getMinutes();
             }
             vm.UserSignedUpEvents.push(data);
+          })
+    .catch(err => console.log(err));
+
+    },
+    loadUpComingEvents: function(){
+      var vm = this;
+      fetch('http://localhost:3000/UpcomingEvents/'+this.UserID+'/0')
+        .then(response => response.json())
+        .then(data => {
+            vm.UpcomingEvents.push(data);
           })
     .catch(err => console.log(err));
 
