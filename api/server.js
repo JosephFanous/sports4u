@@ -111,7 +111,30 @@ app.get('/venues/:id/sports', (req, res, next) => {
 
 app.post('/login', (req, res, next) => {
  console.log(req.body)
- res.json(req.body)
+ db.get('SELECT Email as email, Password as pass FROM User WHERE email = ?',req.body.email,(err, row) => {
+  if (err) {
+    throw err;
+  }
+  if(!row){
+    res.json({
+      errors:{
+        email: 'hasError'
+      }
+    })
+  } else if(req.body.password!=row.pass){
+    res.json({
+      errors:{
+        password: 'hasError'
+      }
+    })
+  }else{
+    res.json({
+      success: true
+    })
+  }
+  console.log(row);
+  });
+
 })
 
 app.get('/sports/search', (req, res, next) => {
