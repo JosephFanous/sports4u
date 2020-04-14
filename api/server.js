@@ -146,7 +146,7 @@ app.get('/users/:id', (req, res, next) => {
 // Get finished and unfinshed events
 app.get('/Events/:id/:EventStatus', (req, res, next) => {
   db.serialize(() => {
-    db.all(`SELECT Name, StartTime, EndTime, EventAddedTime, EventDone, PeopleAttending,SportName, Latitude, Longitude
+    db.all(`SELECT Name, StartTime, EndTime, EventAddedTime, EventDone, PeopleAttending,SportName, Latitude, Longitude, Address
             FROM EVENT
             INNER JOIN SportType ON Event.SportID= SportType.SportID
             INNER JOIN Location ON Event.LocationID = Location.LocationID
@@ -161,11 +161,29 @@ app.get('/Events/:id/:EventStatus', (req, res, next) => {
   });
 });
 
+// Get all upcming events near user
+app.get('/UpcomingEvents/:id/:EventStatus', (req, res, next) => {
+  db.serialize(() => {
+    db.all(`SELECT Name, StartTime, EndTime, EventAddedTime, EventDone, PeopleAttending,SportName, Latitude, Longitude, Address
+            FROM EVENT
+            INNER JOIN SportType ON Event.SportID= SportType.SportID
+            INNER JOIN Location ON Event.LocationID = Location.LocationID
+            WHERE EventDone = ? AND UserID != ?`,req.params.EventStatus,req.params.id ,(err, row) => {
+      if (err) {
+        console.error(err.message);
+      }
+      console.log(row);
+       // Sending data with the request
+      res.send(JSON.stringify(row));
+    })
+  });
+});
+
 // Get SignedUp evemts by a specfic user
 app.get('/SignedUpEvents/:id/Attending', (req, res, next) => {
   db.serialize(() => {
     db.all(`Select User.UserName,User.Email,Event.Name,Event.StartTime,Event.EndTime, Event.EventAddedTime, Event.EventDone,
-            Event.PeopleAttending,SportType.SportName, Location.Latitude, Location.Longitude
+            Event.PeopleAttending,SportType.SportName, Location.Latitude, Location.Longitude, Location.Address
             From UserAttendingEvent
             INNER JOIN Event ON Event.EventID= UserAttendingEvent.EventID
             INNER JOIN Location ON Event.LocationID= Location.LocationID
