@@ -150,6 +150,8 @@ app.get('/', (req, res, next) => {
 
 })
 
+//Gets all event names, event start times, and event endtimes
+
 // Used to get user data
 app.get('/users/:id', (req, res, next) => {
   db.serialize(() => {
