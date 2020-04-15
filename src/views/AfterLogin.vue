@@ -85,7 +85,7 @@
                            <td  width="5%"><i class="fas fa-user-friends"></i>{{items.PeopleAttending}}</td>
                            <td><a v-on:click="MoreDetails"> {{items.Name}} </a></td>
                            <td width="10%"><a  v-on:click="EditButton(items.Name)"><i class="fas fa-edit" ></i></a></td>
-                           <td width="10%"><a v-on:click="DeleteButton(items.Name)"><i class="fas fa-trash-alt"></i></a></td>
+                           <td width="10%"><a v-on:click="DeleteButton(items.Name, 'UserEvents')"><i class="fas fa-trash-alt"></i></a></td>
                            <!-- <td class="level-right"><a class="button is-small is-primary" href="#">Edit</a></td> -->
                         </tr>
 
@@ -100,12 +100,12 @@
                 <b-button block href="#" v-b-toggle.accordion-2 variant="info">Signed Up Events</b-button>
               </b-card-header>
               <b-collapse id="accordion-2" accordion="my-accordion" role="tabpanel">
-                <b-card-body v-for="items in UserSignedUpEvents">
-                  <article class="post" v-for="item in items">
+                <b-card-body >
+                  <article class="post" v-for="item in UserSignedUpEvents">
                    <h4>{{item.Name}} &nbsp;
                        <span id = "CloseButton" class="tag is-danger">
                          Cancel
-                         <button class="delete is-small"></button>
+                         <button v-on:click="DeleteButton(item.Name, 'SignedUpEvents')" class="delete is-small"></button>
                        </span>
                    </h4>
                     <div class="media">
@@ -174,11 +174,11 @@
                   </div> -->
                   <div class="content">
                      <table class="table is-fullwidth is-striped">
-                        <tbody v-for="items in UpcomingEvents">
-                           <tr v-for="item in items">
+                        <tbody>
+                           <tr v-for="item in UpcomingEvents">
                               <td width="5%"><i class="fa fa-circle" style=color:green;></i></td>
                               <td><a href="#">{{item.Name}}</a></td>
-                              <td class="level-right"><a class="button is-small is-primary" href="#">Join</a></td>
+                              <td class="level-right"><a v-on:click="JoinEvent(item.Name)" class="button is-small is-primary" href="#">Join</a></td>
                            </tr>
 
                         </tbody>
@@ -200,9 +200,6 @@
          <div class="tile is-child box">
            <p class="title">Map</p>
            <div id='map'></div>
-
-
-
         <!-- <div class="card"> -->
             <!-- <div class="card-image"> -->
 
@@ -258,15 +255,75 @@
             <div class="modal-background"></div>
             <div class="modal-card">
               <header class="modal-card-head">
-                <p class="modal-card-title">Modal title</p>
-                <button class="delete" aria-label="close"></button>
+                <h2 class="modal-card-title">What would you like to Edit?</h2>
+                <button v-on:click="CloseModal" class="delete" aria-label="close"></button>
               </header>
+
               <section class="modal-card-body">
-                <!-- Content ... -->
+                  <h6>* Please leave the fields <strong>EMPTY</strong> that you do not wish to change</h6>
+                  <div class="field">
+                    <label class="label">Event Name</label>
+                    <div class="control">
+                      <input v-model = "UpdateTemp.EventName" class="input" type="text" placeholder="">
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label class="label">Address</label>
+                    <div class="control">
+                      <input class="input" type="text" placeholder="">
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label class="label">Sport</label>
+                    <div class="field">
+                      <div class="control">
+                        <div class="select is-primary">
+                          <select id = "SportDropDown" v-on:click="SportSelection">
+                            <option value=""> </option>
+                            <option value="Basketball">Basketball</option>
+                            <option value="Table Tennis">Table Tennis</option>
+                            <option value="Volleyball">Volleyball</option>
+                            <option value="Badminton">Badminton</option>
+                            <option value="Soccer">Soccer</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+            <div class="columns">
+              <div class="column is-half">
+                  <div class="field">
+                    <label class="label">Start Time</label>
+                    <div class="control">
+                      <input class="input" type="text" placeholder="dd-mmm-yyyy hh:mm:(AM/PM)">
+                    </div>
+                  </div>
+                </div>
+                <div class="column is-half">
+                  <div class="field">
+                    <label class="label">End Time</label>
+                    <div class="control">
+                      <input class="input" type="text" placeholder="dd-mmm-yyyy hh:mm(AM/PM)">
+                    </div>
+                  </div>
+                </div>
+            </div>
+
+                <div class="field">
+                  <div class="field">
+                    <div class="control">
+                      <label class="checkbox">
+                        <input type="checkbox">
+                        I agree that once the edits have been made, they will not reversable</a>
+                      </label>
+                    </div>
+                </div>
+              </div>
+
               </section>
               <footer class="modal-card-foot">
                 <button class="button is-success">Save changes</button>
-                <button class="button">Cancel</button>
               </footer>
             </div>
           </div>
@@ -297,6 +354,14 @@ export default {
       popup : null,
       centerOfMap : null,
       EditOption : false,
+      UpdateTemp : [
+        {EventName: ''},
+        {SportDropDown: ''},
+        {Address: ''},
+        {StartTime: ''},
+        {EndTime: ''},
+      ],
+
     }
 
   },
@@ -339,8 +404,8 @@ export default {
             for(var i=0;i<data.length;i++){
               var d = new Date(data[i].StartTime);
               data[i].StartTime = d.getHours() + ':' + d.getMinutes();
+              vm.UserSignedUpEvents.push(data[i]);
             }
-            vm.UserSignedUpEvents.push(data);
           })
     .catch(err => console.log(err));
 
@@ -350,7 +415,10 @@ export default {
       fetch('http://localhost:3000/UpcomingEvents/'+this.UserID+'/0')
         .then(response => response.json())
         .then(data => {
-            vm.UpcomingEvents.push(data);
+            for(var i=0;i<data.length;i++){
+              vm.UpcomingEvents.push(data[i]);
+            }
+            console.log(vm.UpcomingEvents)
           }).catch(err => console.log(err));
     },
     MoreDetails: function(event){
@@ -386,26 +454,57 @@ export default {
           }
         }
       },
+      CloseModal: function(){
+        this.EditOption = false;
+      },
       EditButton: function(EventName){
-        console.log(EventName);
+
+        // for(var i=0;i<this.UserEvents.length;i++){
+        //   // console.log(this.UserEvents[i].Name)
+        //    if(this.UserEvents[i].Name == EventName){
+        //      this.UpdateTemp.push(this.UserEvents[i])
+        //    }
+        // }
+        console.log(this.UpdateTemp)
+        this.EditOption = true;
         // var element = event.target.parentElement;
         // console.log(element);
         // this.EditButton = true;
 
       },
+      SportSelection : function(test){
+        this.UpdateTemp.SportDropDown = document.getElementById("SportDropDown").value
+        console.log(this.UpdateTemp.SportDropDown);
+      },
 
-      DeleteButton: function(DeleteEvent){
-
+      DeleteButton: function(DeleteEvent, TypeOfEvent){
         var EventID;
         if(confirm("Are you sure!") == true){
-          for(var i=0;i<this.UserEvents.length;i++){
-            console.log(this.UserEvents[i].Name)
-             if(this.UserEvents[i].Name == DeleteEvent){
-                 EventID = this.UserEvents[i].EventID
-                 delete this.UserEvents[i]
-             }
-          }
-            var data = {EventID};
+          if(TypeOfEvent == 'UserEvents'){
+              for(var i=0;i<this.UserEvents.length;i++){
+                console.log(this.UserEvents[i].Name)
+                 if(this.UserEvents[i].Name == DeleteEvent){
+                     EventID = this.UserEvents[i].EventID
+                     this.UserEvents = this.UserEvents.filter(event => event.EventID != EventID)
+
+
+                 }
+              }
+           }
+           if(TypeOfEvent == 'SignedUpEvents'){
+               for(var i=0;i<this.UserSignedUpEvents.length;i++){
+                 console.log(this.UserSignedUpEvents[i].Name)
+                  if(this.UserSignedUpEvents[i].Name == DeleteEvent){
+                      EventID = this.UserSignedUpEvents[i].EventID
+                      this.UpcomingEvents.push(this.UserSignedUpEvents[i])
+                      this.UserSignedUpEvents = this.UserSignedUpEvents.filter(event => event.EventID != EventID)
+
+                  }
+               }
+            }
+            console.log(EventID)
+            console.log(TypeOfEvent)
+            var data = {EventID, TypeOfEvent};
             const options = {
               method: 'POST',
               headers: {
@@ -414,14 +513,32 @@ export default {
               body: JSON.stringify(data)
             };
             fetch('http://localhost:3000/DeleteEvents', options)
-              console.log(DeleteEvent);
 
-            location.reload(); // temp fix for reloading page
 
         }else {
             console.log("Not happening ");
         }
+      },
+      JoinEvent : function(EventName){
+        var EventID, UserID = this.UserID;
+        for(var i=0;i<this.UpcomingEvents.length;i++){
+          if(this.UpcomingEvents[i].Name == EventName){
+              EventID = this.UpcomingEvents[i].EventID
+              this.UserSignedUpEvents.push(this.UpcomingEvents[i]);
+              this.UpcomingEvents = this.UpcomingEvents.filter(event => event.EventID != EventID)
+          }
+        }
+        var data = {EventID, UserID};
+        const options = {
+          method: 'POST',
+          headers: {
+            'Content-Type':  'application/json'
+          },
+          body: JSON.stringify(data)
+        };
+        fetch('http://localhost:3000/JoinEvent', options)
 
+        // location.reload(); // temp fix for reloading page
       }
 
 
@@ -532,10 +649,6 @@ body,html{
   height: 100%;
   width: 100%;
 }
-.mapboxgl-popup-content{
-  background-color: yellow;
-  // max-width: 20px;
-  // font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
-}
+
 
 </style>

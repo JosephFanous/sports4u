@@ -296,11 +296,14 @@ app.get('/Events/:id/:EventStatus', (req, res, next) => {
 // Get all upcming events near user
 app.get('/UpcomingEvents/:id/:EventStatus', (req, res, next) => {
   db.serialize(() => {
-    db.all(`SELECT Name, StartTime, EndTime, EventAddedTime, EventDone, PeopleAttending,SportName, Latitude, Longitude, Address
-            FROM EVENT
-            INNER JOIN SportType ON Event.SportID= SportType.SportID
+    db.all(`SELECT Event.EventID, Event.UserID, Event.LocationID, Event.Name, Event.SportID, Event.StartTime, Event.EndTime, Event.EventAddedTime, Event.EventDone, Event.PeopleAttending,
+            User.First, User.Last, User.UserName, User.Email, User.Rating, Location.Address, Location.Latitude, Location.Longitude, SportType.SportName
+            FROM Event
+            LEFT JOIN UserAttendingEvent ON Event.EventID = UserAttendingEvent.EventID
+            INNER JOIN User ON Event.UserID = User.UserID
             INNER JOIN Location ON Event.LocationID = Location.LocationID
-            WHERE EventDone = ? AND UserID != ?`,req.params.EventStatus,req.params.id ,(err, row) => {
+            INNER JOIN SportType ON Event.SportID = SportType.SportID
+            WHERE (Event.UserID != `+req.params.id+` AND (UserAttendingEvent.UserID IS NULL OR UserAttendingEvent.UserID != `+req.params.id+`) AND EventDone = `+req.params.EventStatus+`);` ,(err, row) => {
       if (err) {
         console.error(err.message);
       }
@@ -314,8 +317,7 @@ app.get('/UpcomingEvents/:id/:EventStatus', (req, res, next) => {
 // Get SignedUp evemts by a specfic user
 app.get('/SignedUpEvents/:id/Attending', (req, res, next) => {
   db.serialize(() => {
-    db.all(`Select User.UserName,User.Email,Event.Name,Event.StartTime,Event.EndTime, Event.EventAddedTime, Event.EventDone,
-            Event.PeopleAttending,SportType.SportName, Location.Latitude, Location.Longitude, Location.Address
+    db.all(`Select *
             From UserAttendingEvent
             INNER JOIN Event ON Event.EventID= UserAttendingEvent.EventID
             INNER JOIN Location ON Event.LocationID= Location.LocationID
@@ -335,14 +337,38 @@ app.get('/SignedUpEvents/:id/Attending', (req, res, next) => {
 // Post request to deleteEvents for a specfic user
 app.post('/DeleteEvents', (req, res) => {
   db.serialize(() => {
-    db.all(`DELETE FROM Event WHERE EventID = ?`, req.body.EventID ,(err, row) => {
-      if (err) {
-        console.error(err.message);
-      }
-    })
+    if(req.body.TypeOfEvent == 'UserEvents'){
+      db.all(`DELETE FROM Event WHERE EventID = ?`, req.body.EventID ,(err, row) => {
+          if (err) {
+            console.error(err.message);
+          }
+        });
+    }
+    if(req.body.TypeOfEvent == 'SignedUpEvents'){
+        db.all(`DELETE FROM UserAttendingEvent WHERE EventID = ?`, req.body.EventID ,(err, row) => {
+          if (err) {
+            console.error(err.message);
+          }
+        });
+    }
   });
   console.log("Event ID Removed : ",req.body.EventID)
+  console.log("DelelteFor : ",req.body.TypeOfEvent)
 
+});
+
+// Post request used to Join event
+app.post('/JoinEvent', (req, res) => {
+  db.serialize(() => {
+    db.all(`INSERT INTO UserAttendingEvent (UserID, EventID)
+            VALUES (?,?);`,req.body.UserID, req.body.EventID ,(err, row) => {
+            if (err) {
+              console.error(err.message);
+            }
+     });
+  });
+  console.log("Joining Event ID  : ",req.body.EventID)
+  console.log("User : ",req.body.UserID)
 });
 
 
