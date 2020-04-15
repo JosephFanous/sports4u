@@ -227,16 +227,28 @@ app.post('/register', (req, res, next) => {
         })
       }
     }
+    else if (!row){
+      res.json({
+        errors:{
+          email: 'error'
+        }
+      })
+    }
     else{
       db.run('INSERT INTO User(First, Last, UserName, Email, Password) VALUES(?,?,?,?,?)',[req.body.First,req.body.Last,req.body.Username,req.body.Email,req.body.Password], function (err) {
         if (err){
           throw err
         }
         else{
+          console.log(row)
+
           req.session.userID = this.lastID
           res.json({
-            success: true,
-            username: row.username
+            user: {
+              username: req.body.Username,
+              id: this.lastID
+            },
+            success: true
           })
         }
       })
