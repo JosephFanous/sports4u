@@ -9,8 +9,6 @@
     <router-view />
   </div>
 </template>
-<<<<<<< HEAD
-=======
 
 <script>
 import Navbar from './components/Navbar'
@@ -21,7 +19,7 @@ export default {
 }
 </script>
 
->>>>>>> 80ad471b99e684b56f06a7bb472b0057d84ac5ff
+
 <style lang="scss">
 @import "~bulma/css/bulma.css";
 

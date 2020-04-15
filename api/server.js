@@ -9,9 +9,18 @@ const app = express()
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 
-var apps = require('express')();
-var http = require('http').createServer(apps);
-var io = require('socket.io-client')(http);
+
+var server = require('http').Server(app);
+var io = require('socket.io')(server);
+
+
+//Listen for socket conection from the client and dissconnection
+io.on('connection', (socket) => {
+  console.log('a user connected');
+  socket.on('disconnect', () => {
+    console.log('user disconnected');
+  });
+});
 
 // TODO: database integration (this is just mock data for testing)
 const venues = [
@@ -340,13 +349,7 @@ app.get('/sports/search', (req, res, next) => {
   })
 })
 
-//Listen for socket conection from the client and dissconnection
-io.on('connection', (socket) => {
-  console.log('a user connected');
-  socket.on('disconnect', () => {
-    console.log('user disconnected');
-  });
-});
+
 
 //Gets all event names, event start times, and event endtimes
 
@@ -382,7 +385,7 @@ app.post('/Events', async (req, res, next) => {
   if (!sport) errors.sport = 'Please enter a sport.'
   if (!isValidDate(startDate)) errors.startDate = 'Please enter a valid start date.'
   if (!isValidDate(endDate)) errors.endDate = 'Please enter a valid end date.'
-  
+
   if (Object.keys(errors).length) {
     return res.json({ errors })
   }
@@ -518,8 +521,7 @@ app.post('/UpdateEdit', (req, res) => {
 
 });
 
-
-// start server listening on port 3000
-app.listen(3000, () => {
+server.listen(3000, () => {
   console.log('Server listening on port 3000')
 })
+// start server listening on port 3000

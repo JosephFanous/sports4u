@@ -13,10 +13,11 @@
     <p>Message from server: "{{socketMessage}}"</p>
     <button @click="pingServer()">Ping Server</button>
     <div id="messagesBox">
-      <div id="message"> Sam:  Hey buddy!  How are you?</div>
-      </div>
+      <div id="message"> Hello, I'm good you?? dsasdasd</div>
+      <div id="othersMessage">Sam:  Hey buddy!  How are you asdasdasdadasdasda </div>
+    </div>
     <div id="chatForm">
-      <input class="input" type="text" placeholder="type message here">  
+      <input class="input" type="text" v-on:keyup="handleOnEnter" placeholder="type message here">  
     </div>
   </div>
 </div>
@@ -39,6 +40,21 @@
   border-bottom-left-radius: 15px;
   border-top-right-radius: 15px;
   padding: 10px;
+  padding-left: 30px;
+  margin-bottom: 15px;
+  width: 300px;
+  float:right;
+  
+}
+#othersMessage{
+  background-color: lightgray;
+  border-top-left-radius: 15px;
+  border-bottom-right-radius: 15px;
+  border-top-right-radius: 15px;
+  padding: 10px;
+  margin-bottom: 15px;
+  float: left;
+  width: 300px;
 }
 #chat .icon{
   float:right;
@@ -72,7 +88,7 @@
 }
 
 #messagesBox {
-	padding: 1em;
+	padding: 10px;
 }
 
 
@@ -80,15 +96,18 @@
 
 </style>
 <script >
+import io from 'socket.io-client';
   export default {
     name: 'Chatbox',
     props: {
     },
     data: function() {
       return {
+        socket: io.connect('http://localhost:3000'),
         chatOpend: false,
         chatBox: 'box',
         isConnected: false,
+        chatMessages: '',
         socketMessage: ''
       }
     },
@@ -109,7 +128,7 @@
     methods: {
       pingServer() {
       // Send the "pingServer" event to the server.
-      this.$socket.emit('pingServer', 'PING!')
+      // this.$socket.emit('pingServer', 'PING!')
     },
       handleChatOpen(event){
         this.chatOpend = true;
@@ -123,8 +142,11 @@
         this.display = 'none';
         
       },
-      handleOnEnter(){
+      handleOnEnter: function(e){
+        if(e.keyCode ===13){
+          console.log("Enter");
         
+        }  
       },
       sendMessage(){
         
