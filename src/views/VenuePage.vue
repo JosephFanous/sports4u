@@ -9,15 +9,21 @@
         {{ locationError }}
       </h1>
       <div class="events">
-        <h3 class="title is-4">Events</h3>
+        <div class="events-title">
+          <h3 class="title is-4">Events</h3>
+          <button v-on:click="handleOpenAddEvent" class="button is-info">Add Event</button>
+        </div>
         <p v-if="!events.length">No events at this location... 🙁</p>
         <ul>
           <li class="box" v-for="event in events" v-bind:key="event.EventID">
-            <h3 class='event-title title is-5'>{{ event.Name }}</h3>
+            <div class='event-header is-flex'>
+              <h3 class='event-title title is-5'>{{ event.Name }}</h3>
+              <small>Added on {{ formatDate(event.EventAddedTime) }}</small>
+            </div>
             <p>{{ event.SportName }}</p>
-            <p>{{ event.StartTime }}</p>
-            <p>{{ event.EndTime }}</p>
-            <small>{{ event.EventAddedTime }}</small>
+            <p><i class="fas fa-calendar"></i>{{ dateRange(event.StartTime, event.EndTime) }}</p>
+            <p><i class="fas fa-clock"></i>{{ formatTime(event.StartTime) }} to {{ formatTime(event.EndTime) }}</p>
+            <button class="button is-success">Join Event</button>
           </li>
         </ul>
       </div>
@@ -26,6 +32,10 @@
       <p v-if="isVenueLoading">Loading venue data...</p>
       <p v-if="!isVenueLoading && venueError">{{ venueError }}</p>
     </div>
+    <AddEvent
+      v-if="showAddEventModal"
+      v-on:close="handleCloseAddEvent"
+    />
   </div>
 </template>
 
@@ -34,8 +44,32 @@
   margin-top: 2rem;
 }
 
+.modal-card-title {
+  margin: 0;
+}
+
+.events-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  .title {
+    margin: 0;
+  }
+}
+
 .events li {
   margin-bottom: 1rem;
+  .fas {
+    margin-right: 0.5rem;
+  }
+  .event-header {
+    justify-content: space-between;
+    align-items: flex-start;
+    small {
+      font-family: monospace;
+    }
+  }
   .event-title {
     margin-bottom: 0.5rem;
   }
@@ -47,11 +81,13 @@
 
 <script>
 import mapboxgl from 'mapbox-gl'
-import { getVenue, reverseGeocode } from '../util'
+import { getVenue, reverseGeocode, formatDate, formatTime } from '../util'
+import AddEvent from '../components/AddEvent'
 
 export default {
   name: "VenuePage",
   components: {
+    AddEvent
   },
   data: function() {
     return {
@@ -61,6 +97,7 @@ export default {
       isLocationLoading: false,
       locationError: '',
       location: null,
+      showAddEventModal: false
     }
   },
   methods: {
@@ -79,9 +116,26 @@ export default {
         .finally(() => {
           this.isLocationLoading = false
         })
+    },
+    formatDate,
+    formatTime,
+    dateRange(startStr, endStr) {
+      const start = new Date(startStr)
+      const end = new Date(endStr)
+      const isDiffDay = start.toDateString() != end.toDateString()
+
+      if (isDiffDay) {
+        return this.formatDate(startStr) + ' to ' + this.formatDate(endStr)
+      } else {
+        return this.formatDate(startStr)
+      }
+    },
+    handleOpenAddEvent() {
+      this.showAddEventModal = true
+    },
+    handleCloseAddEvent() {
+      this.showAddEventModal = false
     }
-  },
-  computed: {
   },
   mounted: function() {
     const venueId = this.$route.params.id

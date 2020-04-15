@@ -89,3 +89,63 @@ export function endSession() {
     else throw new Error(res.status)
   })
 }
+
+const months = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December'
+]
+
+const days = [
+  'Sunday',
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday'
+]
+
+export function formatDate(str) {
+  const date = new Date(str)
+  const dayStr = days[date.getDay()]
+  const monthStr = months[date.getMonth()]
+  return `${dayStr}, ${monthStr} ${date.getDate()}, ${date.getFullYear()}`
+}
+
+export function formatTime(str) {
+  const date = new Date(str)
+  const isPM = false
+  let hours = date.getHours()
+  if (hours >= 12) {
+    hours -= 12
+    if (hours == 0) hours = 12
+    isPM = true
+  } else if (hours == 0) {
+    hours = 12
+  }
+
+  return `${hours}:${date.getMinutes()} ${isPM ? 'PM' : 'AM'}`
+}
+
+// https://stackoverflow.com/questions/17182544/disable-certain-dates-from-html5-datepicker
+export function todayInputValue() {
+  return (new Date().toISOString().split('T')[0])
+}
+
+// https://stackoverflow.com/questions/1353684/detecting-an-invalid-date-date-instance-in-javascript
+export function isValidDate(dateStr) {
+  const timestamp = Date.parse(dateStr)
+
+  // if the timestamp is a number, it is a valid date
+  return !isNaN(timestamp)
+}
