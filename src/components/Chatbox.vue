@@ -7,26 +7,30 @@
     </span>
   </div>
 
-  <div id="chatPopup" v-bind:style="{ display: changeDisplay }">
-    <div id="messages">
-      <div>Sam:  Hey buddy!  How are you?</div>
-    </div>
+  <div id="chatPopup" class="has-text-weight-bold" v-bind:style="{ display: changeDisplay }">
+    <div id="messagesBox">
+      <div id="message"> Sam:  Hey buddy!  How are you?</div>
+      </div>
     <div id="chatForm">
-    <ul>
-      <li>Nandor: </li>
-      <li><input type="text" id="messageField" name="message"></li>
-    </ul>
-      </input>
+      <input class="input" type="text" placeholder="type message here">  
     </div>
   </div>
 </div>
 </template>
 <style scoped>
-li{
-  display: inline-block;
+#chatForm{
+  position: fixed;
+  bottom: 10px;
+  width: 370px;
+  padding-left: 0.5rem;
+  padding-right:0.5rem;
 }
-ul{
-  display: inline-block;
+#message{
+  background-color: deepskyblue;
+  border-top-left-radius: 15px;
+  border-bottom-left-radius: 15px;
+  border-top-right-radius: 15px;
+  padding: 5px;
 }
 #chat .icon{
   float:right;
@@ -59,13 +63,11 @@ ul{
   border-radius: 5px;
 }
 
-#messages {
+#messagesBox {
 	padding: 1em;
 }
 
-#chatForm {
-	padding: 1em;
-}
+
 .display{display: chatBox;}
 
 </style>
