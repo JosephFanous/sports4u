@@ -207,6 +207,43 @@ app.post('/venues/find', (req, res, next) => {
   )
 })
 
+app.post('/register', (req, res, next) => {
+  console.log(req.body)
+  db.get('SELECT UserName as user, Email as email FROM User WHERE user = ? OR email = ?', [req.body.Username, req.body.Email],(err, row) => {
+    const errors = {}
+    if(err){
+      throw err
+    }
+    if(row){
+      if(req.body.Username==row.user){
+        errors.Username = 'hasError'
+      }
+      if(req.body.Email==row.email){
+        errors.Email = 'hasError'
+      }
+      if(errors.Username || errors.Email){
+        res.json({
+          errors
+        })
+      }
+    }
+    else{
+      db.run('INSERT INTO User(First, Last, UserName, Email, Password) VALUES(?,?,?,?,?)',[req.body.First,req.body.Last,req.body.Username,req.body.Email,req.body.Password], function (err) {
+        if (err){
+          throw err
+        }
+        else{
+          req.session.userID = this.lastID
+          res.json({
+            success: true,
+            username: row.username
+          })
+        }
+      })
+    }
+  })
+})
+
 app.post('/login', (req, res, next) => {
  console.log(req.body)
  db.get('SELECT UserID as id, Email as email, Password as pass, UserName as username FROM User WHERE email = ?',req.body.email,(err, row) => {

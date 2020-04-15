@@ -89,6 +89,8 @@
   #sign{
     padding-top: 50px;
     text-align: center;
+    margin-left: auto;
+    margin-right: auto;
   }
   .field{
     label{
