@@ -9,6 +9,10 @@ const app = express()
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 
+var apps = require('express')();
+var http = require('http').createServer(apps);
+var io = require('socket.io-client')(http);
+
 // TODO: database integration (this is just mock data for testing)
 const venues = [
   {
@@ -324,11 +328,13 @@ app.get('/sports/search', (req, res, next) => {
   })
 })
 
-//Pulls isSigned in From  DB
-//TODO
-app.get('/', (req, res, next) => {
-
-})
+//Listen for socket conection from the client and dissconnection
+io.on('connection', (socket) => {
+  console.log('a user connected');
+  socket.on('disconnect', () => {
+    console.log('user disconnected');
+  });
+});
 
 //Gets all event names, event start times, and event endtimes
 

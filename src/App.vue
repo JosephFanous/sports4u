@@ -8,7 +8,6 @@
     <router-view />
   </div>
 </template>
-
 <style lang="scss">
 @import "~bulma/css/bulma.css";
 
