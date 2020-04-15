@@ -4,7 +4,7 @@
      <div id = "InfoBar" >
         <div class="ImageInfo">
            <figure id = "Image" class="image is-96x96">
-             <img class="is-rounded" src="../assets/intial.png">
+             <img class="is-rounded" src="images/intial.png">
            </figure>
          </div>
          <div class="Info">
@@ -118,7 +118,7 @@
                     <div class="media">
                       <div class="media-left">
                         <p class="image is-32x32">
-                          <img src="http://bulma.io/images/placeholders/128x128.png">
+                          <img v-bind:src="'images/' + item.SportName + '.png'">
                         </p>
                       </div>
                       <div class="media-content">
