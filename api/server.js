@@ -442,6 +442,21 @@ app.post('/JoinEvent', (req, res) => {
   console.log("User : ",req.body.UserID)
 });
 
+// Post request used to update the users request event
+app.post('/UpdateEdit', (req, res) => {
+  db.serialize(() => {
+    db.run(`UPDATE Event
+            SET Name = '`+ req.body[2] +`', StartTime = '` + req.body[4] + `', EndTime = '` + req.body[5] + `', SportID = '`+req.body[3]+`'
+            WHERE UserID = ` + req.body[0] +` AND EventID = ` + req.body[1] + `;`,(err, row) => {
+            if (err) {
+              console.error(err.message);
+            }
+     });
+  });
+  console.log("Update Request : ",req.body)
+
+});
+
 
 // start server listening on port 3000
 app.listen(3000, () => {
