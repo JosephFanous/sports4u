@@ -34,7 +34,9 @@
     </div>
     <AddEvent
       v-if="showAddEventModal"
+      v-bind:venueID="$route.params.id"
       v-on:close="handleCloseAddEvent"
+      v-on:eventAdded="handleAddEvent"
     />
   </div>
 </template>
@@ -134,6 +136,10 @@ export default {
       this.showAddEventModal = true
     },
     handleCloseAddEvent() {
+      this.showAddEventModal = false
+    },
+    handleAddEvent(event) {
+      this.events = [event, ...this.events]
       this.showAddEventModal = false
     }
   },

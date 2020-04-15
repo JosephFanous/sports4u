@@ -4,7 +4,7 @@
      <div id = "InfoBar" >
         <div class="ImageInfo">
            <figure id = "Image" class="image is-96x96">
-             <img class="is-rounded" src="../assets/intial.png">
+             <img class="is-rounded" src="images/intial.png">
            </figure>
          </div>
          <div class="Info">
@@ -118,7 +118,7 @@
                     <div class="media">
                       <div class="media-left">
                         <p class="image is-32x32">
-                          <img src="http://bulma.io/images/placeholders/128x128.png">
+                          <img v-bind:src="'images/' + item.SportName + '.png'">
                         </p>
                       </div>
                       <div class="media-content">
@@ -267,17 +267,11 @@
               </header>
 
               <section class="modal-card-body">
-                  <h6>* Please leave the fields <strong>EMPTY</strong> that you do not wish to change</h6>
+                  <h6>* Please leave the fields <strong>EMPTY</strong> that you do not wish to change. Address cannot be changed as it violates the companies policy</h6>
                   <div class="field">
                     <label class="label">Event Name</label>
                     <div class="control">
-                      <input v-model = "UpdateTemp.EventName" class="input" type="text" placeholder="">
-                    </div>
-                  </div>
-                  <div class="field">
-                    <label class="label">Address</label>
-                    <div class="control">
-                      <input class="input" type="text" placeholder="">
+                      <input id = "EventInput" class="input" type="text" placeholder="">
                     </div>
                   </div>
                   <div class="field">
@@ -286,12 +280,15 @@
                       <div class="control">
                         <div class="select is-primary">
                           <select id = "SportDropDown" v-on:click="SportSelection">
-                            <option value=""> </option>
-                            <option value="Basketball">Basketball</option>
-                            <option value="Table Tennis">Table Tennis</option>
-                            <option value="Volleyball">Volleyball</option>
-                            <option value="Badminton">Badminton</option>
-                            <option value="Soccer">Soccer</option>
+                            <option value="No changes"> No Change </option>
+                            <option value="1">Basketball</option>
+                            <option value="2">Table Tennis</option>
+                            <option value="3">Volleyball</option>
+                            <option value="4">Badminton</option>
+                            <option value="5">Soccer</option>
+                            <option value="6">Hockey</option>
+                            <option value="7">Baseball</option>
+                            <option value="8">FootBall</option>
                           </select>
                         </div>
                       </div>
@@ -303,7 +300,7 @@
                   <div class="field">
                     <label class="label">Start Time</label>
                     <div class="control">
-                      <input class="input" type="text" placeholder="dd-mmm-yyyy hh:mm:(AM/PM)">
+                      <input id = "StartTime"  class="input" type="datetime-local"   v-model="startDate">
                     </div>
                   </div>
                 </div>
@@ -311,7 +308,7 @@
                   <div class="field">
                     <label class="label">End Time</label>
                     <div class="control">
-                      <input class="input" type="text" placeholder="dd-mmm-yyyy hh:mm(AM/PM)">
+                      <input id = "EndTime" class="input" type="datetime-local"  v-model="endDate">
                     </div>
                   </div>
                 </div>
@@ -321,8 +318,8 @@
                   <div class="field">
                     <div class="control">
                       <label class="checkbox">
-                        <input type="checkbox">
-                        I agree that once the edits have been made, they will not reversable</a>
+                        <input id = "CheckBox" type="checkbox">
+                        I agree that once the edits have been made, they will not be reversable</a>
                       </label>
                     </div>
                 </div>
@@ -330,9 +327,10 @@
 
               </section>
               <footer class="modal-card-foot">
-                <button class="button is-success">Save changes</button>
+                <button v-on:click="SubmitEdit" class="button is-success">Save changes</button>
               </footer>
             </div>
+            <div id = "ErrorMessage"></div>
           </div>
 
           <div  v-bind:class= "{ 'is-active' : reportBugModal}" class="modal text">
@@ -369,7 +367,7 @@
 </div>
 </template>
 <script>
-import { endSession } from '../util'
+import { endSession, todayInputValue, isValidDate, formatDate, formatTime } from '../util'
 import mapboxgl from 'mapbox-gl';
 export default {
   name: "AfterLogin",
@@ -388,14 +386,11 @@ export default {
       centerOfMap : null,
       dashBoard : true,
       EditOption : false,
+      UpdateTemp : [],
+      SportDropDown : 'No changes',
+      startDate: todayInputValue() + 'T12:00',
+      endDate: todayInputValue() + 'T13:00',
 
-      UpdateTemp : [
-        {EventName: ''},
-        {SportDropDown: ''},
-        {Address: ''},
-        {StartTime: ''},
-        {EndTime: ''},
-      ],
 
 
       reportBugModal: false,
@@ -497,24 +492,83 @@ export default {
         this.EditOption = false;
       },
       EditButton: function(EventName){
-
+        this.UpdateTemp.DataToBeChanged = EventName
         // for(var i=0;i<this.UserEvents.length;i++){
         //   // console.log(this.UserEvents[i].Name)
         //    if(this.UserEvents[i].Name == EventName){
         //      this.UpdateTemp.push(this.UserEvents[i])
         //    }
         // }
-        console.log(this.UpdateTemp)
+        // console.log(this.UpdateTemp)
         this.EditOption = true;
         // var element = event.target.parentElement;
         // console.log(element);
         // this.EditButton = true;
 
       },
+      SubmitEdit: function(EventName){
+        var SendingInfo = [this.UserID];
+        this.UpdateTemp.EventName = $('#EventInput').val();
+        this.UpdateTemp.StartTime = $('#StartTime').val();
+        this.UpdateTemp.EndTime =  $('#EndTime').val();
+        this.UpdateTemp.Sign = document.getElementById("CheckBox").checked;
 
+        if(this.UpdateTemp.Sign == true){
+          for(var i=0;i<this.UserEvents.length;i++){
+            if(this.UserEvents[i].Name == this.UpdateTemp.DataToBeChanged){
+              SendingInfo.push(this.UserEvents[i].EventID)
+              if(this.UpdateTemp.EventName != ""){
+                  this.UserEvents[i].Name = this.UpdateTemp.EventName
+                  SendingInfo.push(this.UpdateTemp.EventName)
+              }else{
+                  SendingInfo.push(this.UserEvents[i].Name)
+              }
+              if(this.SportDropDown != "No changes"){
+                  console.log("Inside")
+                  this.UserEvents[i].SportID = this.SportDropDown
+                  SendingInfo.push(this.SportDropDown)
+              }else{
+                  SendingInfo.push(this.UserEvents[i].SportID)
+              }
+
+              if(this.UpdateTemp.StartTime != this.startDate){
+                  this.UserEvents[i].StartTime = this.UpdateTemp.StartTime
+                  SendingInfo.push(this.UpdateTemp.StartTime)
+              }else{
+                  SendingInfo.push(this.UserEvents[i].StartTime)
+              }
+
+              if(this.UpdateTemp.EndTime != this.endDate){
+                  this.UserEvents[i].EndTime = this.UpdateTemp.EndTime
+                  SendingInfo.push(this.UpdateTemp.EndTime)
+              }else{
+                  SendingInfo.push(this.UserEvents[i].EndTime)
+              }
+              var data = SendingInfo;
+              const options = {
+                method: 'POST',
+                headers: {
+                  'Content-Type':  'application/json'
+                },
+                body: JSON.stringify(data)
+              };
+              fetch('http://localhost:3000/UpdateEdit', options)
+          }
+          this.EditOption = false;
+        }
+
+      }
+
+      else{
+        console.log("Chek Agree")
+      }
+      console.log(this.UserEvents)
+
+      },
       SportSelection : function(test){
-        this.UpdateTemp.SportDropDown = document.getElementById("SportDropDown").value
-        console.log(this.UpdateTemp.SportDropDown);
+        this.SportDropDown = document.getElementById("SportDropDown").value
+
+        console.log(this.SportDropDown)
       },
 
 

@@ -8,12 +8,12 @@
   <div class="field">
      <label class="label">First Name</label>
      <div class="control has-icons-left has-icons-right" id="fname">
-        <input v-model="First" class="input is-dark" type="text" placeholder="John" />
+        <input v-model="First" class="input is-dark" v-bind:class="{'is-danger': firsterr}" type="text" placeholder="John" />
         <span class="icon is-small is-left">
            <i class="fas fa-user"></i>
         </span>
         <span class="icon is-small is-right">
-           <i class="fas fa-exclamation-triangle"></i>
+           <i class="fas" v-bind:class="{'fa-exclamation-triangle': firsterr}"></i>
         </span>
         <p id="firsttxt"> {{firsterr}} </p>
      </div>
@@ -22,12 +22,12 @@
   <div class="field">
      <label class="label">Last Name</label>
      <div class="control has-icons-left has-icons-right" id="lname">
-        <input v-model="Last" class="input is-dark" type="text" placeholder="Adams" />
+        <input v-model="Last" class="input is-dark" v-bind:class="{'is-danger': lasterr}" type="text" placeholder="Adams" />
         <span class="icon is-small is-left">
            <i class="fas fa-user"></i>
         </span>
         <span class="icon is-small is-right">
-           <i class="fas fa-exclamation-triangle"></i>
+           <i class="fas" v-bind:class="{'fa-exclamation-triangle': lasterr}"></i>
         </span>
         <p id="lasttxt"> {{lasterr}} </p>
      </div>
@@ -36,12 +36,12 @@
   <div class="field">
      <label class="label">Username</label>
      <div class="control has-icons-left has-icons-right" id="usrnm">
-        <input v-model="Username" class="input is-dark" type="text" placeholder="kingzilla" />
+        <input v-model="Username" class="input is-dark" v-bind:class="{'is-danger': usererr}" type="text" placeholder="kingzilla" />
         <span class="icon is-small is-left">
            <i class="fas fa-user"></i>
         </span>
         <span class="icon is-small is-right">
-           <i class="fas fa-exclamation-triangle"></i>
+           <i class="fas" v-bind:class="{'fa-exclamation-triangle': usererr}"></i>
         </span>
         <p id="usertxt"> {{usererr}} </p>
      </div>
@@ -50,12 +50,12 @@
    <div class="field">
       <label class="label">E-Mail</label>
       <div class="control has-icons-left has-icons-right" id="eml">
-         <input v-model="Email" class="input is-dark" type="email" placeholder="example@hotmail.com" />
+         <input v-model="Email" class="input is-dark" v-bind:class="{'is-danger': emailerr}" type="email" placeholder="example@hotmail.com" />
          <span class="icon is-small is-left">
             <i class="fas fa-user"></i>
          </span>
          <span class="icon is-small is-right">
-            <i class="fas fa-exclamation-triangle"></i>
+            <i class="fas" v-bind:class="{'fa-exclamation-triangle': emailerr}"></i>
          </span>
          <p id="emailtxt"> {{emailerr}} </p>
       </div>
@@ -64,12 +64,12 @@
    <div class="field">
       <label class="label">Password</label>
       <div class="control has-icons-left has-icons-right" id="pss">
-         <input v-model="Password" class="input is-dark" type="password" placeholder="••••••••••••">
+         <input v-model="Password" class="input is-dark" v-bind:class="{'is-danger': psserr}" type="password" placeholder="••••••••••••">
          <span class="icon is-small is-left">
             <i class="fas fa-envelope"></i>
          </span>
          <span class="icon is-small is-right">
-            <i class="fas fa-exclamation-triangle"></i>
+            <i class="fas" v-bind:class="{'fa-exclamation-triangle': psserr}"></i>
          </span>
          <p id="psstxt"> {{psserr}} </p>
       </div>
@@ -77,13 +77,13 @@
 
    <div class="field">
       <label class="label">Verify Password</label>
-      <div class="control has-icons-left has-icons-right" id="vpss">
-         <input class="input is-dark" type="password" placeholder="••••••••••••">
+      <div class="control has-icons-left has-icons-right"  id="vpss">
+         <input v-model="vPassword" class="input is-dark" v-bind:class="{'is-danger': vpsserr}" type="password" placeholder="••••••••••••">
          <span class="icon is-small is-left">
             <i class="fas fa-envelope"></i>
          </span>
          <span class="icon is-small is-right">
-            <i class="fas fa-exclamation-triangle"></i>
+            <i class="fas" v-bind:class="{'fa-exclamation-triangle': vpsserr}"></i>
          </span>
          <p id="vpsstxt"> {{vpsserr}} </p>
       </div>
@@ -165,6 +165,7 @@
         Username: null,
         Email: null,
         Password: null,
+        vPassword: null,
         firsterr: '',
         lasterr: '',
         usererr: '',
@@ -184,45 +185,63 @@
         this.emailerr = '';
         this.psserr = '';
         this.vpsserr = '';
-        fetch(`${apiUrl}/register`, {
-          method: 'post',
-          headers:{
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            First: this.First,
-            Last: this.Last,
-            Username: this.Username,
-            Email: this.Email,
-            Password: this.Password
+        let next = false
+        if(!this.First){
+          this.firsterr = 'Please enter your first name.'
+          next = false
+        }
+        if(!this.Last){
+          this.lasterr = 'Please enter your last name.'
+          next = false
+        }
+        if(!this.Username){
+          this.usererr = 'Please enter your username.'
+          next = false
+        }
+        if(!this.Email){
+          this.emailerr = 'Please enter your email.'
+          next = false
+        }
+        if(!this.Password){
+          this.psserr = 'Please enter your password.'
+          next = false
+        }
+        if(!this.vPassword){
+          this.vpsserr = 'Please verify your password.'
+          next = false
+        }
+        if(next = true){
+          fetch(`${apiUrl}/register`, {
+            method: 'post',
+            headers:{
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              First: this.First,
+              Last: this.Last,
+              Username: this.Username,
+              Email: this.Email,
+              Password: this.Password
+            })
           })
-        })
-        .then(res => res.json())
-        .then(data =>{
+          .then(res => res.json())
+          .then(data =>{
           if(data.success){
-            this.$globalStore.currentUsername = data.Username
+            this.$globalStore.user = data.user
             this.$router.push({
               path: '/'
             })
             return
           }
-          if (data.errors.First){
-            this.firsterr = 'Please enter your first name.';
-          }
-          if (data.errors.Last){
-            this.lasrterr = 'Please enter your Last name.';
-          }
           if (data.errors.Email){
-            this.emailerr = 'Please enter a Email.'; //still have to do conditional for taken
+            this.emailerr = 'This email is taken. Please enter another one.'; //still have to do conditional for taken
           }
           if (data.errors.Username){
             this.usererr = 'This username is taken. Please enter another one.'; //still have to do conditional for if anything there or too short/long
           }
-          if (data.errors.Password){
-            this.psserr = 'Please enter a password.'; //still have to do conditional for does not match or too short/long
-          }
         })
+      }
       }
     }
   }

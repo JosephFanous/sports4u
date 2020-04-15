@@ -18,6 +18,7 @@
             type="text"
           >
         </div>
+        <p v-if="errors.eventName" class="help is-danger">{{ errors.eventName }}</p>
       </div>
       <div class="field">
         <label class="label">Sport</label>
@@ -57,9 +58,16 @@
         </div>
         <p v-if="errors.endDate" class="help is-danger">{{ errors.endDate }}</p>
       </div>
+      <p v-if="errors.general" class="is-block has-text-danger">{{ errors.general }}</p>
     </section>
     <footer class="modal-card-foot">
-      <button v-on:click="handleCreate" class="button is-success">Create Event</button>
+      <button
+        v-on:click="handleCreate"
+        class="button is-success"
+        v-bind:class="{ 'is-loading': isLoading }"
+      >
+        Create Event
+      </button>
       <button v-on:click="$emit('close')" class="button">Cancel</button>
     </footer>
   </div>
@@ -67,7 +75,8 @@
 </template>
 
 <script>
-import { todayInputValue, isValidDate } from '../util'
+import { todayInputValue, addEvent } from '../util'
+import { isValidDate } from '../../common/util'
 
 export default {
   name: 'AddEvent',
@@ -77,7 +86,9 @@ export default {
       sport: 'Basketball',
       startDate: todayInputValue() + 'T12:00',
       endDate: todayInputValue() + 'T13:00',
+      isLoading: false,
       errors: {
+        general: '',
         eventName: '',
         sport: '',
         startDate: '',
@@ -94,22 +105,45 @@ export default {
       this.errors = {}
 
       const errors = this.getErrors()
-      if (!errors) {
-        // send request
-      } else {
+      if (errors) {
         this.errors = errors
+        return
       }
 
-      const eventData = {
+      const requestBody = {
+        locationID: this.venueID,
         eventName: this.eventName,
+        sport: this.sport,
         startDate: this.startDate,
         endDate: this.endDate,
       }
-      console.log('createEvent:', eventData)
-      // console.log(this.startTime)
-      // console.log(this.endTime)
-      // console.log(this.startDate)
-      // console.log(this.endDate)
+
+      this.isLoading = true
+      addEvent(requestBody).then(data => {
+        if (data.errors) return this.errors = data.errors
+
+        // create a new object since VenuePage expects events to be
+        // in this format
+        const addedEvent = {
+          EventID: data.addedEventID,
+          Name: this.eventName,
+          SportName: this.sport,
+          StartTime: this.startDate,
+          EndTime: this.endDate,
+          EventAddedTime: new Date()
+        }
+
+        // emit eventAdded event so that the parent can update it's view
+        // with the new event (i.e. VenuePage can add it to its event list)
+        this.$emit('eventAdded', addedEvent)
+      }).catch(err => {
+        console.error(err)
+        this.errors = {
+          general: 'Could not create event.'
+        }
+      }).finally(() => {
+        this.isLoading = false
+      })
     },
     getErrors() {
       const errors = {}
@@ -132,10 +166,17 @@ export default {
         }
       }
 
+      if (!errors.startDate && !errors.endDate) {
+        const a = new Date(this.startDate)
+        const b = new Date(this.endDate)
+        if (b <= a) {
+          errors.endDate = 'Please enter an end date after the start date.'
+        }
+      }
+
       if (!Object.keys(errors).length) return null
       else return errors
     }
-
   }
 };
 </script>
@@ -162,6 +203,10 @@ export default {
   div:first-child() {
     padding-right: 1rem;
   }
+}
+
+.modal-card-body > p {
+  margin: 0;
 }
 </style>
 

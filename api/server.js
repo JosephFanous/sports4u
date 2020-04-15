@@ -3,7 +3,7 @@ const cors = require('cors')
 const bodyParser = require('body-parser')
 const sqlite3 = require('sqlite3').verbose()
 const session = require('express-session')
-const { toRadians } = require('./util')
+const { toRadians, isValidDate } = require('../common/util')
 
 const app = express()
 app.use(express.urlencoded({ extended: true }))
@@ -116,7 +116,7 @@ app.get('/venues/:id', (req, res, next) => {
     id,
     (err, rows) => {
       if (err) console.error(err)
-      console.log('/venues/:id', rows)
+      // console.log('/venues/:id', rows)
       if (!rows) {
         return res.json({
           error: 'Venue not found'
@@ -231,16 +231,28 @@ app.post('/register', (req, res, next) => {
         })
       }
     }
+    else if (!row){
+      res.json({
+        errors:{
+          email: 'error'
+        }
+      })
+    }
     else{
       db.run('INSERT INTO User(First, Last, UserName, Email, Password) VALUES(?,?,?,?,?)',[req.body.First,req.body.Last,req.body.Username,req.body.Email,req.body.Password], function (err) {
         if (err){
           throw err
         }
         else{
+          console.log(row)
+
           req.session.userID = this.lastID
           res.json({
-            success: true,
-            username: row.username
+            user: {
+              username: req.body.Username,
+              id: this.lastID
+            },
+            success: true
           })
         }
       })
@@ -352,6 +364,49 @@ app.get('/users/:id', (req, res, next) => {
   });
 });
 
+// POST to add an event
+app.post('/Events', async (req, res, next) => {
+  const { locationID, eventName, sport, startDate, endDate } = req.body
+
+  if (!req.session.userID) {
+    return res.json({
+      errors: {
+        general: 'Please log in to add events.'
+      }
+    })
+  }
+
+  const errors = {}
+  if (!locationID || isNaN(parseInt(locationID))) errors.general = 'Invalid location.'
+  if (!eventName) errors.eventName = 'Please enter an event name.'
+  if (!sport) errors.sport = 'Please enter a sport.'
+  if (!isValidDate(startDate)) errors.startDate = 'Please enter a valid start date.'
+  if (!isValidDate(endDate)) errors.endDate = 'Please enter a valid end date.'
+  
+  if (Object.keys(errors).length) {
+    return res.json({ errors })
+  }
+
+  db.run(`
+      INSERT INTO Event (UserID, LocationID, Name, SportID, StartTime, EndTime, EventAddedTime)
+      VALUES (?, ?, ?, (SELECT SportID from SportType WHERE SportName = ?), datetime(?), datetime(?), datetime("now"))
+    `,
+    [req.session.userID, locationID, eventName, sport, startDate, endDate],
+    function(err) {
+      if (err) {
+        console.error(err)
+        res.json({
+          errors: { general: 'Could not create event.' }
+        })
+      } else {
+        res.json({
+          addedEventID: this.lastID
+        })
+      }
+    }
+  )
+})
+
 // Get finished and unfinshed events
 app.get('/Events/:id/:EventStatus', (req, res, next) => {
   db.serialize(() => {
@@ -446,6 +501,21 @@ app.post('/JoinEvent', (req, res) => {
   });
   console.log("Joining Event ID  : ",req.body.EventID)
   console.log("User : ",req.body.UserID)
+});
+
+// Post request used to update the users request event
+app.post('/UpdateEdit', (req, res) => {
+  db.serialize(() => {
+    db.run(`UPDATE Event
+            SET Name = '`+ req.body[2] +`', StartTime = '` + req.body[4] + `', EndTime = '` + req.body[5] + `', SportID = '`+req.body[3]+`'
+            WHERE UserID = ` + req.body[0] +` AND EventID = ` + req.body[1] + `;`,(err, row) => {
+            if (err) {
+              console.error(err.message);
+            }
+     });
+  });
+  console.log("Update Request : ",req.body)
+
 });
 
 

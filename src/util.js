@@ -1,11 +1,9 @@
+import { toRadians } from '../common/util'
+
 export function getClientLocation(callback) {
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(callback)
   }
-}
-
-export function toRadians(deg) {
-  return deg * (Math.PI / 180)
 }
 
 // https://wiki.openstreetmap.org/wiki/Zoom_levels
@@ -90,6 +88,26 @@ export function endSession() {
   })
 }
 
+// send a request to add an event
+export function addEvent(body) {
+  const apiUrl = process.env.VUE_APP_API_URL
+  return fetch(`${apiUrl}/Events`,
+    {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      // USE credentials: 'include' TO MAKE SURE AUTHENTICATION COOKIE IS SENT TO SERVER
+      credentials: 'include',
+      body: JSON.stringify(body)
+    }
+  ).then(res => {
+    if (res.ok) return res.json()
+    else throw new Error(res.status)
+  })
+}
+
 const months = [
   'January',
   'February',
@@ -124,7 +142,7 @@ export function formatDate(str) {
 
 export function formatTime(str) {
   const date = new Date(str)
-  const isPM = false
+  let isPM = false
   let hours = date.getHours()
   if (hours >= 12) {
     hours -= 12
@@ -134,18 +152,13 @@ export function formatTime(str) {
     hours = 12
   }
 
-  return `${hours}:${date.getMinutes()} ${isPM ? 'PM' : 'AM'}`
+  let minutes = date.getMinutes()
+  if (minutes < 10) minutes = '0' + minutes
+
+  return `${hours}:${minutes} ${isPM ? 'PM' : 'AM'}`
 }
 
 // https://stackoverflow.com/questions/17182544/disable-certain-dates-from-html5-datepicker
 export function todayInputValue() {
   return (new Date().toISOString().split('T')[0])
-}
-
-// https://stackoverflow.com/questions/1353684/detecting-an-invalid-date-date-instance-in-javascript
-export function isValidDate(dateStr) {
-  const timestamp = Date.parse(dateStr)
-
-  // if the timestamp is a number, it is a valid date
-  return !isNaN(timestamp)
 }

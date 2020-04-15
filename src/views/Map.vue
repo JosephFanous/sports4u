@@ -1,6 +1,5 @@
 <template>
 <div class="mappage">
-<Navbar></Navbar>
   <div class="map columns is-gapless">
     <div class="sidebar has-text-left column is-4 has-background-white-ter">
       <div class="section">
@@ -100,16 +99,13 @@
   </div>
 </template>
 
-<style lang="scss">
+<style scoped lang="scss">
 .map {
   height: 100%;
 }
-.mappage{
-  height:90%;
-}
-nav{
-  border-bottom: 1px solid gray;
-  height: 10%;
+
+.mappage {
+  height: calc(100% - 100px);
 }
 
 .sidebar {
@@ -161,6 +157,7 @@ hr {
 <script>
 const mapboxgl = require("mapbox-gl/dist/mapbox-gl.js");
 import { getClientLocation, metresToPixels } from '../util';
+import { toRadians } from '../../common/util';
 import LocationResult from '../components/LocationResult.vue';
 import MapVenue from '../components/MapVenue.vue';
 import Navbar from '../components/Navbar.vue';

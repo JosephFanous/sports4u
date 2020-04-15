@@ -1,5 +1,6 @@
 <template>
   <div id="app" class="has-background-white-ter" >
+    <Navbar />
     <!-- <div v-if="$route.name !== 'Map'" id="nav">
       <router-link to="/">Home</router-link> |
       <router-link to="/about">About</router-link> |
@@ -8,12 +9,25 @@
     <router-view />
   </div>
 </template>
+<<<<<<< HEAD
+=======
+
+<script>
+import Navbar from './components/Navbar'
+export default {
+  components: {
+    Navbar
+  }
+}
+</script>
+
+>>>>>>> 80ad471b99e684b56f06a7bb472b0057d84ac5ff
 <style lang="scss">
 @import "~bulma/css/bulma.css";
 
-
 html, body {
   height: 100%;
+  overflow-y: auto;
 }
 
 #app {
@@ -22,6 +36,7 @@ html, body {
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
   height: 100%;
+  overflow: auto;
 }
 
 #nav {
