@@ -100,16 +100,20 @@
   </div>
 </template>
 
-<style lang="scss">
+<style scoped lang="scss">
+$navbar-height: 100px;
+
 .map {
   height: 100%;
 }
-.mappage{
-  height:90%;
+
+.mappage {
+  height: calc(100% - 100px);
 }
-nav{
+
+nav {
   border-bottom: 1px solid gray;
-  height: 10%;
+  height: $navbar-height;
 }
 
 .sidebar {
@@ -161,6 +165,7 @@ hr {
 <script>
 const mapboxgl = require("mapbox-gl/dist/mapbox-gl.js");
 import { getClientLocation, metresToPixels } from '../util';
+import { toRadians } from '../../common/util';
 import LocationResult from '../components/LocationResult.vue';
 import MapVenue from '../components/MapVenue.vue';
 import Navbar from '../components/Navbar.vue';
