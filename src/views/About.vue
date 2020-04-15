@@ -5,6 +5,7 @@
       <h2 class="title is-1">About Sports4U</h2>
       <h4 class="subtitle is-2">We provide you a simple way to find sports and events, locally in your area.</h4>
     </div>
+    <Chatbox></Chatbox>
   </div>
 </template>
 <style lang="scss" scoped>
@@ -13,14 +14,17 @@
   border-bottom: 1px solid black
 }
 
+
 </style>
 <script>
 import Navbar from '../components/Navbar.vue';
+import Chatbox from '../components/Chatbox.vue';
 
 export default {
   name: "About",
   components: {
     Navbar,
+    Chatbox,
   },
   beforeMount: function(){
     //Check if the user is signed in From another page, check sign in and username from log in.
