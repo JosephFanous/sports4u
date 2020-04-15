@@ -41,12 +41,17 @@
 
          <p class="menu-label">Contact Us</p>
          <ul class="menu-list">
-            <li><a><span class="icon is-small"><i class="fa fa-bug"></i></span> Report Software Bugs </a></li>
-            <li id = "LastOne"><a><span class="icon is-small"><i class="fas fa-question-circle"></i></span> Additional Inquires </a></li>
-
+            <li v-on:click=HandleBugModalClick()>
+              <a>
+              <span class="icon is-small"><i class="fa fa-bug"></i></span> Report Software Bugs
+              </a>
+            </li>
+            <li id = "LastOne"><a><span class="icon is-small"><i class="fas fa-question-circle"></i></span> About </a></li>
          </ul>
 
-         <button id = "LogoutButton" class="button is-block is-info is-large is-fullwidth">Logout <i class="fas fa-sign-out-alt" aria-hidden="true"></i></button>
+         <button v-on:click="handleLogoutClick" class="button is-block is-info is-large is-fullwidth" v-bind:class="{ 'is-loading': isLogoutLoading }"  id = "LogoutButton">
+          <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
+         </button>
 
        </nav>
 
@@ -328,6 +333,31 @@
             </div>
           </div>
 
+          <div  v-bind:class= "{ 'is-active' : reportBugModal}" class="modal text">
+             <div class="modal-background"></div>
+             <div class="modal-card ">
+               <header class="modal-card-head">
+                 <p class="modal-card-title">Submit an issue here</p>
+                 <button v-on:click="HandleSubmitClick" class="delete" aria-label="close"></button>
+               </header>
+               <section class="modal-card-body">
+               <div class="field is-grouped is-grouped-centered">
+                  <ul>
+                    <label class="text-is-bold">Report issue here:</label>
+                    <input class="input is-rounded" type="text" placeholder="Enter claim here">
+                  </ul>
+                </div>
+               </section>
+               <footer class="modal-card-foot">
+                <div class="field is-grouped is-grouped-centered">
+                 <button v-on:click="HandleSubmitClick" class="button is-success">Submit Claim</button>
+                 <button v-on:click="HandleSubmitClick" class="button">Cancel</button>
+                </div>
+               </footer>
+
+             </div>
+           </div>
+
       </div>
     </div>
        </div>
@@ -337,6 +367,7 @@
 </div>
 </template>
 <script>
+import { endSession } from '../util'
 import mapboxgl from 'mapbox-gl';
 export default {
   name: "AfterLogin",
@@ -353,7 +384,9 @@ export default {
       map : null,
       popup : null,
       centerOfMap : null,
+
       EditOption : false,
+
       UpdateTemp : [
         {EventName: ''},
         {SportDropDown: ''},
@@ -361,6 +394,10 @@ export default {
         {StartTime: ''},
         {EndTime: ''},
       ],
+
+
+      reportBugModal: false,
+      isLogoutLoading: false
 
     }
 
@@ -472,10 +509,20 @@ export default {
         // this.EditButton = true;
 
       },
+
       SportSelection : function(test){
         this.UpdateTemp.SportDropDown = document.getElementById("SportDropDown").value
         console.log(this.UpdateTemp.SportDropDown);
       },
+
+
+      HandleBugModalClick: function(){
+        this.reportBugModal = true;
+      },
+      HandleSubmitClick: function(){
+        this.reportBugModal = false;
+      },
+
 
       DeleteButton: function(DeleteEvent, TypeOfEvent){
         var EventID;
@@ -518,6 +565,7 @@ export default {
         }else {
             console.log("Not happening ");
         }
+
       },
       JoinEvent : function(EventName){
         var EventID, UserID = this.UserID;
@@ -538,8 +586,22 @@ export default {
         };
         fetch('http://localhost:3000/JoinEvent', options)
 
-        // location.reload(); // temp fix for reloading page
-      }
+
+      },
+
+
+
+      handleLogoutClick(){
+        console.log("User Signed Out")
+        this.isLogoutLoading = true
+
+        endSession().then(data => {
+          this.$globalStore.user = null
+        }).finally(() => {
+          this.isLogoutLoading = false
+        })
+      },
+
 
 
 

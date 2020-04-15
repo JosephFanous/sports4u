@@ -2,6 +2,7 @@ const express = require('express')
 const cors = require('cors')
 const bodyParser = require('body-parser')
 const sqlite3 = require('sqlite3').verbose()
+const session = require('express-session')
 const { toRadians } = require('./util')
 
 const app = express()
@@ -32,7 +33,6 @@ const db = new sqlite3.Database('./database/sportDatabase.db', sqlite3.OPEN_READ
   console.log('Connected to the Sports database.');
 });
 
-
 // whitelist requests from frontend server
 const whitelist = ['http://localhost:8080', 'http://localhost:3000']
 const corsOptions = {
@@ -44,9 +44,20 @@ const corsOptions = {
       error.status = 400
       callback(error)
     }
-  }
+  },
+  credentials: true
 }
 app.use(cors(corsOptions));
+
+app.use(session({
+  secret: 'change this probably',
+  cookie: {
+    // 365 days in milliseconds
+    maxAge: 365 * 24 * 60 * 60 * 1000
+  },
+  resave: false,
+  saveUninitialized: true
+}))
 
 app.get('/venues/search', (req, res, next) => {
   console.log('query', req.query)
@@ -196,9 +207,46 @@ app.post('/venues/find', (req, res, next) => {
   )
 })
 
+app.post('/register', (req, res, next) => {
+  console.log(req.body)
+  db.get('SELECT UserName as user, Email as email FROM User WHERE user = ? OR email = ?', [req.body.Username, req.body.Email],(err, row) => {
+    const errors = {}
+    if(err){
+      throw err
+    }
+    if(row){
+      if(req.body.Username==row.user){
+        errors.Username = 'hasError'
+      }
+      if(req.body.Email==row.email){
+        errors.Email = 'hasError'
+      }
+      if(errors.Username || errors.Email){
+        res.json({
+          errors
+        })
+      }
+    }
+    else{
+      db.run('INSERT INTO User(First, Last, UserName, Email, Password) VALUES(?,?,?,?,?)',[req.body.First,req.body.Last,req.body.Username,req.body.Email,req.body.Password], function (err) {
+        if (err){
+          throw err
+        }
+        else{
+          req.session.userID = this.lastID
+          res.json({
+            success: true,
+            username: row.username
+          })
+        }
+      })
+    }
+  })
+})
+
 app.post('/login', (req, res, next) => {
  console.log(req.body)
- db.get('SELECT Email as email, Password as pass FROM User WHERE email = ?',req.body.email,(err, row) => {
+ db.get('SELECT UserID as id, Email as email, Password as pass, UserName as username FROM User WHERE email = ?',req.body.email,(err, row) => {
   if (err) {
     throw err;
   }
@@ -215,13 +263,36 @@ app.post('/login', (req, res, next) => {
       }
     })
   }else{
+    // set the session cookie username field to the row's username
+    // and send it back so we can store it in vue globals for UI
+    req.session.userID = row.id
+    console.log('/login:', row)
+    console.log('/login:', req.session.userID)
     res.json({
-      success: true
+      success: true,
+      user: {
+        id: row.id,
+        username: row.username,
+      }
     })
   }
   console.log(row);
   });
 
+})
+
+app.post('/logout', (req, res, next) => {
+  console.log('/logout:', req.session)
+
+  if (!req.session.userID) {
+    return res.status(400).json({
+      error: 'Not logged in'
+    })
+  }
+
+  res.json({
+    success: true
+  })
 })
 
 app.post('/', (req, res, next) => {

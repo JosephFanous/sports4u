@@ -10,7 +10,7 @@
           <span>Home</span>
           </router-link>
           <router-link class="button is-large" v-bind:to="`/about`">About Us</router-link>
-          <router-link v-if="isSignedIn"class="button is-large" v-bind:to="`/afterLogin`">Dashboard</router-link>
+          <router-link v-if="$globalStore.user" class="button is-large" v-bind:to="`/afterLogin`">Dashboard</router-link>
         </div>
         <div class="centerlogo">
           <img class="logo" src="images/atheletes.png"  alt="Sports4U" />
@@ -19,14 +19,18 @@
     </div>
     <div class="navbar-end">
       <div class="navbar-item">
-        <div v-if="isSignedIn" class="buttons">
+        <div v-if="$globalStore.user" class="buttons">
            <router-link  class="button is-large" to="/afterLogin">
              <span class="icon">
               <i class="fas fa-user"></i>
              </span>
-             <span>Logged in as: {{user_name}} </span>
+             <span>Logged in as: {{ $globalStore.user.username }} </span>
            </router-link>
-           <Button v-on:click="handleSignOutClick" class="button has-background-light is-medium" to="/">Sign Out</Button>
+           <Button
+            v-on:click="handleSignOutClick"
+            class="button has-background-light is-medium"
+            v-bind:class="{ 'is-loading': isLogoutLoading }"
+            >Sign Out</Button>
         </div>
         <div v-else class="buttons">
            <router-link  class="button is-danger is-large" to="/register">Register</router-link>
@@ -42,6 +46,7 @@
   }
 </style>
 <script>
+import { endSession } from '../util'
 //TODO Add Navbars ontop of everypage
 //TODO Create Proper Router links on Navbars
 //TODO Maybe center logo
@@ -51,17 +56,22 @@
       isSignedIn: Boolean,
       user_name: String,
     },
+    data: function() {
+      return {
+        isLogoutLoading: false
+      }
+    },
     methods: {
       handleSignOutClick(){
         console.log("User Signed Out")
-        this.isSignedIn = false
+        this.isLogoutLoading = true
+
+        endSession().then(data => {
+          this.$globalStore.user = null
+        }).finally(() => {
+          this.isLogoutLoading = false
+        })
       },
-    },
-    // data: function() 
-    // {
-    //   return{
-    //     //isSignedin: true,
-    //   }
-    // },
+    }
   };
 </script>

@@ -8,6 +8,14 @@ import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-vue/dist/bootstrap-vue.css';
 
+// global variables to be accessed and changed by any component
+const globalStore = new Vue({
+  data: {
+    user: null
+  }
+})
+Vue.prototype.$globalStore = globalStore
+
 Vue.config.productionTip = false;
 Vue.use(BootstrapVue);
 
