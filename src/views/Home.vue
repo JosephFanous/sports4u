@@ -1,6 +1,5 @@
 <template>
   <div class="has-background-white-ter">
-  <Navbar v-bind:isSignedIn="true" vbind:user_name=Nandor></Navbar>
   
   <section class="section">
     <h1 class="title">Sports</h1>
@@ -73,7 +72,6 @@ html, body{
   height: 100%;
 }
 .section{
-  border-top: 2px solid grey;
   margin-bottom: 10px;
   margin-top:0px;
   padding-left: 40px;
@@ -97,15 +95,11 @@ padding: 5px;
 <script>
 // @ is an alias to /src
 import { getClientLocation } from '../util';
-import Navbar from '../components/Navbar.vue';
 
 //TODO IF THE USER IS LOGGED IN, THEN DISPLAY THE USER'S NAME AND A SIGN OUT BUTTON DONE
 
 export default {
   name: "Home",
-  components: {
-    Navbar,
-  },
   methods: {
     handlesSportsClick(sport){
       const apiUrl = process.env.VUE_APP_API_URL

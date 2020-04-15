@@ -1,6 +1,5 @@
 <template>
 <div class="mappage">
-<Navbar></Navbar>
   <div class="map columns is-gapless">
     <div class="sidebar has-text-left column is-4 has-background-white-ter">
       <div class="section">
@@ -101,19 +100,12 @@
 </template>
 
 <style scoped lang="scss">
-$navbar-height: 100px;
-
 .map {
   height: 100%;
 }
 
 .mappage {
   height: calc(100% - 100px);
-}
-
-nav {
-  border-bottom: 1px solid gray;
-  height: $navbar-height;
 }
 
 .sidebar {

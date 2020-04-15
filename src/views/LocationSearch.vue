@@ -1,4 +1,5 @@
 <template>
+<div>
   <section class="section">
     <div class="container">
       <h1 class="title">Venue Search</h1>
@@ -54,6 +55,7 @@
       </ul>
     </div>
   </section>
+</div>
 </template>
 
 <style lang="scss">
@@ -68,8 +70,6 @@ import { geocode, findVenuePage } from '../util';
 
 export default {
   name: "LocationSearch",
-  components: {
-  },
   data: function() {
     return {
       query: '',

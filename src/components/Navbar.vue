@@ -13,7 +13,7 @@
           <router-link v-if="$globalStore.user" class="button is-large" v-bind:to="`/afterLogin`">Dashboard</router-link>
         </div>
         <div class="centerlogo">
-          <img class="logo" src="images/atheletes.png"  alt="Sports4U" />
+          <img class="logo" src="/images/atheletes.png"  alt="Sports4U" />
         </div>
       </div>
     </div>
@@ -40,9 +40,13 @@
     </div>
   </nav>
 </template>
-<style scoped>
-  .buttons{
+<style lang="scss" scoped>
+  .navbar .navbar-item .buttons{
     margin-bottom: 0;
+  }
+  .navbar {
+    height: 100px;
+    border-bottom: 1px solid $grey-darker;
   }
 </style>
 <script>
