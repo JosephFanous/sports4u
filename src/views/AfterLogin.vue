@@ -16,7 +16,7 @@
       <nav class="menu">
          <p class="menu-label">Home</p>
          <ul class="menu-list">
-            <li><a class="is-active" href="#"><span class="icon is-small"><i class="fas fa-chart-line"></i></span> Dashboard</a></li>
+            <li><a v-bind:class= "{ 'is-active' : dashBoard}" href="#"><span class="icon is-small"><i class="fas fa-chart-line"></i></span> Dashboard</a></li>
             <li><a href="#"><span class="icon is-small"><i class="fas fa-plus-circle"></i></span> Add an Event</a></li>
          </ul>
          <p class="menu-label">Setting</p>
@@ -41,12 +41,14 @@
 
          <p class="menu-label">Contact Us</p>
          <ul class="menu-list">
-            <li v-on:click=HandleBugModalClick()>
+           <!-- v-bind:class= "{ 'is-active' : reportBugModal} -->
+             <li><a v-on:click=HandleBugModalClick() v-bind:class= "{ 'is-active' : reportBugModal}" href="#"><span class="icon is-small"><i class="fas fa-bug"></i></span> Report Software Bugs</a></li>
+            <!-- <li v-on:click=HandleBugModalClick()>
               <a>
               <span class="icon is-small"><i class="fa fa-bug"></i></span> Report Software Bugs
               </a>
-            </li>
-            <li id = "LastOne"><a><span class="icon is-small"><i class="fas fa-question-circle"></i></span> About </a></li>
+            </li> -->
+
          </ul>
 
          <button v-on:click="handleLogoutClick" class="button is-block is-info is-large is-fullwidth" v-bind:class="{ 'is-loading': isLogoutLoading }"  id = "LogoutButton">
@@ -380,11 +382,11 @@ export default {
       UserEvents: [],
       UserSignedUpEvents: [],
       UpcomingEvents : [],
-      UserID : 1,
+      UserID : 1,//this.$globalStore.user.id,
       map : null,
       popup : null,
       centerOfMap : null,
-
+      dashBoard : true,
       EditOption : false,
 
       UpdateTemp : [
@@ -517,10 +519,12 @@ export default {
 
 
       HandleBugModalClick: function(){
+        this.dashBoard = false;
         this.reportBugModal = true;
       },
       HandleSubmitClick: function(){
         this.reportBugModal = false;
+        this.dashBoard = true;
       },
 
 
