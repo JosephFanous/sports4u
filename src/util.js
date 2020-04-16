@@ -152,6 +152,19 @@ export function leaveEvent(eventID) {
   })
 }
 
+export function checkAuth() {
+  const apiUrl = process.env.VUE_APP_API_URL
+  return fetch(`${apiUrl}/auth`,
+    {
+      // USE credentials: 'include' TO MAKE SURE AUTHENTICATION COOKIE IS SENT TO SERVER
+      credentials: 'include'
+    }
+  ).then(res => {
+    if (res.ok) return res.json()
+    else throw new Error(res.status)
+  }).then(data => data.user)
+}
+
 const months = [
   'January',
   'February',

@@ -14,9 +14,18 @@
 <script>
 import Navbar from './components/Navbar'
 import Chatbox from './components/Chatbox'
+import { checkAuth } from './util'
+
 export default {
   components: {
     Navbar
+  },
+  mounted: function() {
+    // check if the user is logged in
+    checkAuth()
+      .then(user => {
+        this.$globalStore.user = user
+      })
   }
 }
 </script>

@@ -81,6 +81,32 @@ app.use(session({
   saveUninitialized: true
 }))
 
+// check if the user is currently logged in to update frontend
+app.get('/auth', (req, res, next) => {
+  if (!req.session.userID) return res.json({ user: null })
+
+  db.get(`
+    SELECT UserID as id, UserName as username
+    FROM User
+    WHERE id = ?
+  `,
+  [req.session.userID],
+  (err, row) => {
+    if (err) console.error(err)
+
+    if (err || !row) {
+      return res.json({ user: null })
+    } else {
+      return res.json({
+        user: {
+          id: row.id,
+          username: row.username,
+        }
+      })
+    }
+  })
+})
+
 app.get('/venues/search', (req, res, next) => {
   console.log('query', req.query)
   const { sport, radius } = req.query
@@ -334,6 +360,7 @@ app.post('/logout', (req, res, next) => {
     })
   }
 
+  req.session.userID = null
   res.json({
     success: true
   })
