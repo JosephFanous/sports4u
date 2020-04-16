@@ -1,4 +1,12 @@
 # sports4u
+## Website functionality
+  ### Routes
+  - Home
+  - Login
+  - Signup
+  - Map
+  - Dashboard
+  - Eventpage
 
 ## Project setup
 ### Installing
