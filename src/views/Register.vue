@@ -185,7 +185,7 @@
         this.emailerr = '';
         this.psserr = '';
         this.vpsserr = '';
-        let next = false
+        let next = true
         if(!this.First){
           this.firsterr = 'Please enter your first name.'
           next = false
@@ -210,7 +210,10 @@
           this.vpsserr = 'Please verify your password.'
           next = false
         }
-        if(next = true){
+        if(this.Password != this.vPassword){
+          this.vpsserr = 'Password does not match. Please try again.'
+        }
+        if(next == true){
           fetch(`${apiUrl}/register`, {
             method: 'post',
             headers:{
@@ -235,10 +238,10 @@
             return
           }
           if (data.errors.Email){
-            this.emailerr = 'This email is taken. Please enter another one.'; //still have to do conditional for taken
+            this.emailerr = 'This email is taken. Please enter another one.';
           }
           if (data.errors.Username){
-            this.usererr = 'This username is taken. Please enter another one.'; //still have to do conditional for if anything there or too short/long
+            this.usererr = 'This username is taken. Please enter another one.'; //still have to do conditional for if too short/long
           }
         })
       }

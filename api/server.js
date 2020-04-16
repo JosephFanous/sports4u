@@ -4,6 +4,10 @@ const bodyParser = require('body-parser')
 const sqlite3 = require('sqlite3').verbose()
 const session = require('express-session')
 const { toRadians, isValidDate } = require('../common/util')
+const bcrypt = require('bcrypt')
+const saltRounds = 10
+const myPlaintextPassword = 's0/\/\P4$$w0rD'
+const someOtherPlaintextPassword = 'not_bacon'
 
 const app = express()
 app.use(express.urlencoded({ extended: true }))
@@ -261,13 +265,7 @@ app.post('/register', (req, res, next) => {
         })
       }
     }
-    else if (!row){
-      res.json({
-        errors:{
-          email: 'error'
-        }
-      })
-    }
+
     else{
       db.run('INSERT INTO User(First, Last, UserName, Email, Password) VALUES(?,?,?,?,?)',[req.body.First,req.body.Last,req.body.Username,req.body.Email,req.body.Password], function (err) {
         if (err){
