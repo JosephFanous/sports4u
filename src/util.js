@@ -240,3 +240,14 @@ export function FormatDateDatabase(DateTime){
   }
   return (d.getFullYear() + "-" + month + "-" + date  + " " + hour + ":" + min + ":00")
 }
+
+export const emojiBySport = {
+  'Basketball': '🏀',
+  'Volleyball': '🏐',
+  'Table Tennis': '🏓',
+  'Soccer': '⚽',
+  'Badminton': '🏸',
+  'Hockey': '🏒',
+  'Baseball': '⚾',
+  'FootBall': '🏈'
+}

@@ -14,6 +14,9 @@
                 <option>Volleyball</option>
                 <option>Badminton</option>
                 <option>Soccer</option>
+                <option>Hockey</option>
+                <option>Baseball</option>
+                <option>FootBall</option>
               </select>
             </div>
           </div>

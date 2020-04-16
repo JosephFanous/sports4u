@@ -9,7 +9,8 @@
         {{ locationError }}
       </h1>
       <div class="events">
-        <div class="events-title">
+        <p v-if="!events.length">No events at this location... 🙁</p>
+        <div v-if="events.length" class="events-title">
           <h3 class="title is-4">Events</h3>
           <router-link
             v-if="!$globalStore.user"
@@ -26,37 +27,56 @@
             Add Event
           </button>
         </div>
-        <p v-if="!events.length">No events at this location... 🙁</p>
-        <ul>
-          <li class="box" v-for="event in events" v-bind:key="event.EventID">
-            <div class='event-header is-flex'>
-              <h3 class='event-title title is-5'>{{ event.Name }}</h3>
-              <small>Added on {{ formatDate(event.EventAddedTime) }}</small>
+        <div v-if="events.length" class="columns">
+          <div class="column is-one-third">
+            <div class="box filters">
+              <div class="filter-header is-flex">
+                <h3 class="title is-5">Filter</h3>
+                <button v-on:click="toggleShowAll" class="button is-link is-light">{{ showAll ? 'Deselect All' : 'Select All' }}</button>
+              </div>
+              <button
+                v-for="sport in Object.keys(emojiBySport)"
+                v-bind:key="sport"
+                class="button is-medium is-fullwidth"
+                v-bind:class="{ 'is-link': selectedSports[sport] }"
+                v-on:click="toggleSport(sport)"
+              >
+                {{ emojiBySport[sport] + ' ' + sport }}
+              </button>
             </div>
-            <p>{{ event.SportName }}</p>
-            <p><i class="fas fa-calendar"></i>{{ dateRange(event.StartTime, event.EndTime) }}</p>
-            <p><i class="fas fa-clock"></i>{{ formatTime(event.StartTime) }} to {{ formatTime(event.EndTime) }}</p>
-            <router-link
-              v-if="!$globalStore.user"
-              class="button is-success"
-              to="/login"
-            >
-              Join Event
-            </router-link>
-            <button
-              v-else
-              v-on:click="handleToggleEvent(event.EventID, !event.IsAttending)"
-              class="button"
-              v-bind:class="{
-                'is-success': !event.IsAttending,
-                'is-danger': event.IsAttending,
-                'is-loading': eventLoadings[event.EventID]
-              }"
-            >
-              {{ event.IsAttending ? 'Leave Event' : 'Join Event' }}
-            </button>
-          </li>
-        </ul>
+          </div>
+          <ul class="column is-two-thirds">
+            <p class="title is-5" v-if="!visibleEvents.length">No events found... 🙁</p>
+            <li class="box" v-for="event in visibleEvents" v-bind:key="event.EventID">
+              <div class='event-header is-flex'>
+                <h3 class='event-title title is-5'>{{ event.Name }}</h3>
+                <small>Added on {{ formatDate(event.EventAddedTime) }}</small>
+              </div>
+              <span class="event-sport tag is-normal is-rounded">{{ emojiBySport[event.SportName] + ' ' + event.SportName }}</span>
+              <p><i class="fas fa-calendar"></i>{{ dateRange(event.StartTime, event.EndTime) }}</p>
+              <p><i class="fas fa-clock"></i>{{ formatTime(event.StartTime) }} to {{ formatTime(event.EndTime) }}</p>
+              <router-link
+                v-if="!$globalStore.user"
+                class="button is-success"
+                to="/login"
+              >
+                Join Event
+              </router-link>
+              <button
+                v-else
+                v-on:click="handleToggleEvent(event.EventID, !event.IsAttending)"
+                class="button"
+                v-bind:class="{
+                  'is-success': !event.IsAttending,
+                  'is-danger': event.IsAttending,
+                  'is-loading': eventLoadings[event.EventID]
+                }"
+              >
+                {{ event.IsAttending ? 'Leave Event' : 'Join Event' }}
+              </button>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
     <div class="section" v-if="isVenueLoading || venueError">
@@ -75,6 +95,28 @@
 <style lang="scss">
 .events {
   margin-top: 2rem;
+}
+
+.event-sport {
+  font-weight: semibold;
+  margin-bottom: 0.75rem;
+}
+
+.filter-header {
+  .title {
+    margin: 0;
+  }
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.filters .button {
+  justify-content: flex-start;
+  font-weight: bold;
+  &:not(:last-child) {
+    margin-bottom: 0.5rem;
+  }
 }
 
 .modal-card-title {
@@ -123,6 +165,12 @@ import {
   formatTime
 } from '../util'
 import AddEvent from '../components/AddEvent'
+import { emojiBySport } from '../util'
+
+const initialSelection = {}
+for (let sport in emojiBySport) {
+  initialSelection[sport] = true
+}
 
 export default {
   name: "VenuePage",
@@ -138,7 +186,10 @@ export default {
       locationError: '',
       location: null,
       showAddEventModal: false,
-      eventLoadings: {}
+      eventLoadings: {},
+      emojiBySport,
+      selectedSports: this.$route.query.sport ? { [this.$route.query.sport]: true } : initialSelection,
+      showAll: this.$route.query.sport ? false : true
     }
   },
   methods: {
@@ -205,6 +256,34 @@ export default {
         .finally(() => { 
           this.eventLoadings = { ...this.eventLoadings, [id]: false }
         })
+    },
+    toggleSport(sport) {
+      this.selectedSports = {
+        ...this.selectedSports,
+        [sport]: !this.selectedSports[sport]
+      }
+
+      if (!this.selectedSports[sport] && this.showAll) {
+        this.showAll = false
+      }
+
+      const totalSports = 8
+      let numSelected = 0
+      for (let sport in this.selectedSports) {
+        if (this.selectedSports[sport]) numSelected++
+      }
+
+      if (this.selectedSports[sport] && numSelected == totalSports) this.showAll = true
+    },
+    toggleShowAll() {
+      this.showAll = !this.showAll
+      const newSelected = {}
+
+      for (let sport in this.emojiBySport) {
+        newSelected[sport] = this.showAll
+      }
+
+      this.selectedSports = newSelected
     }
   },
   mounted: function() {
@@ -227,6 +306,11 @@ export default {
         this.isVenueLoading = false;
       })
     console.log(venueId)
+  },
+  computed: {
+    visibleEvents: function() {
+      return this.events.filter(event => this.selectedSports[event.SportName])
+    }
   }
 };
 </script>
