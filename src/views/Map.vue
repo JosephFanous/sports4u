@@ -14,6 +14,9 @@
                 <option>Volleyball</option>
                 <option>Badminton</option>
                 <option>Soccer</option>
+                <option>Hockey</option>
+                <option>Baseball</option>
+                <option>FootBall</option>
               </select>
             </div>
           </div>
@@ -221,6 +224,11 @@ export default {
       this.isVenueSearchLoading = true
       this.venueSearchError = ''
       this.updateRadiusOnMap()
+      
+      this.map.jumpTo({
+        center: { lon, lat },
+        zoom: 8
+      });
 
       // fetch venue points to display on map
       const apiUrl = process.env.VUE_APP_API_URL
@@ -405,6 +413,7 @@ export default {
             this.searchLocation = loc.place_name
             this.searchLocationCenter = loc.center
             this.updateRadiusOnMap()
+            this.handleUpdateClick()
           })
       });
     })

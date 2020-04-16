@@ -60,6 +60,12 @@ const routes = [
     name: "VenuePage",
     component: () =>
       import(/* webpackChunkName: "venue" */ "../views/VenuePage.vue")
+  },
+  {
+    path: "/profile",
+    name: "Profile",
+    component: () =>
+    import(/* webpackChunkName: "map" */ "../views/Profile.vue")
   }
 ];
 

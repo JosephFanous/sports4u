@@ -21,16 +21,37 @@
     </div>
     </div>
   </div>
-   
   
   <div class="modal"v-bind:class= "{ 'is-active' : showModal }">
     <div class="modal-background"></div>
     <div class="modal-card">
       <header class="modal-card-head">
-        <p class="modal-card-title">{{selectedSport}} Facilities</p>
+        <p class="modal-card-title">{{selectedSport}} Events</p>
         <button class="delete" aria-label="close" v-on:click="handleCloseClick"></button>
       </header>
       <section class="modal-card-body">
+      <div class="card" v-for="location in locations">
+     <header class="card-header">
+         <p class="card-header-title">
+          <a class="has-text-centered">{{location.text}}</a>
+         </p>
+     </header>
+     <div class="card-content">
+       <div class="content">
+         {{location.place_name}}
+         <br>
+         <time datetime="2016-1-1">11:09 PM - 1 Jan 2016</time>
+       </div>
+     </div>
+     <footer class="card-footer">
+     <router-link class="card-footer-item" v-bind:to="`/map?sport=${selectedSport}`">
+     <span class="icon">
+      <i class="fas fa-map"></i>
+     </span>
+     <span>View on map</span>
+     </router-link>
+     </footer>
+    </div>
       <div class="container">
       </div>
       <ul v-for="location in locations">
@@ -41,17 +62,12 @@
           Address: {{ location.place_name }}
         </li>
         <li class="has-text-weight-bold">
-          Phone number: ###-###-####
-        </li>
-        <li class="has-text-weight-bold">
           Events:
           <ul v-for="events in eventnames">
             <li>{{events}}</li>
           </ul>
         </li>
       </ul>
-
-        
       <footer class="modal-card-foot">
         <router-link class="button is-success" v-bind:to="`/map?sport=${selectedSport}`">
         <span class="icon">

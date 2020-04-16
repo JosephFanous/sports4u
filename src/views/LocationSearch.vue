@@ -72,7 +72,7 @@ export default {
   name: "LocationSearch",
   data: function() {
     return {
-      query: '',
+      query: this.$route.query.query || '',
       results: null,
       resultsError: '',
       resultsIsLoading: false
@@ -111,6 +111,7 @@ export default {
   computed: {
   },
   mounted: function() {
+    this.search()
   }
 };
 </script>

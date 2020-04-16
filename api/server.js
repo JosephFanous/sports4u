@@ -4,6 +4,8 @@ const bodyParser = require('body-parser')
 const sqlite3 = require('sqlite3').verbose()
 const session = require('express-session')
 const { toRadians, isValidDate } = require('../common/util')
+const bcrypt = require('bcrypt')
+
 
 const app = express()
 app.use(express.urlencoded({ extended: true }))
@@ -18,10 +20,15 @@ var data = {}
 //Listen for socket conection from the client and dissconnection
 io.on('connection', (socket) => {
   console.log('a user connected');
+  socket.on('chat message', ([msg, user_name]) => {
+    console.log(user_name + ' : ' + msg);
+    io.emit('chat message', [msg, user_name]);
+  });
   socket.on('disconnect', () => {
     console.log('user disconnected');
   });
 });
+
 
 // TODO: database integration (this is just mock data for testing)
 const venues = [
@@ -73,6 +80,32 @@ app.use(session({
   saveUninitialized: true
 }))
 
+// check if the user is currently logged in to update frontend
+app.get('/auth', (req, res, next) => {
+  if (!req.session.userID) return res.json({ user: null })
+
+  db.get(`
+    SELECT UserID as id, UserName as username
+    FROM User
+    WHERE id = ?
+  `,
+  [req.session.userID],
+  (err, row) => {
+    if (err) console.error(err)
+
+    if (err || !row) {
+      return res.json({ user: null })
+    } else {
+      return res.json({
+        user: {
+          id: row.id,
+          username: row.username,
+        }
+      })
+    }
+  })
+})
+
 app.get('/venues/search', (req, res, next) => {
   console.log('query', req.query)
   const { sport, radius } = req.query
@@ -117,13 +150,28 @@ app.get('/venues/:id', (req, res, next) => {
   const { id } = req.params
   db.all(
     `
-      SELECT * FROM Location
+      SELECT
+        Location.Longitude,
+        Location.Latitude,
+        Event.EventID,
+        Event.Name,
+        SportType.SportName,
+        Event.StartTime,
+        Event.EndTime,
+        Event.EventAddedTime,
+        IsAttending
+      FROM Location
       LEFT JOIN Event ON Location.LocationID = Event.LocationID
       LEFT JOIN SportType on Event.SportID = SportType.SportID
+      LEFT JOIN UserAttendingEvent on Event.EventID = UserAttendingEvent.EventID
+      LEFT JOIN (
+        SELECT 1 as IsAttending FROM UserAttendingEvent WHERE UserAttendingEvent.UserID = ?
+      ) ON Event.EventID = UserAttendingEvent.EventID
       WHERE Location.LocationID = ?
+      GROUP BY Event.EventID
       ORDER BY Event.EventAddedTime DESC
     `,
-    id,
+    [req.session.userID, id],
     (err, rows) => {
       if (err) console.error(err)
       // console.log('/venues/:id', rows)
@@ -143,7 +191,8 @@ app.get('/venues/:id', (req, res, next) => {
             SportName: row.SportName,
             StartTime: row.StartTime,
             EndTime: row.EndTime,
-            EventAddedTime: row.EventAddedTime
+            EventAddedTime: row.EventAddedTime,
+            IsAttending: row.IsAttending
           }
         })
       }
@@ -241,31 +290,31 @@ app.post('/register', (req, res, next) => {
         })
       }
     }
-    else if (!row){
-      res.json({
-        errors:{
-          email: 'error'
-        }
-      })
-    }
-    else{
-      db.run('INSERT INTO User(First, Last, UserName, Email, Password) VALUES(?,?,?,?,?)',[req.body.First,req.body.Last,req.body.Username,req.body.Email,req.body.Password], function (err) {
-        if (err){
-          throw err
-        }
-        else{
-          console.log(row)
 
-          req.session.userID = this.lastID
-          res.json({
-            user: {
-              username: req.body.Username,
-              id: this.lastID
-            },
-            success: true
+    else{
+      bcrypt.hash(req.body.Password, 10, function(err, hash) {
+        if(err){
+          throw err
+        } else{
+          db.run('INSERT INTO User(First, Last, UserName, Email, Password) VALUES(?,?,?,?,?)',[req.body.First,req.body.Last,req.body.Username,req.body.Email,hash], function (err) {
+            if (err){
+              throw err
+            }
+            else{
+              console.log(row)
+
+              req.session.userID = this.lastID
+              res.json({
+                user: {
+                  username: req.body.Username,
+                  id: this.lastID
+                },
+                success: true
+              })
+            }
           })
         }
-      })
+      });
     }
   })
 })
@@ -282,26 +331,29 @@ app.post('/login', (req, res, next) => {
         email: 'hasError'
       }
     })
-  } else if(req.body.password!=row.pass){
-    res.json({
-      errors:{
-        password: 'hasError'
-      }
-    })
-  }else{
-    // set the session cookie username field to the row's username
-    // and send it back so we can store it in vue globals for UI
-    req.session.userID = row.id
-    console.log('/login:', row)
-    console.log('/login:', req.session.userID)
-    res.json({
-      success: true,
-      user: {
-        id: row.id,
-        username: row.username,
-      }
-    })
+    return
   }
+  bcrypt.compare(req.body.password, row.pass, function(err, rez) {
+    if(rez) {
+      // set the session cookie username field to the row's username
+      // and send it back so we can store it in vue globals for UI
+      req.session.userID = row.id
+      console.log('/login:', row)
+      console.log('/login:', req.session.userID)
+      res.json({
+        success: true,
+        user: {
+          id: row.id,
+          username: row.username,
+        }
+      })
+    } else {
+      res.json({
+        errors:{
+          password: 'hasError'
+        }
+      })    }
+  });
   console.log(row);
   });
 
@@ -316,6 +368,7 @@ app.post('/logout', (req, res, next) => {
     })
   }
 
+  req.session.userID = null
   res.json({
     success: true
   })
@@ -472,6 +525,10 @@ app.get('/SignedUpEvents/:id/Attending', (req, res, next) => {
 
 // Post request to deleteEvents for a specfic user
 app.post('/DeleteEvents', (req, res) => {
+  if (!req.session.userID) return res.json({
+    error: 'Not logged in'
+  })
+
   db.serialize(() => {
     if(req.body.TypeOfEvent == 'UserEvents'){
       db.run(`DELETE FROM Event WHERE EventID = ?`, req.body.EventID ,(err, row) => {
@@ -493,13 +550,20 @@ app.post('/DeleteEvents', (req, res) => {
             });
 
     }
-    if(req.body.TypeOfEvent == 'SignedUpEvents'){
-        db.run(`DELETE FROM UserAttendingEvent WHERE EventID = ?`, req.body.EventID ,(err, row) => {
+    if (req.body.TypeOfEvent == 'SignedUpEvents') {
+      db.run(
+        `DELETE FROM UserAttendingEvent WHERE EventID = ? AND UserID = ?`,
+        [req.body.EventID, req.session.userID],
+        (err, row) => {
           if (err) {
-            console.error(err.message);
+            console.error(err)
+            res.json({
+              error: 'Could not leave event.'
+            })
           }
         });
-        db.run(`UPDATE Event
+
+      db.run(`UPDATE Event
                  SET PeopleAttending = PeopleAttending - 1
                  WHERE EventID = ?;`,req.body.EventID ,(err, row) => {
                 if (err) {
@@ -514,21 +578,30 @@ app.post('/DeleteEvents', (req, res) => {
 
     }
   });
-  console.log("Event ID Removed : ",req.body.EventID)
-  console.log("DelelteFor : ",req.body.TypeOfEvent)
+  console.log("Event ID Removed : ", req.body.EventID)
+  console.log("DelelteFor : ", req.body.TypeOfEvent)
 
 });
 
 // Post request used to Join event
 app.post('/JoinEvent', (req, res) => {
+  if (!req.session.userID) {
+    return res.json({
+      error: 'Not logged in'
+    })
+  }
+
   db.serialize(() => {
     db.run(`INSERT INTO UserAttendingEvent (UserID, EventID)
-            VALUES (?,?);`,req.body.UserID, req.body.EventID ,(err, row) => {
-            if (err) {
-              console.error(err.message);
-            }
-     });
-     db.run(`UPDATE Event
+            VALUES (?,?);`, req.session.userID, req.body.EventID, (err, row) => {
+      if (err) {
+        console.error(err.message);
+        res.json({
+          error: 'Could not join event'
+        })
+      }
+    });
+    db.run(`UPDATE Event
               SET PeopleAttending = PeopleAttending + 1
               WHERE EventID = ?;`,req.body.EventID ,(err, row) => {
              if (err) {

@@ -1,28 +1,29 @@
 <template>
 <div>
-  <div id="chat" v-on:click="handleChatOpen" class="has-text-centered has-text-weight-bold	">
-    Chat
-    <span class="icon">
-      <i class="fas fa-comment"></i>
-    </span>
+  <div id="chat" v-on:click="handleChatOpen" v-bind:style="{display: chatBox}">
+    <div class="has-text-centered has-text-weight-bold">
+      Chat
+      <span class="icon">
+        <i class="fas fa-comment"></i>
+      </span>
+    </div>
   </div>
 
-  <div id="chatPopup" class="has-text-weight-bold" v-bind:style="{ display: changeDisplay }">
-    <i id="close" class="fas fa-times"></i>
-    <p v-if="isConnected">We're connected to the server!</p>
-    <p>Message from server: "{{socketMessage}}"</p>
-    <button @click="pingServer()">Ping Server</button>
-    <div id="messagesBox">
-      <div id="message"> Hello, I'm good you?? dsasdasd</div>
-      <div id="othersMessage">Sam:  Hey buddy!  How are you asdasdasdadasdasda </div>
-    </div>
-    <div id="chatForm">
-      <input class="input" type="text" v-on:keyup="handleOnEnter" placeholder="type message here">  
+  <div id="chatPopup" class="has-text-weight-bold" v-bind:style="{ display: chatWindow }">
+    <i id="close" v-on:click="handleChatClose" class="fas fa-times"></i>
+    <div id="textForm">
+      <div v-for="message in messages">
+        <div v-bind:class="{ 'message': message.isSelf, 'othersMessage':!message.isSelf }">{{message.content}}</div>
+      </div>
+      <div id="chatForm">
+        <input id="inputbox" class="input" type="text" v-model="socketMessage" v-on:keyup="handleOnEnter" placeholder="type message here" />
+      </div>
     </div>
   </div>
 </div>
+
 </template>
-<style scoped>
+<style scoped> 
 #close{
   float:right;
   padding: 5px;
@@ -34,7 +35,7 @@
   padding-left: 0.5rem;
   padding-right:0.5rem;
 }
-#message{
+.message{
   background-color: deepskyblue;
   border-top-left-radius: 15px;
   border-bottom-left-radius: 15px;
@@ -43,10 +44,10 @@
   padding-left: 30px;
   margin-bottom: 15px;
   width: 300px;
-  float:right;
+  float: right;
   
 }
-#othersMessage{
+.othersMessage{
   background-color: lightgray;
   border-top-left-radius: 15px;
   border-bottom-right-radius: 15px;
@@ -60,12 +61,12 @@
   float:right;
 }
 #chat {
-  display: box;
+  display: block;
 	padding-left: 0.5em;
 	padding-right: 0.5em;
 	position: fixed;
 	right: 0;
-	bottom: 0;
+	bottom: 0px;
 	height: 40px;
 	width: 300px;;
 	background: white;
@@ -75,7 +76,7 @@
   font-size: 20px;
 }
 #chatPopup {
-	display: box;
+	display: none;
 	position:fixed;
 	bottom: 0px;
 	right: 0;
@@ -85,14 +86,17 @@
 	background: white;
 	border: 1px solid black;
   border-radius: 5px;
+  z-index: 999;
+}
+#textForm{
+  height:442px;
+  overflow-y: auto;
+  padding-top: 30px;
 }
 
 #messagesBox {
 	padding: 10px;
 }
-
-
-.display{display: chatBox;}
 
 </style>
 <script >
@@ -103,59 +107,51 @@ import io from 'socket.io-client';
     },
     data: function() {
       return {
-        socket: io.connect('http://localhost:3000'),
-        chatOpend: false,
-        chatBox: 'box',
-        isConnected: false,
-        chatMessages: '',
-        socketMessage: ''
+        socket: '',
+        chatOpend: true,
+        chatBox: 'block',
+        chatWindow: 'none',
+        isConnected: false,  
+        messages: [],
+        socketMessage: '',
+        messageStart: false,
       }
     },
-    sockets: {
-    connect() {
-      // Fired when the socket connects.
-      this.isConnected = true;
-    },
-
-    disconnect() {
-      this.isConnected = false;
-    },
-    // Fired when the server sends something on the "messageChannel" channel.
-    messageChannel(data) {
-      this.socketMessage = data
-    },
-    },
     methods: {
-      pingServer() {
-      // Send the "pingServer" event to the server.
-      // this.$socket.emit('pingServer', 'PING!')
-    },
       handleChatOpen(event){
         this.chatOpend = true;
         console.log("ChatOpened");
-        console.log(this.chatBox);
-        this.chatBox = 'box';
-        
+        this.chatBox = 'none';
+        this.chatWindow = 'block';
+        this.messageStart = true;
+        //Only connect when the chatbox is open
+        this.socket = io.connect('http://localhost:3000');
+        //Recieve messages from the server TODO FORMAT INCOMING MESSAGES
+         this.socket.on('chat message', ([msg,UserName]) => {
+           if(UserName == this.$globalStore.user.username){
+           }else{
+             this.messages = [...this.messages, {content: UserName + ': ' + msg ,isSelf: false}]
+             console.log(UserName + ': ' + msg);
+           }
+         });
         
       },
       handleChatClose(){
-        this.display = 'none';
-        
+        this.chatBox = 'block';
+        this.chatWindow = 'none';
+        this.messages = [];
       },
       handleOnEnter: function(e){
         if(e.keyCode ===13){
-          console.log("Enter");
-        
+          e.preventDefault();
+          this.socket.emit('chat message',[this.socketMessage, this.$globalStore.user.username]);
+          this.messages = [...this.messages, {content: this.socketMessage, isSelf: true}]
+          this.socketMessage = '';
+
         }  
-      },
-      sendMessage(){
-        
       },
     },
     computed: {
-      changeDisplay: function(){
-        return this.display;
-      }
     }
   }
 </script>

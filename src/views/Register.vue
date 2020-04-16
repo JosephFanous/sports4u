@@ -8,7 +8,7 @@
   <div class="field">
      <label class="label">First Name</label>
      <div class="control has-icons-left has-icons-right" id="fname">
-        <input v-model="First" class="input is-dark" v-bind:class="{'is-danger': firsterr}" type="text" placeholder="John" />
+        <input v-on:keyup.enter="signUP" v-model="First" class="input is-dark" v-bind:class="{'is-danger': firsterr}" type="text" placeholder="John" />
         <span class="icon is-small is-left">
            <i class="fas fa-user"></i>
         </span>
@@ -22,7 +22,7 @@
   <div class="field">
      <label class="label">Last Name</label>
      <div class="control has-icons-left has-icons-right" id="lname">
-        <input v-model="Last" class="input is-dark" v-bind:class="{'is-danger': lasterr}" type="text" placeholder="Adams" />
+        <input v-on:keyup.enter="signUP" v-model="Last" class="input is-dark" v-bind:class="{'is-danger': lasterr}" type="text" placeholder="Adams" />
         <span class="icon is-small is-left">
            <i class="fas fa-user"></i>
         </span>
@@ -36,7 +36,7 @@
   <div class="field">
      <label class="label">Username</label>
      <div class="control has-icons-left has-icons-right" id="usrnm">
-        <input v-model="Username" class="input is-dark" v-bind:class="{'is-danger': usererr}" type="text" placeholder="kingzilla" />
+        <input v-on:keyup.enter="signUP" v-model="Username" class="input is-dark" v-bind:class="{'is-danger': usererr}" type="text" placeholder="kingzilla" />
         <span class="icon is-small is-left">
            <i class="fas fa-user"></i>
         </span>
@@ -50,7 +50,7 @@
    <div class="field">
       <label class="label">E-Mail</label>
       <div class="control has-icons-left has-icons-right" id="eml">
-         <input v-model="Email" class="input is-dark" v-bind:class="{'is-danger': emailerr}" type="email" placeholder="example@hotmail.com" />
+         <input v-on:keyup.enter="signUP" v-model="Email" class="input is-dark" v-bind:class="{'is-danger': emailerr}" type="email" placeholder="example@hotmail.com" />
          <span class="icon is-small is-left">
             <i class="fas fa-user"></i>
          </span>
@@ -64,7 +64,7 @@
    <div class="field">
       <label class="label">Password</label>
       <div class="control has-icons-left has-icons-right" id="pss">
-         <input v-model="Password" class="input is-dark" v-bind:class="{'is-danger': psserr}" type="password" placeholder="••••••••••••">
+         <input v-on:keyup.enter="signUP" v-model="Password" class="input is-dark" v-bind:class="{'is-danger': psserr}" type="password" placeholder="••••••••••••">
          <span class="icon is-small is-left">
             <i class="fas fa-envelope"></i>
          </span>
@@ -78,7 +78,7 @@
    <div class="field">
       <label class="label">Verify Password</label>
       <div class="control has-icons-left has-icons-right"  id="vpss">
-         <input v-model="vPassword" class="input is-dark" v-bind:class="{'is-danger': vpsserr}" type="password" placeholder="••••••••••••">
+         <input v-on:keyup.enter="signUP" v-model="vPassword" class="input is-dark" v-bind:class="{'is-danger': vpsserr}" type="password" placeholder="••••••••••••">
          <span class="icon is-small is-left">
             <i class="fas fa-envelope"></i>
          </span>
@@ -185,7 +185,7 @@
         this.emailerr = '';
         this.psserr = '';
         this.vpsserr = '';
-        let next = false
+        let next = true
         if(!this.First){
           this.firsterr = 'Please enter your first name.'
           next = false
@@ -210,7 +210,10 @@
           this.vpsserr = 'Please verify your password.'
           next = false
         }
-        if(next = true){
+        if(this.Password != this.vPassword){
+          this.vpsserr = 'Password does not match. Please try again.'
+        }
+        if(next == true){
           fetch(`${apiUrl}/register`, {
             method: 'post',
             headers:{
@@ -223,7 +226,8 @@
               Username: this.Username,
               Email: this.Email,
               Password: this.Password
-            })
+            }),
+            credentials: 'include'
           })
           .then(res => res.json())
           .then(data =>{
@@ -235,10 +239,10 @@
             return
           }
           if (data.errors.Email){
-            this.emailerr = 'This email is taken. Please enter another one.'; //still have to do conditional for taken
+            this.emailerr = 'This email is taken. Please enter another one.';
           }
           if (data.errors.Username){
-            this.usererr = 'This username is taken. Please enter another one.'; //still have to do conditional for if anything there or too short/long
+            this.usererr = 'This username is taken. Please enter another one.'; //still have to do conditional for if too short/long
           }
         })
       }

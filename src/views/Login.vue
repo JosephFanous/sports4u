@@ -8,7 +8,7 @@
    <div class="field">
       <label class="label">E-Mail</label>
       <div class="control has-icons-left has-icons-right" id="eml">
-         <input v-model="email" class="input is-dark" v-bind:class="{'is-danger': emlerr}" type="email" placeholder="E-Mail address" />
+         <input v-on:keyup.enter="login" v-model="email" class="input is-dark" v-bind:class="{'is-danger': emlerr}" type="email" placeholder="E-Mail address" />
          <span class="icon is-small is-left">
             <i class="fas fa-user"></i>
          </span>
@@ -22,7 +22,7 @@
    <div class="field">
       <label class="label">Password</label>
       <div class="control has-icons-left has-icons-right" id="pss">
-         <input v-model="password" class="input is-dark" v-bind:class="{'is-danger': psserr}" type="password" placeholder="Password">
+         <input v-on:keyup.enter="login" v-model="password" class="input is-dark" v-bind:class="{'is-danger': psserr}" type="password" placeholder="Password">
          <span class="icon is-small is-left">
             <i class="fas fa-envelope"></i>
          </span>

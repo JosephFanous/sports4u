@@ -19,30 +19,28 @@
     <div v-if="!isDataLoading && !dataError && data" class="sports">
       <h5 class="title-sports title is-5">Sports</h5>
       <p class='error-text' v-if="!data.sports.length">No sports at this location currently... 🙁</p>
-      <button
+      <router-link
         v-for="sport in data.sports"
+        v-bind:to="`/venue/${venue.properties.venueId}?sport=${sport}`"
         v-bind:key="sport"
-        class="button is-light is-medium is-fullwidth"
+        class="button is-medium is-fullwidth"
+        tag="button"
       >
         {{ emojiBySport[sport] + ' ' + sport }}
-      </button>
+      </router-link>
     </div>
   </div>
 </template>
 
 <script>
+import { emojiBySport } from '../util'
+
 export default {
   name: "MapVenue",
   props: ["venue"],
   data: function() {
     return {
-      emojiBySport: {
-        'Basketball': '🏀',
-        'Volleyball': '🏐',
-        'Table Tennis': '🏓',
-        'Soccer': '⚽',
-        'Badminton': '🏸'
-      },
+      emojiBySport,
 
       isLocationLoading: false,
       locationError: '',

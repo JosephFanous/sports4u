@@ -105,7 +105,7 @@
                             <div class="list-group" id="LeftTab" role="tablist">
                               <a class="list-group-item list-group-item-action active" id="list-home-list" data-toggle="list" href="#FirstList" role="tab" aria-controls="Event Update"><h6>New Joined Users <span id = "numColor" class="badge badge-primary badge-pill">{{this.NewUserNotify.length}}</span></h6></a>
                               <a class="list-group-item list-group-item-action" id="list-profile-list" data-toggle="list" href="#SecondList" role="tab" aria-controls="profile"><h6>Event Changes <span id = "numColor" class="badge badge-primary badge-pill">{{this.SignedUpUpdates.length}}</span></h6></a>
-                              <a class="list-group-item list-group-item-action" id="list-messages-list" data-toggle="list" href="#ThirdList" role="tab" aria-controls="messages"><h6>Events Deletes <span id = "numColor" class="badge badge-primary badge-pill">{{this.EventsDeletedUsers.length}}</span></h6></a>
+                              <a class="list-group-item list-group-item-action" id="list-messages-list" data-toggle="list" href="#ThirdList" role="tab" aria-controls="messages"><h6>Deleted Events <span id = "numColor" class="badge badge-primary badge-pill">{{this.EventsDeletedUsers.length}}</span></h6></a>
                             </div>
                           </div>
                           <div id = "rightSideTab" class="col-8">
@@ -492,6 +492,7 @@ export default {
               headers: {
                 'Content-Type':  'application/json'
               },
+              credentials: 'include',
               body: JSON.stringify(data)
             };
             fetch('http://localhost:3000/DeleteEvents', options)
@@ -524,6 +525,7 @@ export default {
           headers: {
             'Content-Type':  'application/json'
           },
+          credentials: 'include',
           body: JSON.stringify(data)
         };
         fetch('http://localhost:3000/JoinEvent', options)

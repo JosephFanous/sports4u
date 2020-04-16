@@ -62,12 +62,14 @@ export function findVenuePage(lon, lat, address) {
 // get venue data from some venue id
 export function getVenue(id) {
   const apiUrl = process.env.VUE_APP_API_URL
-  return fetch(`${apiUrl}/venues/${id}`)
-    .then(res => {
-      if (res.ok) return res.json()
-      else throw new Error(res.status)
-    })
-    .then(data => data)
+  return fetch(`${apiUrl}/venues/${id}`,
+    {
+      credentials: 'include'
+    }
+  ).then(res => {
+    if (res.ok) return res.json()
+    else throw new Error(res.status)
+  })
 }
 
 // send a request to end the current session (deletes session on server and cookie on client)
@@ -106,6 +108,61 @@ export function addEvent(body) {
     if (res.ok) return res.json()
     else throw new Error(res.status)
   })
+}
+
+// send a request to add an event
+export function joinEvent(eventID) {
+  const apiUrl = process.env.VUE_APP_API_URL
+  return fetch(`${apiUrl}/JoinEvent`,
+    {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      // USE credentials: 'include' TO MAKE SURE AUTHENTICATION COOKIE IS SENT TO SERVER
+      credentials: 'include',
+      body: JSON.stringify({ EventID: eventID })
+    }
+  ).then(res => {
+    if (res.ok) return res.json()
+    else throw new Error(res.status)
+  })
+}
+
+export function leaveEvent(eventID) {
+  const apiUrl = process.env.VUE_APP_API_URL
+  return fetch(`${apiUrl}/DeleteEvents`,
+    {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      // USE credentials: 'include' TO MAKE SURE AUTHENTICATION COOKIE IS SENT TO SERVER
+      credentials: 'include',
+      body: JSON.stringify({
+        TypeOfEvent: 'SignedUpEvents',
+        EventID: eventID
+      })
+    }
+  ).then(res => {
+    if (res.ok) return res.json()
+    else throw new Error(res.status)
+  })
+}
+
+export function checkAuth() {
+  const apiUrl = process.env.VUE_APP_API_URL
+  return fetch(`${apiUrl}/auth`,
+    {
+      // USE credentials: 'include' TO MAKE SURE AUTHENTICATION COOKIE IS SENT TO SERVER
+      credentials: 'include'
+    }
+  ).then(res => {
+    if (res.ok) return res.json()
+    else throw new Error(res.status)
+  }).then(data => data.user)
 }
 
 const months = [
@@ -182,4 +239,15 @@ export function FormatDateDatabase(DateTime){
     min = ("0" + min).slice(-2);
   }
   return (d.getFullYear() + "-" + month + "-" + date  + " " + hour + ":" + min + ":00")
+}
+
+export const emojiBySport = {
+  'Basketball': '🏀',
+  'Volleyball': '🏐',
+  'Table Tennis': '🏓',
+  'Soccer': '⚽',
+  'Badminton': '🏸',
+  'Hockey': '🏒',
+  'Baseball': '⚾',
+  'FootBall': '🏈'
 }
