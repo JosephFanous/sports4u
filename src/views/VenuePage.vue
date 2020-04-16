@@ -11,7 +11,20 @@
       <div class="events">
         <div class="events-title">
           <h3 class="title is-4">Events</h3>
-          <button v-on:click="handleOpenAddEvent" class="button is-info">Add Event</button>
+          <router-link
+            v-if="!$globalStore.user"
+            class="button is-info"
+            to="/login"
+          >
+            Add Event
+          </router-link>
+          <button
+            v-else
+            v-on:click="handleOpenAddEvent"
+            class="button is-info"
+          >
+            Add Event
+          </button>
         </div>
         <p v-if="!events.length">No events at this location... 🙁</p>
         <ul>
@@ -23,7 +36,25 @@
             <p>{{ event.SportName }}</p>
             <p><i class="fas fa-calendar"></i>{{ dateRange(event.StartTime, event.EndTime) }}</p>
             <p><i class="fas fa-clock"></i>{{ formatTime(event.StartTime) }} to {{ formatTime(event.EndTime) }}</p>
-            <button class="button is-success">Join Event</button>
+            <router-link
+              v-if="!$globalStore.user"
+              class="button is-success"
+              to="/login"
+            >
+              Join Event
+            </router-link>
+            <button
+              v-else
+              v-on:click="handleToggleEvent(event.EventID, !event.IsAttending)"
+              class="button"
+              v-bind:class="{
+                'is-success': !event.IsAttending,
+                'is-danger': event.IsAttending,
+                'is-loading': eventLoadings[event.EventID]
+              }"
+            >
+              {{ event.IsAttending ? 'Leave Event' : 'Join Event' }}
+            </button>
           </li>
         </ul>
       </div>
@@ -83,7 +114,14 @@
 
 <script>
 import mapboxgl from 'mapbox-gl'
-import { getVenue, reverseGeocode, formatDate, formatTime } from '../util'
+import {
+  getVenue,
+  reverseGeocode,
+  joinEvent,
+  leaveEvent,
+  formatDate,
+  formatTime
+} from '../util'
 import AddEvent from '../components/AddEvent'
 
 export default {
@@ -99,7 +137,8 @@ export default {
       isLocationLoading: false,
       locationError: '',
       location: null,
-      showAddEventModal: false
+      showAddEventModal: false,
+      eventLoadings: {}
     }
   },
   methods: {
@@ -141,6 +180,31 @@ export default {
     handleAddEvent(event) {
       this.events = [event, ...this.events]
       this.showAddEventModal = false
+    },
+    handleToggleEvent(id, newState) {
+      console.log('attempting to join event', id)
+      this.eventLoadings = { ...this.eventLoadings, [id]: true }
+
+      let promise
+      if (newState) {
+        promise = joinEvent(id)
+      } else {
+        promise = leaveEvent(id)
+      }
+
+      promise
+        .then(data => {
+          if (!data.error) {
+            this.events = this.events.map(event => {
+              if (event.EventID == id) return { ...event, IsAttending: newState }
+              return event
+            })
+          }
+        })
+        .catch(console.error)
+        .finally(() => { 
+          this.eventLoadings = { ...this.eventLoadings, [id]: false }
+        })
     }
   },
   mounted: function() {

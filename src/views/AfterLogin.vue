@@ -396,6 +396,7 @@ export default {
               headers: {
                 'Content-Type':  'application/json'
               },
+              credentials: true,
               body: JSON.stringify(data)
             };
             fetch('http://localhost:3000/DeleteEvents', options)
@@ -421,12 +422,13 @@ export default {
               this.UpcomingEvents = this.UpcomingEvents.filter(event => event.EventID != EventID)
           }
         }
-        var data = {EventID, UserID};
+        var data = { EventID };
         const options = {
           method: 'POST',
           headers: {
             'Content-Type':  'application/json'
           },
+          credentials: 'include',
           body: JSON.stringify(data)
         };
         fetch('http://localhost:3000/JoinEvent', options)
