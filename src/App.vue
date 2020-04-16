@@ -2,6 +2,7 @@
   <div id="app" class="has-background-white-ter" >
     <!-- <Navbar /> -->
      <Navbar v-if="$route.name !== 'AfterLogin'" />
+     <Chatbox v-if="$route.name !== 'Login' && this.$globalStore.user!== null" />
     <!-- <div v-if="$route.name !== 'Map'" id="nav">
       <router-link to="/">Home</router-link> |
       <router-link to="/about">About</router-link> |
@@ -18,7 +19,8 @@ import { checkAuth } from './util'
 
 export default {
   components: {
-    Navbar
+    Navbar,
+    Chatbox,
   },
   mounted: function() {
     // check if the user is logged in

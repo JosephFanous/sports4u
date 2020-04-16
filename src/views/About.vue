@@ -4,7 +4,6 @@
     <h2 class="title is-1">About Sports4U</h2>
     <h4 class="subtitle is-2">We provide you a simple way to find sports and events, locally in your area.</h4>
   </div>
-  <Chatbox></Chatbox>
   </div>
 </template>
 <style lang="scss" scoped>

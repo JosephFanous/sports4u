@@ -1,29 +1,29 @@
 <template>
 <div>
-  <div id="chat" v-on:click="handleChatOpen" class="has-text-centered has-text-weight-bold	">
-    Chat
-    <span class="icon">
-      <i class="fas fa-comment"></i>
-    </span>
+  <div id="chat" v-on:click="handleChatOpen" v-bind:style="{display: chatBox}">
+    <div class="has-text-centered has-text-weight-bold">
+      Chat
+      <span class="icon">
+        <i class="fas fa-comment"></i>
+      </span>
+    </div>
   </div>
 
-  <div id="chatPopup" class="has-text-weight-bold" v-bind:style="{ display: changeDisplay }">
-    <i id="close" class="fas fa-times"></i>
-    <div id="messagesBox" v-model="chatMessages" >
-      <div v-if="messageStart" v-for="element in OtherMessages">
-        <div id="othersMessage" v-html="element[0]"></div> 
+  <div id="chatPopup" class="has-text-weight-bold" v-bind:style="{ display: chatWindow }">
+    <i id="close" v-on:click="handleChatClose" class="fas fa-times"></i>
+    <div id="textForm">
+      <div v-for="message in messages">
+        <div v-bind:class="{ 'message': message.isSelf, 'othersMessage':!message.isSelf }">{{message.content}}</div>
       </div>
-      <div v-for="element in chatMessages" >
-        <div id="message" v-if="messageStart" v-html="element[0]"></div>
+      <div id="chatForm">
+        <input id="inputbox" class="input" type="text" v-model="socketMessage" v-on:keyup="handleOnEnter" placeholder="type message here" />
       </div>
-    </div>
-    <div id="chatForm">
-      <input class="input" type="text" v-model="socketMessage" v-on:keyup="handleOnEnter" placeholder="type message here" />
     </div>
   </div>
 </div>
+
 </template>
-<style scoped>
+<style scoped> 
 #close{
   float:right;
   padding: 5px;
@@ -35,7 +35,7 @@
   padding-left: 0.5rem;
   padding-right:0.5rem;
 }
-#message{
+.message{
   background-color: deepskyblue;
   border-top-left-radius: 15px;
   border-bottom-left-radius: 15px;
@@ -44,10 +44,10 @@
   padding-left: 30px;
   margin-bottom: 15px;
   width: 300px;
-  float:right;
+  float: right;
   
 }
-#othersMessage{
+.othersMessage{
   background-color: lightgray;
   border-top-left-radius: 15px;
   border-bottom-right-radius: 15px;
@@ -61,12 +61,12 @@
   float:right;
 }
 #chat {
-  display: box;
+  display: block;
 	padding-left: 0.5em;
 	padding-right: 0.5em;
 	position: fixed;
 	right: 0;
-	bottom: 0;
+	bottom: 0px;
 	height: 40px;
 	width: 300px;;
 	background: white;
@@ -76,7 +76,7 @@
   font-size: 20px;
 }
 #chatPopup {
-	display: box;
+	display: none;
 	position:fixed;
 	bottom: 0px;
 	right: 0;
@@ -86,14 +86,17 @@
 	background: white;
 	border: 1px solid black;
   border-radius: 5px;
+  z-index: 999;
+}
+#textForm{
+  height:442px;
+  overflow-y: auto;
+  padding-top: 30px;
 }
 
 #messagesBox {
 	padding: 10px;
 }
-
-
-.display{display: chatBox;}
 
 </style>
 <script >
@@ -102,22 +105,14 @@ import io from 'socket.io-client';
     name: 'Chatbox',
     props: {
     },
-    created(){
-      this.chatMessages.push(this.UserMessages);
-      this.OtherMessages.push(this.PublicMessages);
-    },
     data: function() {
       return {
-        socket: io.connect('http://localhost:3000'),
-        chatOpend: false,
-        chatBox: 'box',
-        isConnected: false,
-        
-        chatMessages: [],
-        UserMessages: [],
-        OtherMessages: [],
-        PublicMessages:[],
-        
+        socket: '',
+        chatOpend: true,
+        chatBox: 'block',
+        chatWindow: 'none',
+        isConnected: false,  
+        messages: [],
         socketMessage: '',
         messageStart: false,
       }
@@ -126,35 +121,37 @@ import io from 'socket.io-client';
       handleChatOpen(event){
         this.chatOpend = true;
         console.log("ChatOpened");
-        console.log(this.chatBox);
-        this.chatBox = 'box';
+        this.chatBox = 'none';
+        this.chatWindow = 'block';
+        this.messageStart = true;
+        //Only connect when the chatbox is open
+        this.socket = io.connect('http://localhost:3000');
+        //Recieve messages from the server TODO FORMAT INCOMING MESSAGES
+         this.socket.on('chat message', ([msg,UserName]) => {
+           if(UserName == this.$globalStore.user.username){
+           }else{
+             this.messages = [...this.messages, {content: UserName + ': ' + msg ,isSelf: false}]
+             console.log(UserName + ': ' + msg);
+           }
+         });
         
       },
       handleChatClose(){
-        this.display = 'none';
-        
+        this.chatBox = 'block';
+        this.chatWindow = 'none';
+        this.messages = [];
       },
       handleOnEnter: function(e){
-        this.UserMessages = [];
         if(e.keyCode ===13){
-          //Recieve messages from the server TODO FORMAT INCOMING MESSAGES
-          // this.socket.on('chat message', function([msg,UserName]){
-          //   this.OtherMessages.push([`<div>hello</div>`]);
-          //   console.log(UserName + ': ' + msg);
-          // });
-          //Send Message to Server
-          this.messageStart = true;
           e.preventDefault();
-          this.socket.emit('chat message',[this.socketMessage, "this.$globalStore.user.username"]);
-          this.chatMessages.push([`<div>${this.socketMessage} </div>`]);
+          this.socket.emit('chat message',[this.socketMessage, this.$globalStore.user.username]);
+          this.messages = [...this.messages, {content: this.socketMessage, isSelf: true}]
+          this.socketMessage = '';
+
         }  
       },
-      
     },
     computed: {
-      changeDisplay: function(){
-        return this.display;
-      }
     }
   }
 </script>
