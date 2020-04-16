@@ -23,7 +23,7 @@
                 </ul>
                 <p class="menu-label">Setting</p>
                 <ul class="menu-list">
-                    <li><a href="www.google.com"><span class="icon is-small"><i class="fas fa-address-card"></i></span> Profile</a></li>
+                    <li><a href="/profile"><span class="icon is-small"><i class="fas fa-address-card"></i></span> Profile</a></li>
                     <li><a href="www.google.com"><span class="icon is-small"><i class="fas fa-cog"></i></span> Advanced Settings</a></li>
 
                 </ul>
