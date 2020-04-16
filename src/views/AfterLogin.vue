@@ -114,12 +114,12 @@
                     <button v-on:click="CloseModal" class="delete" aria-label="close"></button>
                 </header>
 
-                <section class="modal-card-body">
-                    <h6>* Please leave the fields <strong>EMPTY</strong> that you do not wish to change. Address cannot be changed as it violates the companies policy</h6>
+                <section  class="modal-card-body">
+                    <h6>* Please  <strong>DO NOT</strong> edit the fields that you do not wish to change. Address cannot be changed as it violates the companies policy.</h6>
                     <div class="field">
                         <label class="label">Event Name</label>
                         <div class="control">
-                            <input id="EventInput" class="input" type="text" placeholder="">
+                            <input id="EventInput" onfocus="this.value=''" class="input" type="text" placeholder="">
                         </div>
                     </div>
                     <div class="field">
@@ -127,7 +127,7 @@
                         <div class="field">
                             <div class="control">
                                 <div class="select is-primary">
-                                    <select id="SportDropDown" v-on:click="SportSelection">
+                                    <select id="SportDropDown">
                                         <option value="No changes"> No Change </option>
                                         <option value="1">Basketball</option>
                                         <option value="2">Table Tennis</option>
@@ -168,6 +168,7 @@
                                 <label class="checkbox">
                                     <input id="CheckBox" type="checkbox"> I agree that once the edits have been made, they will not be reversable</a>
                                 </label>
+                                <p  v-bind:class="{ 'help is-danger' : EditErrorCheck }"   v-model="ErrorMessage" >{{ErrorMessage}}</p>
                             </div>
                         </div>
                     </div>
@@ -184,7 +185,7 @@
 </template>
 <script>
 /*Imports used for this file*/
-import { endSession, todayInputValue, isValidDate, formatDate, formatTime } from '../util'
+import { endSession, todayInputValue, isValidDate, formatDate, formatTime, FormatDateDatabase } from '../util'
 import SideBar from '../components/SideBar.vue'
 import mapboxgl from 'mapbox-gl';
 export default {
@@ -205,9 +206,11 @@ export default {
       centerOfMap : null,
       EditOption : false,
       UpdateTemp : [],
-      SportDropDown : 'No changes',
       startDate: todayInputValue() + 'T12:00',
       endDate: todayInputValue() + 'T13:00',
+      EditErrorCheck : false,
+      ErrorMessage : '',
+
     }
 
   },
@@ -288,7 +291,15 @@ export default {
         }
       },
       CloseModal: function(){
+        // Used to overwrite field to avoid crashes
+        $("#EventInput").val("")
+        $("#SportDropDown").val("No changes");
+        $( "#CheckBox" ).prop( "checked", false );
+        this.startDate =todayInputValue() + 'T12:00',
+        this.endDate = todayInputValue() + 'T13:00',
+        // Close the dialoge
         this.EditOption = false;
+
       },
       EditButton: function(EventName){
         this.UpdateTemp.DataToBeChanged = EventName
@@ -297,6 +308,7 @@ export default {
       /*Used for the edit feature */
       SubmitEdit: function(EventName){
         var SendingInfo = [this.UserID];
+        this.UpdateTemp.SportDropDown =  ($("#SportDropDown option:selected").val())
         this.UpdateTemp.EventName = $('#EventInput').val();
         this.UpdateTemp.StartTime = $('#StartTime').val();
         this.UpdateTemp.EndTime =  $('#EndTime').val();
@@ -306,6 +318,7 @@ export default {
         if(this.UpdateTemp.Sign == true){
           for(var i=0;i<this.UserEvents.length;i++){
             if(this.UserEvents[i].Name == this.UpdateTemp.DataToBeChanged){
+              this.UserEvents[i].SportName = ($("#SportDropDown option:selected").text())
               SendingInfo.push(this.UserEvents[i].EventID)
               if(this.UpdateTemp.EventName != ""){
                   this.UserEvents[i].Name = this.UpdateTemp.EventName
@@ -313,23 +326,24 @@ export default {
               }else{
                   SendingInfo.push(this.UserEvents[i].Name)
               }
-              if(this.SportDropDown != "No changes"){
-                  this.UserEvents[i].SportID = this.SportDropDown
-                  SendingInfo.push(this.SportDropDown)
+              if(this.UpdateTemp.SportDropDown != "No changes"){
+                  this.UserEvents[i].SportID = this.UpdateTemp.SportDropDown
+                  SendingInfo.push(this.UpdateTemp.SportDropDown)
               }else{
                   SendingInfo.push(this.UserEvents[i].SportID)
               }
 
-              if(this.UpdateTemp.StartTime != this.startDate){
-                  this.UserEvents[i].StartTime = this.UpdateTemp.StartTime
-                  SendingInfo.push(this.UpdateTemp.StartTime)
+              if(this.UpdateTemp.StartTime != (todayInputValue() + 'T12:00')){
+
+                  this.UserEvents[i].StartTime = FormatDateDatabase(this.UpdateTemp.StartTime)
+                  SendingInfo.push(FormatDateDatabase(this.UpdateTemp.StartTime))
               }else{
                   SendingInfo.push(this.UserEvents[i].StartTime)
               }
 
-              if(this.UpdateTemp.EndTime != this.endDate){
-                  this.UserEvents[i].EndTime = this.UpdateTemp.EndTime
-                  SendingInfo.push(this.UpdateTemp.EndTime)
+              if(this.UpdateTemp.EndTime != (todayInputValue() + 'T13:00')){
+                  this.UserEvents[i].EndTime = FormatDateDatabase(this.UpdateTemp.EndTime)
+                  SendingInfo.push(FormatDateDatabase(this.UpdateTemp.EndTime))
               }else{
                   SendingInfo.push(this.UserEvents[i].EndTime)
               }
@@ -346,14 +360,11 @@ export default {
           this.EditOption = false;
         }
       }else{
-        console.log("Chek Agree")
+        this.ErrorMessage = "Please agree the terms and conditions"
+        this.EditErrorCheck = true
       }
 
       },
-      SportSelection : function(test){
-        this.SportDropDown = document.getElementById("SportDropDown").value
-      },
-
       /*Used deleting events in the your event tab and signedup events*/
       DeleteButton: function(DeleteEvent, TypeOfEvent){
         var EventID;

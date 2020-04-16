@@ -162,3 +162,24 @@ export function formatTime(str) {
 export function todayInputValue() {
   return (new Date().toISOString().split('T')[0])
 }
+
+export function FormatDateDatabase(DateTime){
+  var d = new Date(DateTime);
+  var month = d.getMonth() + 1;
+  var hour = d.getHours();
+  var date = d.getDate();
+  var min = d.getMinutes()
+  if(month <= 9){
+    month = ("0" + month).slice(-2);
+  }
+  if(hour <= 9){
+    hour = ("0" + hour).slice(-2);
+  }
+  if(date <= 9){
+    date = ("0" + date).slice(-2);
+  }
+  if(min <= 9){
+    min = ("0" + min).slice(-2);
+  }
+  return (d.getFullYear() + "-" + month + "-" + date  + " " + hour + ":" + min + ":00")
+}
