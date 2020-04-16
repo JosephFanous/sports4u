@@ -12,6 +12,7 @@
 
 <script>
 import Navbar from './components/Navbar'
+import Chatbox from './components/Chatbox'
 export default {
   components: {
     Navbar

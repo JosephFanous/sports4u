@@ -9,15 +9,16 @@
 
   <div id="chatPopup" class="has-text-weight-bold" v-bind:style="{ display: changeDisplay }">
     <i id="close" class="fas fa-times"></i>
-    <p v-if="isConnected">We're connected to the server!</p>
-    <p>Message from server: "{{socketMessage}}"</p>
-    <button @click="pingServer()">Ping Server</button>
-    <div id="messagesBox">
-      <div id="message"> Hello, I'm good you?? dsasdasd</div>
-      <div id="othersMessage">Sam:  Hey buddy!  How are you asdasdasdadasdasda </div>
+    <div id="messagesBox" v-model="chatMessages" >
+      <div v-if="messageStart" v-for="element in OtherMessages">
+        <div id="othersMessage" v-html="element[0]"></div> 
+      </div>
+      <div v-for="element in chatMessages" >
+        <div id="message" v-if="messageStart" v-html="element[0]"></div>
+      </div>
     </div>
     <div id="chatForm">
-      <input class="input" type="text" v-on:keyup="handleOnEnter" placeholder="type message here">  
+      <input class="input" type="text" v-model="socketMessage" v-on:keyup="handleOnEnter" placeholder="type message here" />
     </div>
   </div>
 </div>
@@ -101,41 +102,32 @@ import io from 'socket.io-client';
     name: 'Chatbox',
     props: {
     },
+    created(){
+      this.chatMessages.push(this.UserMessages);
+      this.OtherMessages.push(this.PublicMessages);
+    },
     data: function() {
       return {
         socket: io.connect('http://localhost:3000'),
         chatOpend: false,
         chatBox: 'box',
         isConnected: false,
-        chatMessages: '',
-        socketMessage: ''
+        
+        chatMessages: [],
+        UserMessages: [],
+        OtherMessages: [],
+        PublicMessages:[],
+        
+        socketMessage: '',
+        messageStart: false,
       }
     },
-    sockets: {
-    connect() {
-      // Fired when the socket connects.
-      this.isConnected = true;
-    },
-
-    disconnect() {
-      this.isConnected = false;
-    },
-    // Fired when the server sends something on the "messageChannel" channel.
-    messageChannel(data) {
-      this.socketMessage = data
-    },
-    },
     methods: {
-      pingServer() {
-      // Send the "pingServer" event to the server.
-      // this.$socket.emit('pingServer', 'PING!')
-    },
       handleChatOpen(event){
         this.chatOpend = true;
         console.log("ChatOpened");
         console.log(this.chatBox);
         this.chatBox = 'box';
-        
         
       },
       handleChatClose(){
@@ -143,14 +135,21 @@ import io from 'socket.io-client';
         
       },
       handleOnEnter: function(e){
+        this.UserMessages = [];
         if(e.keyCode ===13){
-          console.log("Enter");
-        
+          //Recieve messages from the server TODO FORMAT INCOMING MESSAGES
+          // this.socket.on('chat message', function([msg,UserName]){
+          //   this.OtherMessages.push([`<div>hello</div>`]);
+          //   console.log(UserName + ': ' + msg);
+          // });
+          //Send Message to Server
+          this.messageStart = true;
+          e.preventDefault();
+          this.socket.emit('chat message',[this.socketMessage, "this.$globalStore.user.username"]);
+          this.chatMessages.push([`<div>${this.socketMessage} </div>`]);
         }  
       },
-      sendMessage(){
-        
-      },
+      
     },
     computed: {
       changeDisplay: function(){

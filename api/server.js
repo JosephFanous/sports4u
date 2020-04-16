@@ -17,10 +17,15 @@ var io = require('socket.io')(server);
 //Listen for socket conection from the client and dissconnection
 io.on('connection', (socket) => {
   console.log('a user connected');
+  socket.on('chat message', ([msg, user_name]) => {
+    console.log(user_name + ' : ' + msg);
+    io.emit('chat message', [msg, user_name]);
+  });
   socket.on('disconnect', () => {
     console.log('user disconnected');
   });
 });
+
 
 // TODO: database integration (this is just mock data for testing)
 const venues = [
