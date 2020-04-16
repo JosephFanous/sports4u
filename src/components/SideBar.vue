@@ -23,15 +23,7 @@
                 <p class="menu-label">Setting</p>
                 <ul class="menu-list">
                     <li><a href="www.google.com"><span class="icon is-small"><i class="fas fa-address-card"></i></span> Profile</a></li>
-                    <li><a href="www.google.com"><span class="icon is-small"><i class="fas fa-cog"></i></span> Advanced Settings</a></li>
-
                 </ul>
-                <p class="menu-label"> Messaging</p>
-                <ul class="menu-list">
-                    <li><a href="www.google.com"><span class="icon is-small"><i class="fas fa-envelope"></i></span> Inbox</a></li>
-                    <li><a href="www.google.com"><span class="icon is-small"><i class="fas fa-reply"></i></span> Reply</a></li>
-                </ul>
-                </p>
 
                 <p class="menu-label">Contact Us</p>
                 <ul class="menu-list">
@@ -73,32 +65,16 @@
 <script >
   export default {
     name: 'SideBar',
-    props: {
-    },
+    props: ['Username', 'EmailAddress'],
     data: function() {
       return {
-        UserID : 1,//this.$globalStore.user.id,
-        Username: '',
-        EmailAddress: '',
         reportBugModal: false,
         isLogoutLoading: false,
         dashBoard : true,
       }
     },
-    created: function(){
-      this.loadUserData(); // Used to load users data
-    },
+
     methods: {
-      loadUserData: function(){
-        var vm = this;
-        fetch('http://localhost:3000/users/'+this.UserID)
-          .then(response => response.json())
-          .then(data => {
-              vm.Username = data.UserName;
-              vm.EmailAddress = data.Email;
-            })
-      .catch(err => console.log(err));
-      },
       handleLogoutClick(){
         console.log("User Signed Out")
         this.isLogoutLoading = true

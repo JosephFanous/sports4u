@@ -12,6 +12,7 @@ app.use(express.json())
 
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
+var data = {}
 
 
 //Listen for socket conection from the client and dissconnection
@@ -478,6 +479,19 @@ app.post('/DeleteEvents', (req, res) => {
             console.error(err.message);
           }
         });
+        db.run(`DELETE FROM Notification WHERE EventID = ?`, req.body.EventID ,(err, row) => {
+            if (err) {
+              console.error(err.message);
+            }
+          });
+          db.run(`INSERT INTO Notification (UserID, EventID, DeleteEvent)
+                  SELECT UserID,`+req.body.EventID+`,'`+req.body.EventName+`' FROM UserAttendingEvent
+                  WHERE UserAttendingEvent.EventID  = `+req.body.EventID+`;` ,(err, row) => {
+              if (err) {
+                console.error(err.message);
+              }
+            });
+
     }
     if(req.body.TypeOfEvent == 'SignedUpEvents'){
         db.run(`DELETE FROM UserAttendingEvent WHERE EventID = ?`, req.body.EventID ,(err, row) => {
@@ -491,6 +505,11 @@ app.post('/DeleteEvents', (req, res) => {
                 if (err) {
                   console.error(err.message);
                 }
+        });
+        db.run(`DELETE FROM Notification WHERE EventID = ?`, req.body.EventID ,(err, row) => {
+          if (err) {
+            console.error(err.message);
+          }
         });
 
     }
@@ -516,14 +535,23 @@ app.post('/JoinEvent', (req, res) => {
                console.error(err.message);
              }
       });
+      db.run(`INSERT INTO Notification (UserID, JoinedUser, EventId)
+                VALUES (?,?,?);`,req.body.OwnerUserID,req.body.UserName,req.body.EventID ,(err, row) => {
+              if (err) {
+                console.error(err.message);
+              }
+       });
+
   });
   console.log("Joining Event ID  : ",req.body.EventID)
   console.log("User : ",req.body.UserID)
+  console.log("UserJoined : ",req.body.UserName)
+  console.log("OwnserID", req.body.OwnerUserID)
 });
 
-// Post request used to update the users request event
+
+// Post request used to update the users request event and add to notification bar
 app.post('/UpdateEdit', (req, res) => {
-  db.serialize(() => {
     db.run(`UPDATE Event
             SET Name = '`+ req.body[2] +`', StartTime = '` + req.body[4] + `', EndTime = '` + req.body[5] + `', SportID = '`+req.body[3]+`'
             WHERE UserID = ` + req.body[0] +` AND EventID = ` + req.body[1] + `;`,(err, row) => {
@@ -531,10 +559,88 @@ app.post('/UpdateEdit', (req, res) => {
               console.error(err.message);
             }
      });
-  });
-  console.log("Update Request : ",req.body)
+    console.log("Update Request : ",req.body)
+    // Used to avoid any duplicate of notifications
+    db.all(`DELETE FROM Notification WHERE EventID = ?`,+req.body[1],(err, row) => {
+            if (err) {
+              console.error(err.message);
+            }
+        });
+
+    //Insert Notification ino to  the database
+    db.all(`INSERT INTO Notification (UserID, EventID, UpdateEvent)
+            SELECT UserID,`+req.body[1]+`,'`+req.body[2]+`' FROM UserAttendingEvent
+            WHERE UserAttendingEvent.EventID  = `+req.body[1]+`;`,(err, row) => {
+            if (err) {
+              console.error(err.message);
+            }
+        });
 
 });
+
+
+// Used to get the notification of a specfic user
+app.get('/NewUsersJoined/:id', (req, res, next) => {
+  db.serialize(() => {
+    db.all(`SELECT JoinedUser, Event.Name
+            FROM Notification
+            INNER JOIN  Event ON Event.EventID = Notification.EventID
+            WHERE Notification.UserID = ?;`,req.params.id ,(err, row) => {
+      if (err) {
+        console.error(err.message);
+      }
+      console.log(row);
+       // Sending data with the request
+      res.send(JSON.stringify(row));
+    })
+  });
+});
+
+// Used to get all the users attending event
+app.get('/AllUserAttendingEvents', (req, res, next) => {
+  db.serialize(() => {
+    db.all(`SELECT * FROM UserAttendingEvent;` ,(err, row) => {
+      if (err) {
+        console.error(err.message);
+      }
+      console.log(row);
+       // Sending data with the request
+      res.send(JSON.stringify(row));
+    })
+  });
+});
+
+// Used to get all the users attending event
+app.get('/SignUpUpdates/:id', (req, res, next) => {
+  db.serialize(() => {
+    db.all(`SELECT UpdateEvent
+            FROM Notification
+            Where UserID = ? AND UpdateEvent IS NOT NULL`,req.params.id,(err, row) => {
+      if (err) {
+        console.error(err.message);
+      }
+      console.log(row);
+       // Sending data with the request
+      res.send(JSON.stringify(row));
+    })
+  });
+});
+// Used to get all the users attending event
+app.get('/EventDeleted/:id', (req, res, next) => {
+  db.serialize(() => {
+    db.all(`SELECT DeleteEvent
+            FROM Notification
+            Where UserID = ? AND DeleteEvent IS NOT NULL`,req.params.id,(err, row) => {
+      if (err) {
+        console.error(err.message);
+      }
+      console.log(row);
+       // Sending data with the request
+      res.send(JSON.stringify(row));
+    })
+  });
+});
+
 
 server.listen(3000, () => {
   console.log('Server listening on port 3000')

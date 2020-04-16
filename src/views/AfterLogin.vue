@@ -1,27 +1,25 @@
 <template>
     <div class="columns is-gapless">
-        <SideBar></SideBar>
+        <SideBar v-bind:Username ="Username" v-bind:EmailAddress = "EmailAddress"></SideBar>
         <div id="ColumnTwo" class="column is-two-fifths">
             <div id="EventLayout" class="tile is-ancestor">
                 <div class="tile is-12 is-vertical is-parent">
                     <div class="tile is-child box">
                         <p class="title">Events</p>
-
                         <div role="tablist">
-                            <b-card no-body class="mb-1">
-                                <b-card-header header-tag="header" class="p-1" role="tab">
+                            <b-card no-body class="mb-2">
+                                <b-card-header header-tag="header" class="p-3" role="tab">
                                     <b-button block href="#" v-b-toggle.accordion-1 variant="info">Your Event (s)</b-button>
                                 </b-card-header>
                                 <b-collapse id="accordion-1" visible accordion="my-accordion" role="tabpanel">
-                                    <b-card-body>
+                                    <b-card-body  id = "Test">
                                         <table id="EventsTable" class="table is-fullwidth is-striped">
-                                            <tbody v-for="items in UserEvents">
+                                            <tbody  id = "Test" v-for="items in UserEvents">
                                                 <tr>
                                                     <td width="5%"><i class="fas fa-user-friends"></i>{{items.PeopleAttending}}</td>
                                                     <td><a v-on:click="MoreDetails"> {{items.Name}} </a></td>
                                                     <td width="10%"><a v-on:click="EditButton(items.Name)"><i class="fas fa-edit" ></i></a></td>
                                                     <td width="10%"><a v-on:click="DeleteButton(items.EventID, 'UserEvents')"><i class="fas fa-trash-alt"></i></a></td>
-                                                    <!-- <td class="level-right"><a class="button is-small is-primary" href="#">Edit</a></td> -->
                                                 </tr>
 
                                             </tbody>
@@ -30,8 +28,8 @@
                                 </b-collapse>
                             </b-card>
 
-                            <b-card no-body class="mb-1">
-                                <b-card-header header-tag="header" class="p-1" role="tab">
+                            <b-card no-body class="mb-2">
+                                <b-card-header header-tag="header" class="p-3" role="tab">
                                     <b-button block href="#" v-b-toggle.accordion-2 variant="info">Signed Up Events</b-button>
                                 </b-card-header>
                                 <b-collapse id="accordion-2" accordion="my-accordion" role="tabpanel">
@@ -69,8 +67,8 @@
                                 </b-collapse>
                             </b-card>
 
-                            <b-card no-body class="mb-1">
-                                <b-card-header header-tag="header" class="p-1" role="tab">
+                            <b-card no-body class="mb-2">
+                                <b-card-header header-tag="header" class="p-3" role="tab">
                                     <b-button block href="#" v-b-toggle.accordion-3 variant="info">Upcoming Event </b-button>
                                 </b-card-header>
                                 <b-collapse id="accordion-3" accordion="my-accordion" role="tabpanel">
@@ -101,6 +99,60 @@
                     <div class="tile is-child box">
                         <p class="title">Map</p>
                         <div id='map'></div>
+                        <p id = "NotificationCenter" class="title">Notification Center <span id = "NewIcon" class="badge badge-secondary">New</span></p>
+                        <div id = "UpdateBar" class="row">
+                          <div id = "leftSideTab" class="col-4">
+                            <div class="list-group" id="LeftTab" role="tablist">
+                              <a class="list-group-item list-group-item-action active" id="list-home-list" data-toggle="list" href="#FirstList" role="tab" aria-controls="Event Update"><h6>New Joined Users <span id = "numColor" class="badge badge-primary badge-pill">{{this.NewUserNotify.length}}</span></h6></a>
+                              <a class="list-group-item list-group-item-action" id="list-profile-list" data-toggle="list" href="#SecondList" role="tab" aria-controls="profile"><h6>Event Changes <span id = "numColor" class="badge badge-primary badge-pill">{{this.SignedUpUpdates.length}}</span></h6></a>
+                              <a class="list-group-item list-group-item-action" id="list-messages-list" data-toggle="list" href="#ThirdList" role="tab" aria-controls="messages"><h6>Events Deletes <span id = "numColor" class="badge badge-primary badge-pill">{{this.EventsDeletedUsers.length}}</span></h6></a>
+                            </div>
+                          </div>
+                          <div id = "rightSideTab" class="col-8">
+                            <div class="tab-content" id="nav-tabContent">
+                              <div class="tab-pane fade show active" id="FirstList" role="tabpanel" aria-labelledby="list-home-list">
+                                <article id = "notificationRight" class="tile is-child notification is-success">
+                                  <div class="content">
+                                    <p class="title">While you were away</p>
+                                    <p class="subtitle">People that have joined your event(s)</p>
+                                    <div class="content" >
+                                      <ul v-for="item in NewUserNotify" >
+                                         <li><strong>@{{item.JoinedUser}}</strong> has joined the following event: <strong>{{item.Name}}</strong></li>
+                                       </ul>
+
+                                    </div>
+                                  </div>
+                                </article>
+                              </div>
+                              <div class="tab-pane fade" id="SecondList" role="tabpanel" aria-labelledby="list-profile-list">
+                                <article id = "notificationRight" class="tile is-child notification is-danger">
+                                  <div class="content">
+                                    <p class="title">Welcome Back!</p>
+                                    <p class="subtitle">More information can be found under the Signed Up tab.</p>
+                                    <div class="content">
+                                      <ul v-for="item in SignedUpUpdates">
+                                         <li>The following informatiion regarding an event has been updated: {{item.UpdateEvent}}</li>
+                                       </ul>
+                                    </div>
+                                  </div>
+                                </article>
+                              </div>
+                              <div class="tab-pane fade" id="ThirdList" role="tabpanel" aria-labelledby="list-messages-list">
+                                <article id = "notificationRight" class="tile is-child notification is-warning">
+                                  <div class="content">
+                                    <p class="title">Deleted Events</p>
+                                    <p class="subtitle">The following Events have been deleted by the user</p>
+                                    <div class="content">
+                                      <ul v-for="item in EventsDeletedUsers">
+                                         <li> {{item.DeleteEvent}}</li>
+                                       </ul>
+                                    </div>
+                                  </div>
+                                </article>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -200,6 +252,9 @@ export default {
       UserEvents: [],
       UserSignedUpEvents: [],
       UpcomingEvents : [],
+      NewUserNotify : [],
+      SignedUpUpdates : [],
+      EventsDeletedUsers : [],
       UserID : 1,//this.$globalStore.user.id,
       map : null,
       popup : null,
@@ -210,52 +265,95 @@ export default {
       endDate: todayInputValue() + 'T13:00',
       EditErrorCheck : false,
       ErrorMessage : '',
+      Username: '',
+      EmailAddress: '',
 
     }
 
   },
   created: function(){
+    this.loadUserData(); // Used to load users data
     this.loadEvents(); // Used to load events for the user
     this.loadSignedUpEvents(); // load up Signed Up events
     this.loadUpComingEvents(); // loading upcoming events
+    this.loadNewUserNotifications();
+    this.loadSignedUpUpdates();
+    this.EventsDeleted();
 
   },
   methods: {
+    loadUserData: function(){
+      fetch('http://localhost:3000/users/'+this.UserID)
+        .then(response => response.json())
+        .then(data => {
+            this.Username = data.UserName;
+            this.EmailAddress = data.Email;
+          })
+    .catch(err => console.log(err));
+    },
     loadEvents: function(){
-      var vm = this;
       fetch('http://localhost:3000/Events/'+this.UserID+'/0')
         .then(response => response.json())
         .then(data => {
           for(var i=0;i<data.length;i++){
-            vm.UserEvents.push(data[i]);
+            this.UserEvents.push(data[i]);
           }
           })
     .catch(err => console.log(err));
 
     },
     loadSignedUpEvents: function(){
-      var vm = this;
       fetch('http://localhost:3000/SignedUpEvents/'+this.UserID+'/Attending')
         .then(response => response.json())
         .then(data => {
             for(var i=0;i<data.length;i++){
               data[i].StartTime = formatTime(data[i].StartTime)
-              vm.UserSignedUpEvents.push(data[i]);
+              this.UserSignedUpEvents.push(data[i]);
             }
-            console.log(vm.UserSignedUpEvents)
+            console.log(this.UserSignedUpEvents)
           })
     .catch(err => console.log(err));
 
     },
     loadUpComingEvents: function(){
-      var vm = this;
       fetch('http://localhost:3000/UpcomingEvents/'+this.UserID+'/0')
         .then(response => response.json())
         .then(data => {
             for(var i=0;i<data.length;i++){
-              vm.UpcomingEvents.push(data[i]);
+              this.UpcomingEvents.push(data[i]);
             }
           }).catch(err => console.log(err));
+    },
+    loadNewUserNotifications: function(){
+      fetch('http://localhost:3000/NewUsersJoined/'+this.UserID)
+        .then(response => response.json())
+        .then(data => {
+            for(var i=0;i<data.length;i++){
+              this.NewUserNotify.push(data[i]);
+            }
+          }).catch(err => console.log(err));
+    },
+    loadSignedUpUpdates : function(){
+      fetch('http://localhost:3000/SignUpUpdates/'+this.UserID)
+        .then(response => response.json())
+        .then(data => {
+          for(var i=0;i<data.length;i++){
+              this.SignedUpUpdates.push(data[i])
+          }
+          })
+        .catch(err => console.log(err));
+      console.log(this.SignedUpUpdates)
+    },
+    EventsDeleted : function(){
+      fetch('http://localhost:3000/EventDeleted/'+this.UserID)
+        .then(response => response.json())
+        .then(data => {
+          for(var i=0;i<data.length;i++){
+              this.EventsDeletedUsers.push(data[i])
+          }
+        })
+        .catch(err => console.log(err));
+        console.log(this.EventsDeletedUsers)
     },
     /*Used fot the popups that appear on the map*/
     MoreDetails: function(event){
@@ -306,76 +404,74 @@ export default {
         this.EditOption = true;
       },
       /*Used for the edit feature */
-      SubmitEdit: function(EventName){
-        var SendingInfo = [this.UserID];
-        this.UpdateTemp.SportDropDown =  ($("#SportDropDown option:selected").val())
-        this.UpdateTemp.EventName = $('#EventInput').val();
-        this.UpdateTemp.StartTime = $('#StartTime').val();
-        this.UpdateTemp.EndTime =  $('#EndTime').val();
-        this.UpdateTemp.Sign = document.getElementById("CheckBox").checked;
+     SubmitEdit: function(EventName){
+       console.log("YES")
+       var SendingInfo = [this.UserID];
+       this.UpdateTemp.SportDropDown =  ($("#SportDropDown option:selected").val())
+       this.UpdateTemp.EventName = $('#EventInput').val();
+       this.UpdateTemp.StartTime = $('#StartTime').val();
+       this.UpdateTemp.EndTime =  $('#EndTime').val();
+       this.UpdateTemp.Sign = document.getElementById("CheckBox").checked;
+       /*Overwrites field that empty and field and send information to the server accordinly*/
+       if(this.UpdateTemp.Sign == true){
+         for(var i=0;i<this.UserEvents.length;i++){
+           if(this.UserEvents[i].Name == this.UpdateTemp.DataToBeChanged){
+             this.UserEvents[i].SportName = ($("#SportDropDown option:selected").text())
+             SendingInfo.push(this.UserEvents[i].EventID)
+             if(this.UpdateTemp.EventName != ""){
+                 this.UserEvents[i].Name = this.UpdateTemp.EventName
+                 SendingInfo.push(this.UpdateTemp.EventName)
+             }else{
+                 SendingInfo.push(this.UserEvents[i].Name)
+             }
+             if(this.UpdateTemp.SportDropDown != "No changes"){
+                 this.UserEvents[i].SportID = this.UpdateTemp.SportDropDown
+                 SendingInfo.push(this.UpdateTemp.SportDropDown)
+             }else{
+                 SendingInfo.push(this.UserEvents[i].SportID)
+             }
+             if(this.UpdateTemp.StartTime != (todayInputValue() + 'T12:00')){
+                 this.UserEvents[i].StartTime = FormatDateDatabase(this.UpdateTemp.StartTime)
+                 SendingInfo.push(FormatDateDatabase(this.UpdateTemp.StartTime))
+             }else{
+                 SendingInfo.push(this.UserEvents[i].StartTime)
+             }
+             if(this.UpdateTemp.EndTime != (todayInputValue() + 'T13:00')){
+                 this.UserEvents[i].EndTime = FormatDateDatabase(this.UpdateTemp.EndTime)
+                 SendingInfo.push(FormatDateDatabase(this.UpdateTemp.EndTime))
+             }else{
+                 SendingInfo.push(this.UserEvents[i].EndTime)
+             }
+         }
+         this.EditOption = false;
+       }
+     }else{
+       this.ErrorMessage = "Please agree the terms and conditions"
+       this.EditErrorCheck = true
+     }
 
-        /*Overwrites field that empty and field and send information to the server accordinly*/
-        if(this.UpdateTemp.Sign == true){
-          for(var i=0;i<this.UserEvents.length;i++){
-            if(this.UserEvents[i].Name == this.UpdateTemp.DataToBeChanged){
-              this.UserEvents[i].SportName = ($("#SportDropDown option:selected").text())
-              SendingInfo.push(this.UserEvents[i].EventID)
-              if(this.UpdateTemp.EventName != ""){
-                  this.UserEvents[i].Name = this.UpdateTemp.EventName
-                  SendingInfo.push(this.UpdateTemp.EventName)
-              }else{
-                  SendingInfo.push(this.UserEvents[i].Name)
-              }
-              if(this.UpdateTemp.SportDropDown != "No changes"){
-                  this.UserEvents[i].SportID = this.UpdateTemp.SportDropDown
-                  SendingInfo.push(this.UpdateTemp.SportDropDown)
-              }else{
-                  SendingInfo.push(this.UserEvents[i].SportID)
-              }
-
-              if(this.UpdateTemp.StartTime != (todayInputValue() + 'T12:00')){
-
-                  this.UserEvents[i].StartTime = FormatDateDatabase(this.UpdateTemp.StartTime)
-                  SendingInfo.push(FormatDateDatabase(this.UpdateTemp.StartTime))
-              }else{
-                  SendingInfo.push(this.UserEvents[i].StartTime)
-              }
-
-              if(this.UpdateTemp.EndTime != (todayInputValue() + 'T13:00')){
-                  this.UserEvents[i].EndTime = FormatDateDatabase(this.UpdateTemp.EndTime)
-                  SendingInfo.push(FormatDateDatabase(this.UpdateTemp.EndTime))
-              }else{
-                  SendingInfo.push(this.UserEvents[i].EndTime)
-              }
-              var data = SendingInfo;
-              const options = {
-                method: 'POST',
-                headers: {
-                  'Content-Type':  'application/json'
-                },
-                body: JSON.stringify(data)
-              };
-              fetch('http://localhost:3000/UpdateEdit', options)
-          }
-          this.EditOption = false;
-        }
-      }else{
-        this.ErrorMessage = "Please agree the terms and conditions"
-        this.EditErrorCheck = true
-      }
+     var data = SendingInfo;
+     const options = {
+       method: 'POST',
+       headers: {
+         'Content-Type':  'application/json'
+       },
+       body: JSON.stringify(data)
+     };
+     fetch('http://localhost:3000/UpdateEdit', options)
 
       },
       /*Used deleting events in the your event tab and signedup events*/
       DeleteButton: function(DeleteEvent, TypeOfEvent){
         var EventID;
+        var EventName;
         if(confirm("Are you sure!") == true){
           if(TypeOfEvent == 'UserEvents'){
               for(var i=0;i<this.UserEvents.length;i++){
                  if(this.UserEvents[i].EventID == DeleteEvent){
                      EventID = this.UserEvents[i].EventID
+                     EventName = this.UserEvents[i].Name
                      this.UserEvents = this.UserEvents.filter(event => event.EventID != EventID)
-
-
                  }
               }
            }
@@ -386,11 +482,11 @@ export default {
                       this.UserSignedUpEvents[i].PeopleAttending = this.UserSignedUpEvents[i].PeopleAttending - 1;
                       this.UpcomingEvents.push(this.UserSignedUpEvents[i])
                       this.UserSignedUpEvents = this.UserSignedUpEvents.filter(event => event.EventID != EventID)
-
                   }
                }
             }
-            var data = {EventID, TypeOfEvent};
+
+            var data = {EventID, TypeOfEvent, EventName};
             const options = {
               method: 'POST',
               headers: {
@@ -400,28 +496,29 @@ export default {
             };
             fetch('http://localhost:3000/DeleteEvents', options)
 
-
         }else {
             console.log("Delete Rejected!");
+            console.log(UserName)
         }
 
       },
 
       JoinEvent : function(EventName){
-        var EventID, UserID = this.UserID;
+        var EventID, UserID = this.UserID, OwnerUserID, UserName = this.Username;
         for(var i=0;i<this.UpcomingEvents.length;i++){
           if(this.UpcomingEvents[i].Name == EventName){
               this.UpcomingEvents[i].PeopleAttending = this.UpcomingEvents[i].PeopleAttending + 1;
               if((formatTime(this.UpcomingEvents[i].StartTime ) != ("NaN:NaN AM" || "NaN:NaN PM"))){ // checks the format of the time, so it does not Overwrite it
                   this.UpcomingEvents[i].StartTime = formatTime(  this.UpcomingEvents[i].StartTime )
               }
-
-              EventID = this.UpcomingEvents[i].EventID
+              OwnerUserID = this.UpcomingEvents[i].UserID;
+              EventID = this.UpcomingEvents[i].EventID;
+              console.log(UserName)
               this.UserSignedUpEvents.push(this.UpcomingEvents[i]);
               this.UpcomingEvents = this.UpcomingEvents.filter(event => event.EventID != EventID)
           }
         }
-        var data = {EventID, UserID};
+        var data = {EventID, UserID,OwnerUserID, UserName};
         const options = {
           method: 'POST',
           headers: {
@@ -457,12 +554,10 @@ export default {
      float: right;
   }
   .collapse{
-    height: 340px;
+    height: 100%;
+    max-height: 580px;
     overflow-y: scroll;
-    max-height:340px;
-  }
-  .card-content{
-    padding: 3px;
+
   }
   #signedButtons{
     margin-left : 80%;
@@ -497,6 +592,34 @@ export default {
   #MapLayout, #EventLayout, #accordingMain{
     height: 100%;
     width: 100%;
+  }
+  #numColor{
+    float: right;
+  }
+  #UpdateBar{
+    padding-top: 10px;
+  }
+  #NotificationCenter{
+    padding-top: 30px;
+    padding-bottom: 0px;
+  }
+  #rightSideTab{
+    padding-left: 0px;
+  }
+  #leftSideTab{
+    padding-right: 5px;
+  }
+  #FirstList, #SecondList, #ThirdList{
+
+  }
+  #notificationRight{
+    height: 100%;
+    max-height: 335px;
+    overflow-y: scroll;
+  }
+
+  #NewIcon{
+    margin-left: 15px;
   }
 
 
