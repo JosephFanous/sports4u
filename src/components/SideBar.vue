@@ -15,10 +15,11 @@
             <nav class="menu">
                 <p class="menu-label">Home</p>
                 <ul class="menu-list">
-                    <router-link <li><a v-bind:href="`/`"><span class="icon is-small"><i class="fas fa-home"></i></span> Home Page</a></li>
-                    </router-link>
-                    <li><a v-bind:class="{ 'is-active' : dashBoard}" href="#"><span class="icon is-small"><i class="fas fa-chart-line"></i></span> Dashboard</a></li>
-                    <li><a href="#"><span class="icon is-small"><i class="fas fa-search"></i></span> Search For Events</a></li>
+                  <li>
+                    <router-link to='/'><span class="icon is-small"><i class="fas fa-home"></i></span>Home</router-link>
+                  </li>
+                  <li><a v-bind:class="{ 'is-active' : dashBoard}" href="#"><span class="icon is-small"><i class="fas fa-chart-line"></i></span> Dashboard</a></li>
+                  <li><a href="#"><span class="icon is-small"><i class="fas fa-search"></i></span> Search For Events</a></li>
                 </ul>
                 <p class="menu-label">Setting</p>
                 <ul class="menu-list">
@@ -70,7 +71,8 @@
         </div>
     </div>
 </template>
-<script >
+<script>
+import { endSession } from '../util'
   export default {
     name: 'SideBar',
     props: {
@@ -105,6 +107,9 @@
 
         endSession().then(data => {
           this.$globalStore.user = null
+          this.$router.push({
+            path: '/'
+          })
         }).finally(() => {
           this.isLogoutLoading = false
         })
