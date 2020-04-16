@@ -1,26 +1,40 @@
 <template>
-  <nav class="navbar has-background-white-ter" role="navigation" aria-label="main navigation">
+  <nav class="navbar has-background-white" role="navigation" aria-label="main navigation">
     <div class="navbar-start">
       <div class="navbar-item">
         <div class="buttons">
-          <router-link class="button is-large" v-bind:to="`/`">
+          <router-link class="button" v-bind:to="`/`">
           <span class="icon">
             <i class="fas fa-home"></i>
           </span>
           <span>Home</span>
           </router-link>
-          <router-link class="button is-large" v-bind:to="`/about`">About Us</router-link>
-          <router-link v-if="$globalStore.user" class="button is-large" v-bind:to="`/afterLogin`">Dashboard</router-link>
+          <router-link class="button" v-bind:to="`/about`">About Us</router-link>
+          <router-link v-if="$globalStore.user" class="button" v-bind:to="`/afterLogin`">Dashboard</router-link>
+        <div class="field has-addons">
+          <div class="control">
+            <input v-on:keyup.enter="handleSearch" v-model="searchQuery" class="input" type="text" placeholder="Find a location">
+          </div>
+          <div class="control">
+            <router-link class="button is-link" tag="button" v-bind:to="'/locationsearch?query=' + searchQuery">
+              <span class="icon is-small">
+                <i class="fas fa-search"></i>
+              </span>
+            </router-link>
+          </div>
+        </div>
         </div>
         <div class="centerlogo">
-          <img class="logo" src="/images/atheletes.png"  alt="Sports4U" />
+          <!-- <img class="logo"  alt="Sports4U" /> -->
         </div>
+      </div>
+      <div class="navbar-item">
       </div>
     </div>
     <div class="navbar-end">
       <div class="navbar-item">
         <div v-if="$globalStore.user" class="buttons">
-           <router-link  class="button is-large" to="/afterLogin">
+           <router-link  class="button" to="/afterLogin">
              <span class="icon">
               <i class="fas fa-user"></i>
              </span>
@@ -28,13 +42,13 @@
            </router-link>
            <Button
             v-on:click="handleSignOutClick"
-            class="button has-background-light is-medium"
+            class="button is-danger"
             v-bind:class="{ 'is-loading': isLogoutLoading }"
             >Sign Out</Button>
         </div>
         <div v-else class="buttons">
-           <router-link  class="button is-danger is-large" to="/register">Register</router-link>
-           <router-link class="button has-background-light is-large" to="/login">Log in</router-link>
+           <router-link  class="button is-link" to="/register">Register</router-link>
+           <router-link class="button has-background-light" to="/login">Log in</router-link>
         </div>
       </div>
     </div>
@@ -46,7 +60,8 @@
   }
   .navbar {
     height: 100px;
-    border-bottom: 1px solid $grey-darker;
+    background-color: white;
+    // border-bottom: 1px solid $grey-darker;
   }
 </style>
 <script>
@@ -62,11 +77,12 @@ import { endSession } from '../util'
     },
     data: function() {
       return {
-        isLogoutLoading: false
+        isLogoutLoading: false,
+        searchQuery: ''
       }
     },
     methods: {
-      handleSignOutClick(){
+      handleSignOutClick() {
         console.log("User Signed Out")
         this.isLogoutLoading = true
 
@@ -76,6 +92,14 @@ import { endSession } from '../util'
           this.isLogoutLoading = false
         })
       },
+      handleSearch() {
+        this.$router.push({
+          path: '/locationsearch',
+          query: {
+            query: this.searchQuery
+          }
+        })
+      }
     }
   };
 </script>
