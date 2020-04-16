@@ -5,9 +5,7 @@ const sqlite3 = require('sqlite3').verbose()
 const session = require('express-session')
 const { toRadians, isValidDate } = require('../common/util')
 const bcrypt = require('bcrypt')
-const saltRounds = 10
-const myPlaintextPassword = 's0/\/\P4$$w0rD'
-const someOtherPlaintextPassword = 'not_bacon'
+
 
 const app = express()
 app.use(express.urlencoded({ extended: true }))
@@ -151,28 +149,13 @@ app.get('/venues/:id', (req, res, next) => {
   const { id } = req.params
   db.all(
     `
-      SELECT 
-        Location.Longitude,
-        Location.Latitude,
-        Event.EventID,
-        Event.Name,
-        SportType.SportName,
-        Event.StartTime,
-        Event.EndTime,
-        Event.EventAddedTime,
-        IsAttending
-      FROM Location
+      SELECT * FROM Location
       LEFT JOIN Event ON Location.LocationID = Event.LocationID
       LEFT JOIN SportType on Event.SportID = SportType.SportID
-      LEFT JOIN UserAttendingEvent on Event.EventID = UserAttendingEvent.EventID
-      LEFT JOIN (
-        SELECT 1 as IsAttending FROM UserAttendingEvent WHERE UserAttendingEvent.UserID = ?
-      ) ON Event.EventID = UserAttendingEvent.EventID
       WHERE Location.LocationID = ?
-      GROUP BY Event.EventID
       ORDER BY Event.EventAddedTime DESC
     `,
-    [req.session.userID, id],
+    id,
     (err, rows) => {
       if (err) console.error(err)
       // console.log('/venues/:id', rows)
@@ -192,8 +175,7 @@ app.get('/venues/:id', (req, res, next) => {
             SportName: row.SportName,
             StartTime: row.StartTime,
             EndTime: row.EndTime,
-            EventAddedTime: row.EventAddedTime,
-            IsAttending: row.IsAttending
+            EventAddedTime: row.EventAddedTime
           }
         })
       }
@@ -293,23 +275,29 @@ app.post('/register', (req, res, next) => {
     }
 
     else{
-      db.run('INSERT INTO User(First, Last, UserName, Email, Password) VALUES(?,?,?,?,?)',[req.body.First,req.body.Last,req.body.Username,req.body.Email,req.body.Password], function (err) {
-        if (err){
+      bcrypt.hash(req.body.Password, 10, function(err, hash) {
+        if(err){
           throw err
-        }
-        else{
-          console.log(row)
+        } else{
+          db.run('INSERT INTO User(First, Last, UserName, Email, Password) VALUES(?,?,?,?,?)',[req.body.First,req.body.Last,req.body.Username,req.body.Email,hash], function (err) {
+            if (err){
+              throw err
+            }
+            else{
+              console.log(row)
 
-          req.session.userID = this.lastID
-          res.json({
-            user: {
-              username: req.body.Username,
-              id: this.lastID
-            },
-            success: true
+              req.session.userID = this.lastID
+              res.json({
+                user: {
+                  username: req.body.Username,
+                  id: this.lastID
+                },
+                success: true
+              })
+            }
           })
         }
-      })
+      });
     }
   })
 })
@@ -326,26 +314,29 @@ app.post('/login', (req, res, next) => {
         email: 'hasError'
       }
     })
-  } else if(req.body.password!=row.pass){
-    res.json({
-      errors:{
-        password: 'hasError'
-      }
-    })
-  }else{
-    // set the session cookie username field to the row's username
-    // and send it back so we can store it in vue globals for UI
-    req.session.userID = row.id
-    console.log('/login:', row)
-    console.log('/login:', req.session.userID)
-    res.json({
-      success: true,
-      user: {
-        id: row.id,
-        username: row.username,
-      }
-    })
+    return
   }
+  bcrypt.compare(req.body.password, row.pass, function(err, rez) {
+    if(rez) {
+      // set the session cookie username field to the row's username
+      // and send it back so we can store it in vue globals for UI
+      req.session.userID = row.id
+      console.log('/login:', row)
+      console.log('/login:', req.session.userID)
+      res.json({
+        success: true,
+        user: {
+          id: row.id,
+          username: row.username,
+        }
+      })
+    } else {
+      res.json({
+        errors:{
+          password: 'hasError'
+        }
+      })    }
+  });
   console.log(row);
   });
 
@@ -517,43 +508,25 @@ app.get('/SignedUpEvents/:id/Attending', (req, res, next) => {
 
 // Post request to deleteEvents for a specfic user
 app.post('/DeleteEvents', (req, res) => {
-  if (!req.session.userID) return res.json({
-    error: 'Not logged in'
-  })
-
   db.serialize(() => {
     if(req.body.TypeOfEvent == 'UserEvents'){
       db.run(`DELETE FROM Event WHERE EventID = ?`, req.body.EventID ,(err, row) => {
           if (err) {
             console.error(err.message);
-            res.json({
-              error: 'Could not delete event.'
-            })
           }
         });
     }
     if(req.body.TypeOfEvent == 'SignedUpEvents'){
-        db.run(
-          `DELETE FROM UserAttendingEvent WHERE EventID = ? AND UserID = ?`,
-          [req.body.EventID, req.session.userID],
-          (err, row) => {
-            if (err) {
-              console.error(err)
-              res.json({
-                error: 'Could not leave event.'
-              })
-            }
-          });
-
+        db.run(`DELETE FROM UserAttendingEvent WHERE EventID = ?`, req.body.EventID ,(err, row) => {
+          if (err) {
+            console.error(err.message);
+          }
+        });
         db.run(`UPDATE Event
                  SET PeopleAttending = PeopleAttending - 1
                  WHERE EventID = ?;`,req.body.EventID ,(err, row) => {
                 if (err) {
                   console.error(err.message);
-                } else {
-                  res.json({
-                    success: true
-                  })
                 }
         });
 
@@ -566,20 +539,11 @@ app.post('/DeleteEvents', (req, res) => {
 
 // Post request used to Join event
 app.post('/JoinEvent', (req, res) => {
-  if (!req.session.userID) {
-    return res.json({
-      error: 'Not logged in'
-    })
-  }
-
   db.serialize(() => {
     db.run(`INSERT INTO UserAttendingEvent (UserID, EventID)
-            VALUES (?,?);`,req.session.userID, req.body.EventID ,(err, row) => {
+            VALUES (?,?);`,req.body.UserID, req.body.EventID ,(err, row) => {
             if (err) {
               console.error(err.message);
-              res.json({
-                error: 'Could not join event'
-              })
             }
      });
      db.run(`UPDATE Event
@@ -587,14 +551,7 @@ app.post('/JoinEvent', (req, res) => {
               WHERE EventID = ?;`,req.body.EventID ,(err, row) => {
              if (err) {
                console.error(err.message);
-               return res.json({
-                 error: 'Could not join event'
-               })
              }
-
-             res.json({
-               success: true
-             })
       });
   });
   console.log("Joining Event ID  : ",req.body.EventID)
