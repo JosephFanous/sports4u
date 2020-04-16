@@ -478,18 +478,26 @@ app.get('/SignedUpEvents/:id/Attending', (req, res, next) => {
 app.post('/DeleteEvents', (req, res) => {
   db.serialize(() => {
     if(req.body.TypeOfEvent == 'UserEvents'){
-      db.all(`DELETE FROM Event WHERE EventID = ?`, req.body.EventID ,(err, row) => {
+      db.run(`DELETE FROM Event WHERE EventID = ?`, req.body.EventID ,(err, row) => {
           if (err) {
             console.error(err.message);
           }
         });
     }
     if(req.body.TypeOfEvent == 'SignedUpEvents'){
-        db.all(`DELETE FROM UserAttendingEvent WHERE EventID = ?`, req.body.EventID ,(err, row) => {
+        db.run(`DELETE FROM UserAttendingEvent WHERE EventID = ?`, req.body.EventID ,(err, row) => {
           if (err) {
             console.error(err.message);
           }
         });
+        db.run(`UPDATE Event
+                 SET PeopleAttending = PeopleAttending - 1
+                 WHERE EventID = ?;`,req.body.EventID ,(err, row) => {
+                if (err) {
+                  console.error(err.message);
+                }
+        });
+
     }
   });
   console.log("Event ID Removed : ",req.body.EventID)
@@ -500,12 +508,19 @@ app.post('/DeleteEvents', (req, res) => {
 // Post request used to Join event
 app.post('/JoinEvent', (req, res) => {
   db.serialize(() => {
-    db.all(`INSERT INTO UserAttendingEvent (UserID, EventID)
+    db.run(`INSERT INTO UserAttendingEvent (UserID, EventID)
             VALUES (?,?);`,req.body.UserID, req.body.EventID ,(err, row) => {
             if (err) {
               console.error(err.message);
             }
      });
+     db.run(`UPDATE Event
+              SET PeopleAttending = PeopleAttending + 1
+              WHERE EventID = ?;`,req.body.EventID ,(err, row) => {
+             if (err) {
+               console.error(err.message);
+             }
+      });
   });
   console.log("Joining Event ID  : ",req.body.EventID)
   console.log("User : ",req.body.UserID)

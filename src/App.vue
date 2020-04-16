@@ -1,11 +1,12 @@
 <template>
   <div id="app" class="has-background-white-ter" >
-    <Navbar />
+    <!-- <Navbar /> -->
+     <Navbar v-if="$route.name !== 'AfterLogin'" />
     <!-- <div v-if="$route.name !== 'Map'" id="nav">
       <router-link to="/">Home</router-link> |
       <router-link to="/about">About</router-link> |
       <router-link to="/map">Map</router-link>
-    </div> !-->
+    </div> ! -->
     <router-view />
   </div>
 </template>
