@@ -226,7 +226,8 @@
               Username: this.Username,
               Email: this.Email,
               Password: this.Password
-            })
+            }),
+            credentials: 'include'
           })
           .then(res => res.json())
           .then(data =>{

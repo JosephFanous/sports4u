@@ -200,7 +200,7 @@ export default {
       UserEvents: [],
       UserSignedUpEvents: [],
       UpcomingEvents : [],
-      UserID : 1,//this.$globalStore.user.id,
+      UserID : this.$globalStore.user.id,
       map : null,
       popup : null,
       centerOfMap : null,
@@ -396,7 +396,7 @@ export default {
               headers: {
                 'Content-Type':  'application/json'
               },
-              credentials: true,
+              credentials: 'include',
               body: JSON.stringify(data)
             };
             fetch('http://localhost:3000/DeleteEvents', options)

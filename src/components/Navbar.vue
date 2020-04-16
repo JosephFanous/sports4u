@@ -11,7 +11,7 @@
           </router-link>
           <router-link class="button" v-bind:to="`/about`">About Us</router-link>
           <router-link v-if="$globalStore.user" class="button" v-bind:to="`/afterLogin`">Dashboard</router-link>
-        <div class="field has-addons">
+        <div v-if="$route.name != 'LocationSearch'" class="field has-addons">
           <div class="control">
             <input v-on:keyup.enter="handleSearch" v-model="searchQuery" class="input" type="text" placeholder="Find a location">
           </div>
