@@ -20,6 +20,7 @@ export default {
 }
 </script>
 
+
 <style lang="scss">
 @import "~bulma/css/bulma.css";
 
