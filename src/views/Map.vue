@@ -93,6 +93,7 @@
       </div>
       <hr>
       <section class="section section-venue">
+        <p v-if="!selectedVenue" class="subtitle is-6">Select a venue marker on the map to view it here.</p>
         <MapVenue v-if="selectedVenue" v-bind:venue="selectedVenue" />
       </section>
     </div>
@@ -417,28 +418,6 @@ export default {
           })
       });
     })
-
-    // for reverse geocoding (coords -> location)
-    // const venues = []
-    // this.map.on('click', (event) => {
-    //   const endpoint = `geocoding/v5/mapbox.places/${event.lngLat.lng},${event.lngLat.lat}.json`
-    //   fetch(`https://api.mapbox.com/${endpoint}?access_token=${process.env.VUE_APP_MAPBOX_API_KEY}`)
-    //     .then(res => {
-    //       if (res.ok) return res.json()
-    //       else throw new Error(res.status)
-    //     })
-    //     .then(json => {
-    //       console.log(json.features)
-    //       const location = json.features[0]
-    //       const placeType = location.place_type[0]
-    //       // if (placeType == 'address' || placeType == 'poi') {
-    //       //   this.selectedLocation = location
-    //       //   venues.push(location.geometry.coordinates)
-    //       //   console.log(venues)
-    //       // }
-    //     })
-    //   console.log(event)
-    // })
   }
 };
 </script>

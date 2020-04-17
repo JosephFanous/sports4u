@@ -103,6 +103,9 @@ export default {
     'venue': function() {
       this.updateData()
     }
+  },
+  mounted: function() {
+    this.updateData()
   }
 };
 </script>
