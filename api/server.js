@@ -288,8 +288,6 @@ app.get('/venues/:id/daydata', (req, res, next) => {
       // if an event takes up 2 days, sumDays is incremented by 2
       let sumDays = 0
       const popularityByDay = { Su: 0, M: 0, T: 0, W: 0, Th: 0, F: 0, S: 0 }
-      console.log('location id:', req.params.id)
-      console.log('day data rows:', rows)
 
       if (!rows.length) {
         return res.json({ popularityByDay })
@@ -576,48 +574,30 @@ app.post('/DeleteEvents', (req, res) => {
 
   db.serialize(() => {
     if(req.body.TypeOfEvent == 'UserEvents'){
-      db.run(`DELETE FROM Event WHERE EventID = ?`, req.body.EventID ,(err, row) => {
-          if (err) {
-            console.error(err.message);
-          }
-        });
-        db.run(`DELETE FROM Notification WHERE EventID = ?`, req.body.EventID ,(err, row) => {
+      db.run(`DELETE FROM Event WHERE EventID = ?`, req.body.EventID)
+        .run(`DELETE FROM Notification WHERE EventID = ?`, req.body.EventID)
+        .run(`INSERT INTO Notification (UserID, EventID, DeleteEvent)
+                SELECT UserID,`+req.body.EventID+`,'`+req.body.EventName+`' FROM UserAttendingEvent
+                WHERE UserAttendingEvent.EventID  = `+req.body.EventID+`;`, (err, row) => {
             if (err) {
               console.error(err.message);
+            } else {
+              res.json({ success: true })
             }
           });
-          db.run(`INSERT INTO Notification (UserID, EventID, DeleteEvent)
-                  SELECT UserID,`+req.body.EventID+`,'`+req.body.EventName+`' FROM UserAttendingEvent
-                  WHERE UserAttendingEvent.EventID  = `+req.body.EventID+`;` ,(err, row) => {
-              if (err) {
-                console.error(err.message);
-              }
-            });
-
     }
     if (req.body.TypeOfEvent == 'SignedUpEvents') {
       db.run(
         `DELETE FROM UserAttendingEvent WHERE EventID = ? AND UserID = ?`,
-        [req.body.EventID, req.session.userID],
-        (err, row) => {
-          if (err) {
-            console.error(err)
-            res.json({
-              error: 'Could not leave event.'
-            })
-          }
-        });
-
-      db.run(`UPDATE Event
+        [req.body.EventID, req.session.userID])
+        .run(`UPDATE Event
                  SET PeopleAttending = PeopleAttending - 1
-                 WHERE EventID = ?;`,req.body.EventID ,(err, row) => {
-                if (err) {
-                  console.error(err.message);
-                }
-        });
-        db.run(`DELETE FROM Notification WHERE EventID = ?`, req.body.EventID ,(err, row) => {
+                 WHERE EventID = ?;`, req.body.EventID)
+        .run(`DELETE FROM Notification WHERE EventID = ?`, req.body.EventID, (err, row) => {
           if (err) {
             console.error(err.message);
+          } else {
+            res.json({ success: true })
           }
         });
 
@@ -639,27 +619,22 @@ app.post('/JoinEvent', (req, res) => {
   db.serialize(() => {
     db.run(`INSERT INTO UserAttendingEvent (UserID, EventID)
             VALUES (?,?);`, req.session.userID, req.body.EventID, (err, row) => {
-      if (err) {
-        console.error(err.message);
-        res.json({
-          error: 'Could not join event'
-        })
-      }
-    });
-    db.run(`UPDATE Event
+    }).run(`UPDATE Event
               SET PeopleAttending = PeopleAttending + 1
               WHERE EventID = ?;`,req.body.EventID ,(err, row) => {
-             if (err) {
-               console.error(err.message);
-             }
-      });
-      db.run(`INSERT INTO Notification (UserID, JoinedUser, EventId)
+    }).run(`INSERT INTO Notification (UserID, JoinedUser, EventId)
                 VALUES (?,?,?);`,req.body.OwnerUserID,req.body.UserName,req.body.EventID ,(err, row) => {
               if (err) {
                 console.error(err.message);
+                res.json({
+                  error: 'Could not join event.'
+                })
+              } else {
+                res.json({
+                  success: true
+                })
               }
        });
-
   });
   console.log("Joining Event ID  : ",req.body.EventID)
   console.log("User : ",req.body.UserID)

@@ -188,7 +188,7 @@
                                         <option value="5">Soccer</option>
                                         <option value="6">Hockey</option>
                                         <option value="7">Baseball</option>
-                                        <option value="8">FootBall</option>
+                                        <option value="8">Football</option>
                                     </select>
                                 </div>
                             </div>

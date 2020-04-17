@@ -15,8 +15,7 @@
         {{ locationError }}
       </h1>
       <div class="events">
-        <p v-if="!events.length">No events at this location... 🙁</p>
-        <div v-if="events.length" class="events-title">
+        <div class="events-title">
           <h3 class="title is-4">Events</h3>
           <router-link
             v-if="!$globalStore.user"
@@ -34,7 +33,7 @@
             Add Event
           </button>
         </div>
-        <div v-if="events.length" class="columns">
+        <div class="columns">
           <div class="column is-one-third">
             <div class="box filters">
               <div class="filter-header is-flex">
