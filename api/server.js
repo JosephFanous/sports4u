@@ -734,6 +734,18 @@ app.get('/EventDeleted/:id', (req, res, next) => {
   });
 });
 
+// Used to remove the notification once they have logged out
+app.post('/LogoutRequest', (req, res, next) => {
+  console.log(req.body)
+  db.serialize(() => {
+    db.all(`DELETE FROM Notification WHERE UserID = ?;`,req.params.id,(err, row) => {
+      if (err) {
+        console.error(err.message);
+      }
+      console.log(row);
+    })
+  });
+});
 
 server.listen(3000, () => {
   console.log('Server listening on port 3000')

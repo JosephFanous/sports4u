@@ -1,5 +1,5 @@
 <template>
-      <div id="ColumnInfoBar" class="column is-one-fifths">
+      <div id="ColumnInfoBar" class="column is-2">
           <div id="InfoBar">
               <div class="ImageInfo">
                   <figure id="Image" class="image is-96x96">
@@ -7,40 +7,22 @@
                   </figure>
               </div>
               <div class="Info">
-                  <h4 class="title is-4">{{Username}}</h4>
-                  <h6 class="subtitle is-6">{{EmailAddress}}</h6>
+                  <h4 id = "Username" class="title is-4">{{Username}}</h4>
+                  <h6 id = "Email" class="subtitle is-6">{{EmailAddress}}</h6>
               </div>
           </div>
           <nav class="menu">
-              <p class="menu-label">Home</p>
+              <!-- <p class="menu-label">Home</p> -->
               <ul class="menu-list">
-                <li>
-                  <router-link to='/'><span class="icon is-small"><i class="fas fa-home"></i></span>Home</router-link>
-                </li>
-                <li><a v-bind:class="{ 'is-active' : dashBoard}" href="#"><span class="icon is-small"><i class="fas fa-chart-line"></i></span> Dashboard</a></li>
-                <li><a href="#"><span class="icon is-small"><i class="fas fa-search"></i></span> Search For Events</a></li>
-              </ul>
-              <p class="menu-label">Setting</p>
-              <ul class="menu-list">
-                  <li><a href="/profile"><span class="icon is-small"><i class="fas fa-address-card"></i></span> Profile</a></li>
-                  <li><a href="www.google.com"><span class="icon is-small"><i class="fas fa-cog"></i></span> Advanced Settings</a></li>
-
-              </ul>
-              <p class="menu-label"> Messaging</p>
-              <ul class="menu-list">
-                  <li><a href="www.google.com"><span class="icon is-small"><i class="fas fa-envelope"></i></span> Inbox</a></li>
-                  <li><a href="www.google.com"><span class="icon is-small"><i class="fas fa-reply"></i></span> Reply</a></li>
-              </ul>
-              </p>
-
-              <p class="menu-label">Contact Us</p>
-              <ul class="menu-list">
-
-                  <li><a v-on:click=HandleBugModalClick() v-bind:class="{ 'is-active' : reportBugModal}" href="#"><span class="icon is-small"><i class="fas fa-bug"></i></span> Report Software Bugs</a></li>
-
+                <li id = "MenuItem" ><router-link to='/'><span class="icon is-small"><i class="fas fa-home"></i></span> Home</router-link></li>
+                <li id = "MenuItem"><a v-bind:class="{ 'is-active' : dashBoard}" href="#"><span class="icon is-small"><i class="fas fa-chart-line"></i></span> Dashboard</a></li>
+                <li id = "MenuItem"><router-link to='/locationsearch'><span class="icon is-small"><i class="fas fa-search"></i></span> Search For Events</router-link></li>
+                <li id = "MenuItem"><router-link to="/profile"><span class="icon is-small"><i class="fas fa-address-card"></i></span> Profile</router-link></li>
+                <li id = "MenuItem"><router-link to="/"><span class="icon is-small"><i class="fas fa-cog"></i></span> Advanced Settings</router-link></li>
+                <li id = "MenuItem"><a v-on:click=HandleBugModalClick() v-bind:class="{ 'is-active' : reportBugModal}" href="#"><span class="icon is-small"><i class="fas fa-bug"></i></span> Report Software Bugs</a></li>
               </ul>
 
-              <button v-on:click="handleLogoutClick" class="button is-block is-info is-large is-fullwidth" v-bind:class="{ 'is-loading': isLogoutLoading }" id="LogoutButton">
+              <button v-on:click="handleLogoutClick" class="button is-block is-info is-large" v-bind:class="{ 'is-loading': isLogoutLoading }" id="LogoutButton">
                   <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
               </button>
           </nav>
@@ -85,6 +67,15 @@ import { endSession } from '../util'
 
     methods: {
       handleLogoutClick(){
+        var data = {'UserID':this.$globalStore.user.id}
+        const options = {
+          method: 'POST',
+          headers: {
+            'Content-Type':  'application/json'
+          },
+          body: JSON.stringify(data)
+        };
+        fetch('http://localhost:3000/LogoutRequest', options)
         console.log("User Signed Out")
         this.isLogoutLoading = true
 
@@ -109,11 +100,16 @@ import { endSession } from '../util'
   }
 </script>
 <style scoped>
+  #ColumnInfoBar{
+    background-color: #1e3d59;
+    position: relative;
+  }
   .menu-label{
-    font-size: 15px;
+    font-size: 18px;
   }
   .menu-list{
-    font-size: 15px;
+    font-size: 18px;
+    padding: 7px;
   }
   #InfoBar{
     position: relative;
@@ -121,7 +117,7 @@ import { endSession } from '../util'
   #Image{
     margin-left: auto;
     margin-right: auto;
-    margin-top: 10px;
+    margin-top: 25px;
   }
   div.Info{
     text-align: center;
@@ -132,6 +128,28 @@ import { endSession } from '../util'
     padding: 10px;
   }
   #LogoutButton {
-    margin-top: 100px;
+    position: absolute;
+    bottom: 0px;
+    margin-bottom: 30px;
+    padding-left: 40%;
+    padding-right: 40%;
+    margin-left: 5px;
+  }
+
+  #MenuItem{
+    padding-top: 10px;
+    color: white;
+  }
+  #MenuItem :hover{
+    background-color: #ff6e40;
+    color: white;
+    font-weight: bold;
+  }
+  a{
+    color: #f5f0e1;
+  }
+  #Username, #Email{
+    color: #f5f0e1;
+
   }
 </style>
