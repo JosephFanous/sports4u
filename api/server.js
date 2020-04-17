@@ -313,8 +313,157 @@ app.get('/venues/:id/daydata', (req, res, next) => {
   )
 })
 
+app.post('/first', (req, res, next) => {
+  if(req.body.First){
+    db.run('UPDATE User SET First = ? WHERE UserID = ?',[req.body.First,req.session.userID], function (err) {
+      if (err){
+            throw err
+      } else{
+        return res.json({
+          first: 'hi',
+          success: true
+        })
+      }
+    })
+  }
+})
+
+app.get('/first', (req, res, next) => {
+  db.get('SELECT * FROM User WHERE UserID = ?', [req.session.userID], (err, row) => {
+    if (err){
+      return err
+    }
+    return res.json({
+      first: row.First,
+    })
+  })
+})
+
+app.post('/last', (req, res, next) => {
+  if(req.body.Last){
+    db.run('UPDATE User SET Last = ? WHERE UserID = ?',[req.body.Last,req.session.userID], function (err) {
+      if (err){
+            throw err
+      } else{
+        return res.json({
+          last: 'hi',
+          success: true
+        })
+      }
+    })
+  }
+})
+
+app.get('/last', (req, res, next) => {
+  db.get('SELECT * FROM User WHERE UserID = ?', [req.session.userID], (err, row) => {
+    if (err){
+      return err
+    }
+    return res.json({
+      last: row.Last,
+    })
+  })
+})
+
+app.post('/username', (req, res, next) => {
+  if(req.body.Username){
+    db.get('SELECT UserName as user FROM User WHERE user = ?', [req.body.Username],(err, row) => {
+      if(row){
+        res.json({
+          errors:{
+            User: 'hasError'
+          }
+        })
+      } else{
+        db.run('UPDATE User SET UserName = ? WHERE UserID = ?',[req.body.Username,req.session.userID], function (err) {
+          if (err){
+                throw err
+          }
+          else{
+            return res.json({
+              Username: req.body.Username,
+              success: true
+            })
+          }
+        })
+    }
+    })
+  }
+})
+
+app.get('/username', (req, res, next) => {
+  db.get('SELECT * FROM User WHERE UserID = ?', [req.session.userID], (err, row) => {
+    if (err){
+      return err
+    } else {
+      return res.json({
+      user: row.UserName,
+    })
+    }
+  })
+})
+
+app.post('/email', (req, res, next) => {
+  if(req.body.Email){
+    db.get('SELECT Email as email FROM User WHERE email = ?', [req.body.Email],(err, row) => {
+      console.log(row)
+      console.log(req.body.Email)
+      if(row){
+        res.json({
+          errors:{
+            Email: 'hasError'
+          }
+        })
+      } else{
+        db.run('UPDATE User SET Email = ? WHERE UserID = ?',[req.body.Email,req.session.userID], function (err) {
+          if (err){
+                throw err
+          }
+          else{
+            return res.json({
+              email: 'hi',
+              success: true
+            })
+          }
+        })
+    }
+    })
+  }
+})
+
+app.get('/email', (req, res, next) => {
+  db.get('SELECT * FROM User WHERE UserID = ?', [req.session.userID], (err, row) => {
+    if (err){
+      return err
+    } else {
+      return res.json({
+      email: row.Email,
+    })
+    }
+  })
+})
+
+app.post('/password', (req, res, next) => {
+  if(req.body.Password){
+    bcrypt.hash(req.body.Password, 10, function(err, hash) {
+         if(err){
+           throw err
+         }else{
+        db.run('UPDATE User SET Password = ? WHERE UserID = ?',[hash, req.session.userID], function (err) {
+          if (err){
+                throw err
+          } else{
+            return res.json({
+              success: true
+            })
+          }
+        })
+      }
+    })
+  }
+})
+
 app.post('/register', (req, res, next) => {
-  console.log(req.body)
   db.get('SELECT UserName as user, Email as email FROM User WHERE user = ? OR email = ?', [req.body.Username, req.body.Email],(err, row) => {
     const errors = {}
     if(err){
