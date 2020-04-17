@@ -885,9 +885,9 @@ app.get('/EventDeleted/:id', (req, res, next) => {
 
 // Used to remove the notification once they have logged out
 app.post('/LogoutRequest', (req, res, next) => {
-  console.log(req.body)
+  console.log(req.body.UserID)
   db.serialize(() => {
-    db.all(`DELETE FROM Notification WHERE UserID = ?;`,req.params.id,(err, row) => {
+    db.all(`DELETE FROM Notification WHERE UserID = ?;`,req.body.UserID,(err, row) => {
       if (err) {
         console.error(err.message);
       }
