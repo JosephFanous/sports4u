@@ -270,6 +270,51 @@ app.post('/venues/find', (req, res, next) => {
   )
 })
 
+app.get('/venues/:id/daydata', (req, res, next) => {
+  db.all(`
+      SELECT strftime("%w", StartTime) as StartDay,
+      CAST((julianday(EndTime) - julianday(StartTime)) + 1 as INT) as DayLength
+      FROM Event
+      WHERE LocationID = ?
+    `,
+    [req.params.id],
+    (err, rows) => {
+      if (err) {
+        console.error(err)
+        return res.json({ error: 'Could not fetch day data.' })
+      }
+
+      // total number of days that have events going on on them
+      // if an event takes up 2 days, sumDays is incremented by 2
+      let sumDays = 0
+      const popularityByDay = { Su: 0, M: 0, T: 0, W: 0, Th: 0, F: 0, S: 0 }
+      console.log('location id:', req.params.id)
+      console.log('day data rows:', rows)
+
+      if (!rows.length) {
+        return res.json({ popularityByDay })
+      }
+
+      const occurrences = [0, 0, 0, 0, 0, 0, 0]
+      rows.forEach(row => {
+        sumDays += row.DayLength
+        const startDay = parseInt(row.StartDay)
+        for (let offset = 0; offset < row.DayLength && offset < 7; offset++) {
+          occurrences[(startDay + offset) % 7]++
+        }
+      })
+
+      const days = ['Su', 'M', 'T', 'W', 'Th', 'F', 'S']
+      occurrences.forEach((total, i) => {
+        const day = days[i]
+        popularityByDay[day] = total / sumDays
+      })
+
+      return res.json({ popularityByDay })
+    }
+  )
+})
+
 app.post('/register', (req, res, next) => {
   console.log(req.body)
   db.get('SELECT UserName as user, Email as email FROM User WHERE user = ? OR email = ?', [req.body.Username, req.body.Email],(err, row) => {

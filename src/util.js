@@ -16,7 +16,7 @@ export function metresToPixels(metres, latitude, zoomLevel) {
 // get locations from some search query
 export function geocode(query) {
   const endpoint = `geocoding/v5/mapbox.places/${query}.json`;
-  return fetch(`https://api.mapbox.com/${endpoint}?access_token=${process.env.VUE_APP_MAPBOX_API_KEY}`)
+  return fetch(`https://api.mapbox.com/${endpoint}?access_token=${process.env.VUE_APP_MAPBOX_API_KEY}&limit=10`)
     .then(res => {
       if (res.ok) return res.json()
       else throw new Error(res.status)
@@ -163,6 +163,15 @@ export function checkAuth() {
     if (res.ok) return res.json()
     else throw new Error(res.status)
   }).then(data => data.user)
+}
+
+export function getDayData(venueID) {
+  const apiUrl = process.env.VUE_APP_API_URL
+  return fetch(`${apiUrl}/venues/${venueID}/daydata`,
+  ).then(res => {
+    if (res.ok) return res.json()
+    else throw new Error(res.status)
+  }).then(data => data)
 }
 
 const months = [

@@ -1,9 +1,15 @@
 <template>
   <div class="container">
     <div v-if="!isVenueLoading && !venueError" class="section">
-      <header v-if="!isLocationLoading && !locationError && location">
-        <h1 class='title is-1'>{{ location.text }}</h1>
-        <h2 class='subtitle is-3'>{{ location.place_name }}</h2>
+      <header class="is-flex" v-if="!isLocationLoading && !locationError && location">
+        <div class="header-text">
+          <h1 class='title is-1'>{{ location.text }}</h1>
+          <h2 class='subtitle is-3'>{{ location.place_name }}</h2>
+        </div>
+        <div class="day-graph">
+          <h3 class="title is-6">Popular Days</h3>
+          <DayPopularity v-bind:venueID="$route.params.id" />
+        </div>
       </header>
       <h1 v-if="!isLocationLoading && locationError" class='title'>
         {{ locationError }}
@@ -14,15 +20,16 @@
           <h3 class="title is-4">Events</h3>
           <router-link
             v-if="!$globalStore.user"
-            class="button is-info"
+            class="button is-link"
             to="/login"
+            tag="button"
           >
             Add Event
           </router-link>
           <button
             v-else
             v-on:click="handleOpenAddEvent"
-            class="button is-info"
+            class="button is-link"
           >
             Add Event
           </button>
@@ -59,6 +66,7 @@
                 v-if="!$globalStore.user"
                 class="button is-success"
                 to="/login"
+                tag="button"
               >
                 Join Event
               </router-link>
@@ -95,6 +103,18 @@
 <style lang="scss">
 .events {
   margin-top: 2rem;
+}
+
+.header-text {
+  padding-right: 3rem;
+}
+
+.day-graph {
+  text-align: center;
+  padding-right: 20px;
+  .title {
+    margin-bottom: 1rem;
+  }
 }
 
 .event-sport {
@@ -165,6 +185,7 @@ import {
   formatTime
 } from '../util'
 import AddEvent from '../components/AddEvent'
+import DayPopularity from '../components/DayPopularity'
 import { emojiBySport } from '../util'
 
 const initialSelection = {}
@@ -175,7 +196,8 @@ for (let sport in emojiBySport) {
 export default {
   name: "VenuePage",
   components: {
-    AddEvent
+    AddEvent,
+    DayPopularity
   },
   data: function() {
     return {
