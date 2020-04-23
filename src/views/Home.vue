@@ -37,6 +37,9 @@ html, body{
   padding-left: 40px;
   padding-top: 20px
 }
+a.subtitle{
+padding: 5px;
+}
 .sport-container{
   flex-direction: row;
   flex-wrap: wrap;
