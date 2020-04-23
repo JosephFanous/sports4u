@@ -450,25 +450,7 @@ app.get('/sports/search', (req, res, next) => {
 
 
 
-//Gets all event names, event start times, endtimes, people attending and Location
-app.post('/events/:sport', (req, res, next) => {
-  db.all(
-    `SELECT event.name, event.StartTime, event.EndTime, event.PeopleAttending, Location.Address, SportType.SportName AS Sport
-    FROM ((event
-    INNER JOIN Location ON event.LocationID = Location.LocationID)
-    INNER JOIN SportType ON event.SportID = SportType.SportID)
-    WHERE SportName = ?`,req.params.sport,(err,rows) => {
-      console.log(req.body);
-      if(err){
-        console.error(err.message);
-      }else{
-        console.log(rows);
-        res.send(JSON.stringify(rows));
-      }
-
-    })
-
-})
+//Gets all event names, event start times, and event endtimes
 
 // Used to get user data
 app.get('/users/:id', (req, res, next) => {
