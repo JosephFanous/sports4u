@@ -1,15 +1,15 @@
-<template id = "Main">
+<template>
     <div class="columns is-gapless">
         <SideBar v-bind:Username ="Username" v-bind:EmailAddress = "EmailAddress"></SideBar>
-        <div id="ColumnTwo" class="column is-5">
+        <div id="ColumnTwo" class="column is-two-fifths">
             <div id="EventLayout" class="tile is-ancestor">
                 <div class="tile is-12 is-vertical is-parent">
-                    <div id = "Column1Back" class="tile is-child box">
+                    <div class="tile is-child box">
                         <p class="title">Events</p>
                         <div role="tablist">
-                            <b-card no-body class="mb-0">
-                                <b-card-header id = "Header" header-tag="header" class="p-0" role="tab">
-                                    <b-button id = "Bar" block href="#" v-b-toggle.accordion-1 variant="info">Your Event (s)</b-button>
+                            <b-card no-body class="mb-2">
+                                <b-card-header header-tag="header" class="p-3" role="tab">
+                                    <b-button block href="#" v-b-toggle.accordion-1 variant="info">Your Event (s)</b-button>
                                 </b-card-header>
                                 <b-collapse id="accordion-1" visible accordion="my-accordion" role="tabpanel">
                                     <b-card-body  id = "Test">
@@ -17,21 +17,20 @@
                                             <tbody  id = "Test" v-for="items in UserEvents">
                                                 <tr>
                                                     <td width="5%"><i class="fas fa-user-friends"></i>{{items.PeopleAttending}}</td>
-                                                    <td><a v-on:click="MoreDetails(items.Name, 'Your Events')"> {{items.Name}} </a></td>
-                                                    <td width="10%"><a v-on:click="EditButton(items.Name)"><i class="fas fa-edit" > Edit</i></a></td>
-                                                    <td width="10%"><a v-on:click="DeleteButton(items.EventID, 'UserEvents')"><i class="fas fa-trash-alt"> Delete</i></a></td>
+                                                    <td><a v-on:click="MoreDetails"> {{items.Name}} </a></td>
+                                                    <td width="10%"><a v-on:click="EditButton(items.Name)"><i class="fas fa-edit" ></i></a></td>
+                                                    <td width="10%"><a v-on:click="DeleteButton(items.EventID, 'UserEvents')"><i class="fas fa-trash-alt"></i></a></td>
                                                 </tr>
 
                                             </tbody>
                                         </table>
-                                            <p v-if="warningPress"class="help is-danger">✪ Press on the Event For More details</p>
                                     </b-card-body>
                                 </b-collapse>
                             </b-card>
 
-                            <b-card no-body class="mb-0">
-                                <b-card-header id = "Header" header-tag="header" class="p-0" role="tab">
-                                    <b-button id = "Bar" block href="#" v-b-toggle.accordion-2 variant="info">Signed Up Events</b-button>
+                            <b-card no-body class="mb-2">
+                                <b-card-header header-tag="header" class="p-3" role="tab">
+                                    <b-button block href="#" v-b-toggle.accordion-2 variant="info">Signed Up Events</b-button>
                                 </b-card-header>
                                 <b-collapse id="accordion-2" accordion="my-accordion" role="tabpanel">
                                     <b-card-body>
@@ -51,12 +50,10 @@
                                                 <div class="media-content">
                                                     <div class="content">
                                                         <p>
-                                                            <a >@{{item.UserName}}&nbsp;</a>
-                                                            <br><i class="fas fa-calendar-alt"></i> {{item.Rating}}
-                                                            <br><i class="fas fa-clock"></i> {{item.StartTime}} - {{item.EndTime}}
-
+                                                            <a href="#">@{{item.UserName}}&nbsp;</a>
+                                                            <br><i class="fas fa-clock"></i> {{item.StartTime}}
                                                             <br>
-                                                            <span class="tag"> <i class="fas fa-location-arrow"> </i> {{" " + item.Address}}</span>
+                                                            <span class="tag"> <i class="fas fa-location-arrow"> </i> &nbsp;{{item.Address}}</span>
                                                         </p>
                                                     </div>
                                                     <hr>
@@ -70,9 +67,9 @@
                                 </b-collapse>
                             </b-card>
 
-                            <b-card no-body class="mb-0">
-                                <b-card-header id = "Header" header-tag="header" class="p-0" role="tab">
-                                    <b-button id = "Bar" block href="#" v-b-toggle.accordion-3 variant="info">Upcoming Event </b-button>
+                            <b-card no-body class="mb-2">
+                                <b-card-header header-tag="header" class="p-3" role="tab">
+                                    <b-button block href="#" v-b-toggle.accordion-3 variant="info">Upcoming Event </b-button>
                                 </b-card-header>
                                 <b-collapse id="accordion-3" accordion="my-accordion" role="tabpanel">
                                     <b-card-body>
@@ -81,13 +78,12 @@
                                                 <tbody>
                                                     <tr v-for="item in UpcomingEvents">
                                                         <td width="5%"><i class="fa fa-circle" style=color:green;></i></td>
-                                                        <td><a v-on:click="MoreDetails(item.Name, 'UpComing')" >{{item.Name}}</a></td>
+                                                        <td><a href="#">{{item.Name}}</a></td>
                                                         <td class="level-right"><a v-on:click="JoinEvent(item.Name)" class="button is-small is-primary" href="#">Join</a></td>
                                                     </tr>
                                                 </tbody>
                                             </table>
                                         </div>
-                                          <p v-if="warningPress2"class="help is-danger">✪ Press on the Event For More details</p>
                                     </b-card-body>
                                 </b-collapse>
                             </b-card>
@@ -97,10 +93,10 @@
             </div>
         </div>
 
-        <div class="column is-5">
+        <div class="column is-two-fifths">
             <div id="MapLayout" class="tile is-ancestor">
                 <div class="tile is-12 is-vertical is-parent">
-                    <div id = "Column1Back" class="tile is-child box">
+                    <div class="tile is-child box">
                         <p class="title">Map</p>
                         <div id='map'></div>
                         <p id = "NotificationCenter" class="title">Notification Center <span id = "NewIcon" class="badge badge-secondary">New</span></p>
@@ -117,11 +113,11 @@
                               <div class="tab-pane fade show active" id="FirstList" role="tabpanel" aria-labelledby="list-home-list">
                                 <article id = "notificationRight" class="tile is-child notification is-success">
                                   <div class="content">
-                                    <p class="title">While you were away..</p>
+                                    <p class="title">While you were away</p>
                                     <p class="subtitle">People that have joined your event(s)</p>
                                     <div class="content" >
-                                      <ul v-for="item in NewUserNotify" style="list-style-type:none;">
-                                         <li>🤝 <strong>@{{item.JoinedUser}}</strong> has joined the following event: <strong>{{item.Name}}</strong></li>
+                                      <ul v-for="item in NewUserNotify" >
+                                         <li><strong>@{{item.JoinedUser}}</strong> has joined the following event: <strong>{{item.Name}}</strong></li>
                                        </ul>
 
                                     </div>
@@ -132,10 +128,10 @@
                                 <article id = "notificationRight" class="tile is-child notification is-danger">
                                   <div class="content">
                                     <p class="title">Welcome Back!</p>
-                                    <p class="subtitle">The following Events have been updated. More information can be found under the Signed Up tab.</p>
+                                    <p class="subtitle">More information can be found under the Signed Up tab.</p>
                                     <div class="content">
-                                      <ul v-for="item in SignedUpUpdates" style="list-style-type:none;">
-                                         <li>✏️ {{item.UpdateEvent}}</li>
+                                      <ul v-for="item in SignedUpUpdates">
+                                         <li>The following informatiion regarding an event has been updated: {{item.UpdateEvent}}</li>
                                        </ul>
                                     </div>
                                   </div>
@@ -145,10 +141,10 @@
                                 <article id = "notificationRight" class="tile is-child notification is-warning">
                                   <div class="content">
                                     <p class="title">Deleted Events</p>
-                                    <p class="subtitle">The following events that you were enrolled in were deleted by the user</p>
+                                    <p class="subtitle">The following Events have been deleted by the user</p>
                                     <div class="content">
-                                      <ul v-for="item in EventsDeletedUsers" style="list-style-type:none;">
-                                         <li>🗑️ {{item.DeleteEvent}}</li>
+                                      <ul v-for="item in EventsDeletedUsers">
+                                         <li> {{item.DeleteEvent}}</li>
                                        </ul>
                                     </div>
                                   </div>
@@ -192,7 +188,7 @@
                                         <option value="5">Soccer</option>
                                         <option value="6">Hockey</option>
                                         <option value="7">Baseball</option>
-                                        <option value="8">Football</option>
+                                        <option value="8">FootBall</option>
                                     </select>
                                 </div>
                             </div>
@@ -259,7 +255,7 @@ export default {
       NewUserNotify : [],
       SignedUpUpdates : [],
       EventsDeletedUsers : [],
-      UserID : this.$globalStore.user.id,
+      UserID : 1,//this.$globalStore.user.id,
       map : null,
       popup : null,
       centerOfMap : null,
@@ -271,8 +267,7 @@ export default {
       ErrorMessage : '',
       Username: '',
       EmailAddress: '',
-      warningPress : true,
-      warningPress2 : true,
+
     }
 
   },
@@ -281,9 +276,9 @@ export default {
     this.loadEvents(); // Used to load events for the user
     this.loadSignedUpEvents(); // load up Signed Up events
     this.loadUpComingEvents(); // loading upcoming events
-    this.loadNewUserNotifications(); // loading the notifications for new users
-    this.loadSignedUpUpdates(); // loads the event changes tab
-    this.EventsDeleted(); // loads the deleted events tab
+    this.loadNewUserNotifications();
+    this.loadSignedUpUpdates();
+    this.EventsDeleted();
 
   },
   methods: {
@@ -312,11 +307,10 @@ export default {
         .then(response => response.json())
         .then(data => {
             for(var i=0;i<data.length;i++){
-              data[i].Rating = formatDate(data[i].StartTime)
               data[i].StartTime = formatTime(data[i].StartTime)
-              data[i].EndTime = formatTime(data[i].EndTime)
               this.UserSignedUpEvents.push(data[i]);
             }
+            console.log(this.UserSignedUpEvents)
           })
     .catch(err => console.log(err));
 
@@ -348,6 +342,7 @@ export default {
           }
           })
         .catch(err => console.log(err));
+      console.log(this.SignedUpUpdates)
     },
     EventsDeleted : function(){
       fetch('http://localhost:3000/EventDeleted/'+this.UserID)
@@ -358,57 +353,40 @@ export default {
           }
         })
         .catch(err => console.log(err));
+        console.log(this.EventsDeletedUsers)
     },
     /*Used fot the popups that appear on the map*/
-    MoreDetails: function(EventName, Type){
-      var target;
-
+    MoreDetails: function(event){
       // Remove previous popups and add new ones
       if(this.popup != null)this.popup.remove();
-      if(Type == "Your Events"){
-        this.warningPress = false;
-        var vm = this;
-        for(var i=0;i<vm.UserEvents.length;i++){
-          if(vm.UserEvents[i].Name == EventName){
-              this.popup = new mapboxgl.Popup({ closeOnClick: false })
-              .setLngLat([vm.UserEvents[i].Longitude, vm.UserEvents[i].Latitude])
-              .setHTML('<div><h3>'+ vm.UserEvents[i].Name + '</h3><ul style="list-style-type:none;"><li><strong>SportName: </strong>' + vm.UserEvents[i].SportName +
-              '</li><li><strong>StartTime: </strong>'+ vm.UserEvents[i].StartTime + '</li><li><strong>EndTime: </strong>'+ vm.UserEvents[i].EndTime +
-               '</li><li><strong>Address: </strong>'+ vm.UserEvents[i].Address + '<li></ul></div>')
-              .addTo(vm.map);
-              target = [vm.UserEvents[i].Longitude, vm.UserEvents[i].Latitude];
-            }
+      var element = event.target;
+      var vm = this;
+      for(var i=0;i<vm.UserEvents.length;i++){
+        if(vm.UserEvents[i].Name == element.text.trim()){
+            this.popup = new mapboxgl.Popup({ closeOnClick: false })
+            .setLngLat([vm.UserEvents[i].Longitude, vm.UserEvents[i].Latitude])
+            .setHTML('<div><h3>'+ vm.UserEvents[i].Name + '</h3><ul style="list-style-type:none;"><li><strong>SportName: </strong>' + vm.UserEvents[i].SportName +
+            '</li><li><strong>StartTime: </strong>'+ vm.UserEvents[i].StartTime + '</li><li><strong>EndTime: </strong>'+ vm.UserEvents[i].EndTime +
+             '</li><li><strong>Address: </strong>'+ vm.UserEvents[i].Address + '<li></ul></div>')
+            .addTo(vm.map);
+            var target = [vm.UserEvents[i].Longitude, vm.UserEvents[i].Latitude];
+
+            /*With the help of https://docs.mapbox.com/mapbox-gl-js/example/flyto-options/ */
+            this.map.flyTo({
+              center: target,
+              zoom: 11,
+              bearing: 0,
+
+              speed: 2, // make the flying slow
+              curve: 1, // change the speed at which it zooms out
+
+              easing: function(t) {
+              return t;
+              },
+              essential: true
+              });
           }
         }
-        if(Type == 'UpComing'){
-          this.warningPress2 = false;
-          for(var i=0;i<this.UpcomingEvents.length;i++){
-            if(this.UpcomingEvents[i].Name == EventName){
-                this.popup = new mapboxgl.Popup({ closeOnClick: false })
-                .setLngLat([this.UpcomingEvents[i].Longitude, this.UpcomingEvents[i].Latitude])
-                .setHTML('<div><h3>'+ this.UpcomingEvents[i].Name + '</h3><ul style="list-style-type:none;"><li><strong>SportName: </strong>' + this.UpcomingEvents[i].SportName +
-                '</li><li><strong>StartTime: </strong>'+ this.UpcomingEvents[i].StartTime + '</li><li><strong>EndTime: </strong>'+ this.UpcomingEvents[i].EndTime +
-                 '</li><li><strong>Address: </strong>'+ this.UpcomingEvents[i].Address + '<li></ul></div>')
-                .addTo(this.map);
-                target = [this.UpcomingEvents[i].Longitude, this.UpcomingEvents[i].Latitude];
-              }
-            }
-        }
-       /*With the help of https://docs.mapbox.com/mapbox-gl-js/example/flyto-options/ */
-        this.map.flyTo({
-        center: target,
-        zoom: 12,
-        bearing: 0,
-
-        speed: 2, // make the flying slow
-        curve: 1, // change the speed at which it zooms out
-
-        easing: function(t) {
-        return t;
-        },
-        essential: true
-        });
-
       },
       CloseModal: function(){
         // Used to overwrite field to avoid crashes
@@ -553,7 +531,6 @@ export default {
         fetch('http://localhost:3000/JoinEvent', options)
 
       },
-
   },
 
   /*Loads the map at the start of the page and mounts it*/
@@ -613,9 +590,6 @@ export default {
   #map{
     height: 50%;
     width: 100%;
-    border: 3px;
-    border-color: #1e3d59;
-    border-style: outset;
   }
   #MapLayout, #EventLayout, #accordingMain{
     height: 100%;
@@ -635,9 +609,11 @@ export default {
     padding-left: 0px;
   }
   #leftSideTab{
+    padding-right: 5px;
+  }
+  #FirstList, #SecondList, #ThirdList{
 
   }
-
   #notificationRight{
     height: 100%;
     max-height: 335px;
@@ -647,18 +623,6 @@ export default {
   #NewIcon{
     margin-left: 15px;
   }
-  #Column1Back{
-    background-color: #f5f0e1;
-  }
 
-  #Bar{
-    background-color: #1e3d59;
-    color: white;
-    font: small-caps bold 20px/1 sans-serif;
-    padding: 12px;
-  }
-  #Bar:hover{
-    background-color: green;
-  }
 
 </style>

@@ -6,7 +6,7 @@
   </div>
   <div id="form" class="box">
    <div class="field">
-      <label id="tag" class="label">E-Mail</label>
+      <label class="label">E-Mail</label>
       <div class="control has-icons-left has-icons-right" id="eml">
          <input v-on:keyup.enter="login" v-model="email" class="input is-dark" v-bind:class="{'is-danger': emlerr}" type="email" placeholder="E-Mail address" />
          <span class="icon is-small is-left">
@@ -20,7 +20,7 @@
    </div>
 
    <div class="field">
-      <label id="tag" class="label">Password</label>
+      <label class="label">Password</label>
       <div class="control has-icons-left has-icons-right" id="pss">
          <input v-on:keyup.enter="login" v-model="password" class="input is-dark" v-bind:class="{'is-danger': psserr}" type="password" placeholder="Password">
          <span class="icon is-small is-left">
@@ -59,9 +59,7 @@
   a{
     text-decoration: none;
   }
-  #tag{
-    text-align: center;
-  }
+
   #s4upic{
     height: 100px;
     width: 190px;
@@ -82,6 +80,7 @@
     margin-right: auto;
     width: 40%;
     min-width: 647px;
+
   }
   #log{
     text-align: center;
@@ -121,12 +120,6 @@
         const apiUrl = process.env.VUE_APP_API_URL
         this.emlerr = '';
         this.psserr = '';
-        let next = true
-        if(!this.email){
-          this.emlerr = 'Please enter your email.'
-          next = false
-        }
-        if(next==true){
         fetch(`${apiUrl}/login`, {
           method: 'post',
           headers: {
@@ -155,8 +148,8 @@
             if (data.errors.password){
               this.psserr = 'Password is incorrect.';
             }
+
           })
-        }
       }
     }
   }

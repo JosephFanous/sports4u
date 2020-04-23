@@ -32,7 +32,7 @@
               <option>Soccer</option>
               <option>Hockey</option>
               <option>Baseball</option>
-              <option>Football</option>
+              <option>FootBall</option>
             </select>
           </div>
         </div>

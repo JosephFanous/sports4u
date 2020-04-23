@@ -26,3 +26,4 @@ yarn-error.log*
 
 # Database
 
+/database/sportDatabase.db

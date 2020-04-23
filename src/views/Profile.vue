@@ -1,46 +1,34 @@
 <template>
-  <div>
-    <div class="container bootstrap snippet">
-      <h1 class="text-primary"><span class="glyphicon glyphicon-user"></span>Edit Profile</h1>
-        <hr>
-      <h4><span id="fname" class="label label-default">
-        First name
-        <router-link id="he"class="button is-link" to="/first">Edit</router-link>
-      </span></h4>
-
-      <h4><span id="lname" class="label label-default">
-        Last name
-        <router-link id="he"class="button is-link" to="/last">Edit</router-link>
-      </span></h4>
-
-      <h4><span id="uname" class="label label-default">
-        Username
-        <router-link id="he"class="button is-link" to="/username">Edit</router-link>
-      </span></h4>
-
-      <h4><span id="ename" class="label label-default">
-        Email
-        <router-link id="he"class="button is-link" to="/email">Edit</router-link>
-      </span></h4>
-
-      <h4><span id="pname" class="label label-default">
-        Password
-        <router-link id="he"class="button is-link" to="/password">Edit</router-link>
-      </span></h4>
+  <div class="card">
+  <div class="card-image">
+    <figure class="image is-4by3">
+      <img src="https://bulma.io/images/placeholders/1280x960.png" alt="Placeholder image">
+    </figure>
   </div>
-  <hr>
+  <div class="card-content">
+    <div class="media">
+      <div class="media-left">
+        <figure class="image is-48x48">
+          <img src="https://bulma.io/images/placeholders/96x96.png" alt="Placeholder image">
+        </figure>
+      </div>
+      <div class="media-content">
+        <p class="title is-4">John Smith</p>
+        <p class="subtitle is-6">@johnsmith</p>
+      </div>
+    </div>
+
+    <div class="content">
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+      Phasellus nec iaculis mauris. <a>@bulmaio</a>.
+      <a href="#">#css</a> <a href="#">#responsive</a>
+      <br>
+      <time datetime="2016-1-1">11:09 PM - 1 Jan 2016</time>
+    </div>
   </div>
+</div>
 </template>
 <style>
-
-h4{
-  padding: 30px;
-}
-
-#he{
-  float: right;
-}
-
 </style>
 <script>
 export default{

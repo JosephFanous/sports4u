@@ -212,7 +212,6 @@
         }
         if(this.Password != this.vPassword){
           this.vpsserr = 'Password does not match. Please try again.'
-          next = false
         }
         if(next == true){
           fetch(`${apiUrl}/register`, {

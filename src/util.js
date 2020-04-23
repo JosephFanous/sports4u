@@ -258,5 +258,5 @@ export const emojiBySport = {
   'Badminton': '🏸',
   'Hockey': '🏒',
   'Baseball': '⚾',
-  'Football': '🏈'
+  'FootBall': '🏈'
 }

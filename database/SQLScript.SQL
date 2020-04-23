@@ -95,15 +95,6 @@ CREATE TABLE SportType
   SportName TEXT
 );
 
-INSERT INTO SportType (SportName) VALUES ("Basketball");
-INSERT INTO SportType (SportName) VALUES ("Volleyball");
-INSERT INTO SportType (SportName) VALUES ("Table Tennis");
-INSERT INTO SportType (SportName) VALUES ("Soccer");
-INSERT INTO SportType (SportName) VALUES ("Badminton");
-INSERT INTO SportType (SportName) VALUES ("Hockey");
-INSERT INTO SportType (SportName) VALUES ("Baseball");
-INSERT INTO SportType (SportName) VALUES ("Football");
-
 -- Table Notification
 
 CREATE TABLE Notification
