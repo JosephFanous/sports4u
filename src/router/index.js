@@ -66,7 +66,37 @@ const routes = [
     name: "Profile",
     component: () =>
     import(/* webpackChunkName: "map" */ "../views/Profile.vue")
-  }
+  },
+  {
+    path: "/first",
+    name: "First",
+    component: () =>
+    import(/* webpackChunkName: "map" */ "../views/First.vue")
+  },
+  {
+    path: "/last",
+    name: "Last",
+    component: () =>
+    import(/* webpackChunkName: "map" */ "../views/Last.vue")
+  },
+  {
+    path: "/username",
+    name: "Username",
+    component: () =>
+    import(/* webpackChunkName: "map" */ "../views/Username.vue")
+  },
+  {
+    path: "/email",
+    name: "Email",
+    component: () =>
+    import(/* webpackChunkName: "map" */ "../views/Email.vue")
+  },
+  {
+    path: "/password",
+    name: "Password",
+    component: () =>
+    import(/* webpackChunkName: "map" */ "../views/Password.vue")
+  },
 ];
 
 const router = new VueRouter({
