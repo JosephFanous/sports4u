@@ -6,7 +6,8 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "api": "nodemon api/server.js"
+    "api": "nodemon api/server.js",
+    "start": "npm run serve"
   },
   "dependencies": {
     "aws-sdk": "^2.656.0",
