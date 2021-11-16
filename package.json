@@ -10,7 +10,7 @@
     "start": "npm run serve"
   },
   "dependencies": {
-    "aws-sdk": "^2.656.0",
+    "aws-sdk": "^2.814.0",
     "bcrypt": "^4.0.1",
     "body-parser": "^1.19.0",
     "bootstrap": "^4.4.1",
